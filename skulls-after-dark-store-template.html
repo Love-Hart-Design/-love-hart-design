@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skulls After Dark</title>
+<style>
+:root {
+  --bg: #141014; --card: #1f1a1f; --text: #eee6ea; --sub: #a3939c;
+  --accent: #8b2b3a; --accent2: #4d4453; --border: #332a30;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e0b0e; --card: #191419; --text: #f0e8ec; --sub: #a3939c;
+    --accent: #a63e4f; --accent2: #5b4f5f; --border: #2a222a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e0b0e; --card: #191419; --text: #f0e8ec; --sub: #a3939c;
+  --accent: #a63e4f; --accent2: #5b4f5f; --border: #2a222a;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Georgia,serif; }
+.backlink { display:block; padding:10px 20px; font-size:0.85rem; color:var(--sub); text-decoration:none; }
+header { text-align:center; padding:20px 20px 12px; }
+h1 { font-family:Georgia,serif; color:var(--accent); margin:0 0 4px; font-size:1.8rem; }
+header p { color:var(--sub); margin:0; font-size:0.9rem; }
+nav.cats {
+  display:flex; gap:8px; overflow-x:auto; padding:14px 16px;
+  border-bottom:1px solid var(--border); -ms-overflow-style:none; scrollbar-width:none;
+}
+nav.cats::-webkit-scrollbar{display:none;}
+nav.cats a {
+  flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
+  color:var(--text); text-decoration:none; font-size:0.85rem; white-space:nowrap;
+}
+nav.cats a:hover { border-color:var(--accent); }
+section.cat { max-width:900px; margin:0 auto; padding:26px 20px 6px; }
+section.cat h2 { font-size:1.2rem; margin:0 0 4px; color:var(--accent); }
+section.cat p.desc { color:var(--sub); font-size:0.85rem; margin:0 0 14px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+.thumb { aspect-ratio:1/1; background:linear-gradient(135deg,var(--accent2),var(--accent)); opacity:0.35; }
+.card-body { padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.card-body .name { font-size:0.9rem; font-weight:600; }
+.card-body .price { color:var(--sub); font-size:0.85rem; }
+.buy {
+  margin-top:auto; text-align:center; padding:8px; border-radius:8px; background:var(--accent);
+  color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600;
+}
+.note { max-width:900px; margin:20px auto 0; padding:0 20px; }
+.note div { background:var(--card); border:1px dashed var(--border); border-radius:10px; padding:12px 16px; font-size:0.82rem; color:var(--sub); }
+footer { text-align:center; color:var(--sub); font-size:0.78rem; padding:40px 20px 60px; }
+</style>
+</head>
+<body>
+<a class="backlink" href="#">&larr; Back to Love Hart Design</a>
+<header>
+  <h1>Skulls After Dark</h1>
+  <p>Horror & gothic apparel, browse by category</p>
+</header>
+<nav class="cats">
+  <a href="#classic">Classic Horror Icons</a>
+  <a href="#gothic">Gothic Skulls & Roses</a>
+  <a href="#darkhumor">Dark Humor / Sarcastic Horror</a>
+  <a href="#mono">Minimalist B&W Horror Art</a>
+</nav>
+<section class="cat" id="classic">
+  <h2>Classic Horror Icons</h2>
+  <p class="desc">Iconic horror-inspired original artwork.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="gothic">
+  <h2>Gothic Skulls & Roses</h2>
+  <p class="desc">Skulls, roses, and gothic ornamentation.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="darkhumor">
+  <h2>Dark Humor / Sarcastic Horror</h2>
+  <p class="desc">Sarcastic and darkly humorous designs.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="mono">
+  <h2>Minimalist B&W Horror Art</h2>
+  <p class="desc">Stark black-and-white horror graphics.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
+  </div>
+</section>
+
+<div class="note"><div>No designs uploaded yet for this brand, so "Buy" is disabled for now &mdash; once designs are ready and uploaded to Spreadconnect, swap these links the same way as the Christmas store.</div></div>
+<footer>Template preview &mdash; swap sample cards for real designs.</footer>
+</body>
+</html>
