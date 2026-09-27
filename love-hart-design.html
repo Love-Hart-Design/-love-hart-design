@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Love Hart Design</title>
+<style>
+:root {
+  --bg: #fdf6f2;
+  --card: #ffffff;
+  --text: #2b1f24;
+  --sub: #7a6870;
+  --accent: #c9536b;
+  --accent2: #e8a0b0;
+  --border: #f0dde2;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1418;
+    --card: #261c21;
+    --text: #f5e9ec;
+    --sub: #b79aa4;
+    --accent: #e8748c;
+    --accent2: #a85a6c;
+    --border: #3a2a30;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1418;
+  --card: #261c21;
+  --text: #f5e9ec;
+  --sub: #b79aa4;
+  --accent: #e8748c;
+  --accent2: #a85a6c;
+  --border: #3a2a30;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Georgia, serif;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 60px;
+}
+header { text-align: center; margin-bottom: 36px; max-width: 480px; }
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.2rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+p.tag {
+  color: var(--sub);
+  font-size: 0.95rem;
+  margin: 0;
+}
+main {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+a.tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+a.tile:active { transform: scale(0.98); }
+a.tile:hover { border-color: var(--accent2); }
+.tile-info { display: flex; flex-direction: column; gap: 3px; }
+.tile-name { font-weight: 600; font-size: 1.05rem; }
+.tile-desc { font-size: 0.82rem; color: var(--sub); }
+.badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+.badge.live { background: rgba(80,170,120,0.15); color: #3c9d6b; }
+.badge.soon { background: rgba(200,150,80,0.15); color: #c98b3a; }
+footer {
+  margin-top: 44px;
+  color: var(--sub);
+  font-size: 0.78rem;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Love Hart Design</h1>
+  <p class="tag">A family of small brands — pick one to explore</p>
+</header>
+<main>
+  <a class="tile" href="https://heirloom-hart-boutique.lovable.app/" target="_blank" rel="noopener">
+    <div class="tile-info">
+      <div class="tile-name">Heirloom Hart</div>
+      <div class="tile-desc">Embroidery files &amp; digital coloring books</div>
+    </div>
+    <span class="badge live">Shop now</span>
+  </a>
+
+  <a class="tile" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">
+    <div class="tile-info">
+      <div class="tile-name">Christmas Songs All Year Long</div>
+      <div class="tile-desc">Holiday tees &amp; designs</div>
+    </div>
+    <span class="badge live">Shop now</span>
+  </a>
+
+  <a class="tile" href="#" onclick="return false;">
+    <div class="tile-info">
+      <div class="tile-name">Pure Dream Sounds</div>
+      <div class="tile-desc">Rain &amp; ambient sound app, plus apparel</div>
+    </div>
+    <span class="badge soon">Coming soon</span>
+  </a>
+
+  <a class="tile" href="#" onclick="return false;">
+    <div class="tile-info">
+      <div class="tile-name">Tiny Dreams Lullaby</div>
+      <div class="tile-desc">Soft, dreamy graphic tees</div>
+    </div>
+    <span class="badge soon">Coming soon</span>
+  </a>
+
+  <a class="tile" href="#" onclick="return false;">
+    <div class="tile-info">
+      <div class="tile-name">Skulls After Dark</div>
+      <div class="tile-desc">Dark, edgy skull artwork tees</div>
+    </div>
+    <span class="badge soon">Coming soon</span>
+  </a>
+
+  <a class="tile" href="#" onclick="return false;">
+    <div class="tile-info">
+      <div class="tile-name">Hush Drift</div>
+      <div class="tile-desc">Calm, quiet-mood designs</div>
+    </div>
+    <span class="badge soon">Coming soon</span>
+  </a>
+
+  <a class="tile" href="#" onclick="return false;">
+    <div class="tile-info">
+      <div class="tile-name">Little Princess Lullabies</div>
+      <div class="tile-desc">Sweet designs for little ones</div>
+    </div>
+    <span class="badge soon">Coming soon</span>
+  </a>
+</main>
+<footer>
+  &copy; Love Hart Design
+</footer>
+</body>
+</html>
