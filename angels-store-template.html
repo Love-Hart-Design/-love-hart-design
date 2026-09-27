@@ -45,15 +45,17 @@
     color:#6b5f6a;
   }
   nav.cats{
-    max-width:820px;
-    margin:0 auto;
-    padding:0 20px 8px;
     display:flex;
-    flex-wrap:wrap;
     gap:10px;
-    justify-content:center;
+    overflow-x:auto;
+    padding:0 20px 8px;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
   }
+  nav.cats::-webkit-scrollbar{display:none;}
   nav.cats a{
+    flex:0 0 auto;
+    white-space:nowrap;
     font-family:'Helvetica Neue',Arial,sans-serif;
     font-size:0.82rem;
     padding:8px 14px;
@@ -208,3 +210,4 @@
 <p class="note">Template preview — swap sample cards for real designs once the Angels store is built.</p>
 </body>
 </html>
+
