@@ -5,172 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Love Hart Design</title>
 <style>
-:root {
-  --bg: #fdf6f2;
-  --card: #ffffff;
-  --text: #2b1f24;
-  --sub: #7a6870;
-  --accent: #c9536b;
-  --accent2: #e8a0b0;
-  --border: #f0dde2;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1b1418;
-    --card: #261c21;
-    --text: #f5e9ec;
-    --sub: #b79aa4;
-    --accent: #e8748c;
-    --accent2: #a85a6c;
-    --border: #3a2a30;
+  :root{
+    --cream:#fdf6f0;
+    --ink:#2e2430;
+    --rose:#c9698a;
+    --rose-deep:#a84f6c;
+    --gold:#c9a15a;
+    --line:#ecdfd8;
   }
-}
-:root[data-theme="dark"] {
-  --bg: #1b1418;
-  --card: #261c21;
-  --text: #f5e9ec;
-  --sub: #b79aa4;
-  --accent: #e8748c;
-  --accent2: #a85a6c;
-  --border: #3a2a30;
-}
-html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Georgia, serif;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 48px 20px 60px;
-}
-header { text-align: center; margin-bottom: 36px; max-width: 480px; }
-h1 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2.2rem;
-  letter-spacing: 0.5px;
-  margin: 0 0 8px;
-  color: var(--accent);
-}
-p.tag {
-  color: var(--sub);
-  font-size: 0.95rem;
-  margin: 0;
-}
-main {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-a.tile {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 20px;
-  text-decoration: none;
-  color: var(--text);
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-a.tile:active { transform: scale(0.98); }
-a.tile:hover { border-color: var(--accent2); }
-.tile-info { display: flex; flex-direction: column; gap: 3px; }
-.tile-name { font-weight: 600; font-size: 1.05rem; }
-.tile-desc { font-size: 0.82rem; color: var(--sub); }
-.badge {
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 999px;
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-}
-.badge.live { background: rgba(80,170,120,0.15); color: #3c9d6b; }
-.badge.soon { background: rgba(200,150,80,0.15); color: #c98b3a; }
-footer {
-  margin-top: 44px;
-  color: var(--sub);
-  font-size: 0.78rem;
-  text-align: center;
-}
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Georgia', 'Iowan Old Style', serif;
+    background:var(--cream);
+    color:var(--ink);
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  header{
+    text-align:center;
+    padding:64px 24px 40px;
+  }
+  header h1{
+    font-size:clamp(2.2rem,6vw,3.2rem);
+    margin:0 0 12px;
+    letter-spacing:0.01em;
+    color:var(--rose-deep);
+  }
+  header p{
+    margin:0;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:1rem;
+    color:#6b5f6a;
+  }
+  main{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 20px 60px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  a.tile{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:22px 24px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    text-decoration:none;
+    color:var(--ink);
+    transition:border-color .2s, transform .2s;
+  }
+  a.tile:hover{
+    border-color:var(--rose);
+    transform:translateY(-2px);
+  }
+  .tile-text h2{
+    font-size:1.25rem;
+    margin:0 0 4px;
+    color:var(--rose-deep);
+  }
+  .tile-text p{
+    margin:0;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+    color:#6b5f6a;
+  }
+  .badge{
+    flex-shrink:0;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    letter-spacing:0.03em;
+    padding:7px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.shop{
+    background:var(--rose);
+    color:#fff;
+  }
+  .badge.preview{
+    background:#f4e9dd;
+    color:var(--rose-deep);
+    border:1px solid var(--gold);
+  }
+  footer{
+    text-align:center;
+    padding:32px 20px 48px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    color:#9a8b96;
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Love Hart Design</h1>
-  <p class="tag">A family of small brands — pick one to explore</p>
+  <p>A family of small brands — pick one to explore</p>
 </header>
+
 <main>
-  <a class="tile" href="https://heirloom-hart.lovable.app/" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Heirloom Hart</div>
-      <div class="tile-desc">Embroidery files &amp; digital coloring books</div>
+  <a class="tile" href="https://heirloom-hart.lovable.app/">
+    <div class="tile-text">
+      <h2>Heirloom Hart</h2>
+      <p>Embroidery files &amp; digital coloring books</p>
     </div>
-    <span class="badge live">Shop now</span>
+    <span class="badge shop">Shop now</span>
   </a>
 
-  <a class="tile" href="christmas-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Christmas Songs All Year Long</div>
-      <div class="tile-desc">Holiday tees &amp; designs</div>
+  <a class="tile" href="angels-store-template.html">
+    <div class="tile-text">
+      <h2>Angels</h2>
+      <p>Angels watching over — comfort &amp; keepsake designs</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
   </a>
 
-  <a class="tile" href="pure-dream-sounds-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Pure Dream Sounds</div>
-      <div class="tile-desc">Rain &amp; ambient sound app, plus apparel</div>
+  <a class="tile" href="christmas-store-template.html">
+    <div class="tile-text">
+      <h2>Christmas Songs All Year Long</h2>
+      <p>Holiday tees &amp; designs</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
   </a>
 
-  <a class="tile" href="tiny-dreams-lullaby-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Tiny Dreams Lullaby</div>
-      <div class="tile-desc">Soft, dreamy graphic tees</div>
+  <a class="tile" href="hush-drift-store-template.html">
+    <div class="tile-text">
+      <h2>Hush Drift</h2>
+      <p>Calm, quiet-mood designs</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
   </a>
 
-  <a class="tile" href="skulls-after-dark-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Skulls After Dark</div>
-      <div class="tile-desc">Dark, edgy skull artwork tees</div>
+  <a class="tile" href="pure-dream-sounds-store-template.html">
+    <div class="tile-text">
+      <h2>Pure Dream Sounds</h2>
+      <p>Rain &amp; ambient sound app, plus apparel</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
   </a>
 
-  <a class="tile" href="hush-drift-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Hush Drift</div>
-      <div class="tile-desc">Calm, quiet-mood designs</div>
+  <a class="tile" href="skulls-after-dark-store-template.html">
+    <div class="tile-text">
+      <h2>Skulls After Dark</h2>
+      <p>Dark, edgy skull artwork tees</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
   </a>
 
-  <a class="tile" href="little-princess-lullabies-store-template.html" target="_blank" rel="noopener">
-    <div class="tile-info">
-      <div class="tile-name">Little Princess Lullabies</div>
-      <div class="tile-desc">Sweet designs for little ones</div>
+  <a class="tile" href="tiny-dreams-lullaby-store-template.html">
+    <div class="tile-text">
+      <h2>Tiny Dreams Lullaby</h2>
+      <p>Soft, dreamy graphic tees</p>
     </div>
-    <span class="badge live">Preview</span>
+    <span class="badge preview">Preview</span>
+  </a>
+
+  <a class="tile" href="little-princess-lullabies-store-template.html">
+    <div class="tile-text">
+      <h2>Little Princess Lullabies</h2>
+      <p>Sweet designs for little ones</p>
+    </div>
+    <span class="badge preview">Preview</span>
   </a>
 </main>
-<footer>
-  &copy; Love Hart Design
-</footer>
+
+<footer>&copy; Love Hart Design 2026</footer>
 </body>
 </html>
 
