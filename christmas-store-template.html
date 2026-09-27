@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Christmas Songs All Year Long</title>
+<style>
+:root {
+  --bg: #fff8f5; --card: #ffffff; --text: #2b1f24; --sub: #7a6870;
+  --accent: #b5303f; --accent2: #2f6b45; --border: #f0dde2;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1418; --card: #261c21; --text: #f5e9ec; --sub: #b79aa4;
+    --accent: #e8748c; --accent2: #4f9a6b; --border: #3a2a30;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1418; --card: #261c21; --text: #f5e9ec; --sub: #b79aa4;
+  --accent: #e8748c; --accent2: #4f9a6b; --border: #3a2a30;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Georgia,serif; }
+.backlink { display:block; padding:10px 20px; font-size:0.85rem; color:var(--sub); text-decoration:none; }
+header { text-align:center; padding:20px 20px 12px; }
+h1 { font-family:Georgia,serif; color:var(--accent); margin:0 0 4px; font-size:1.8rem; }
+header p { color:var(--sub); margin:0; font-size:0.9rem; }
+nav.cats {
+  display:flex; gap:8px; overflow-x:auto; padding:14px 16px;
+  border-bottom:1px solid var(--border); -ms-overflow-style:none; scrollbar-width:none;
+}
+nav.cats::-webkit-scrollbar{display:none;}
+nav.cats a {
+  flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
+  color:var(--text); text-decoration:none; font-size:0.85rem; white-space:nowrap;
+}
+nav.cats a:hover { border-color:var(--accent); }
+section.cat { max-width:900px; margin:0 auto; padding:26px 20px 6px; }
+section.cat h2 { font-size:1.2rem; margin:0 0 4px; color:var(--accent); }
+section.cat p.desc { color:var(--sub); font-size:0.85rem; margin:0 0 14px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+.thumb { aspect-ratio:1/1; background:linear-gradient(135deg,var(--accent2),var(--accent)); opacity:0.35; }
+.card-body { padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.card-body .name { font-size:0.9rem; font-weight:600; }
+.card-body .price { color:var(--sub); font-size:0.85rem; }
+.buy {
+  margin-top:auto; text-align:center; padding:8px; border-radius:8px; background:var(--accent);
+  color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600;
+}
+footer { text-align:center; color:var(--sub); font-size:0.78rem; padding:40px 20px 60px; }
+</style>
+</head>
+<body>
+<a class="backlink" href="#">&larr; Back to Love Hart Design</a>
+<header>
+  <h1>Christmas Songs All Year Long</h1>
+  <p>Holiday tees, browse by category</p>
+</header>
+<nav class="cats">
+  <a href="#carols">Classic Carols &amp; Traditional</a>
+  <a href="#singalong">Sing-Along &amp; Music</a>
+  <a href="#funny">Funny &amp; Sarcastic</a>
+  <a href="#family">Family &amp; Matching</a>
+  <a href="#kids">Kids &amp; Baby</a>
+  <a href="#cozy">Cozy Nights</a>
+</nav>
+
+<section class="cat" id="carols">
+  <h2>Classic Carols &amp; Traditional</h2>
+  <p class="desc">Timeless, nostalgic holiday themes.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 3</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="singalong">
+  <h2>Sing-Along &amp; Music Themed</h2>
+  <p class="desc">Musical notes, caroling, and song-inspired art.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="funny">
+  <h2>Funny &amp; Sarcastic Holiday</h2>
+  <p class="desc">Humor and sarcasm for the not-so-jolly.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="family">
+  <h2>Family &amp; Matching</h2>
+  <p class="desc">Sets for the whole family.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="kids">
+  <h2>Kids &amp; Baby Christmas</h2>
+  <p class="desc">Playful holiday designs for little ones.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$19.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$19.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<section class="cat" id="cozy">
+  <h2>Cozy Nights</h2>
+  <p class="desc">Fireplace, snow, and cocoa-mug vibes.</p>
+  <div class="grid">
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+  </div>
+</section>
+
+<footer>Template preview &mdash; swap sample cards for real designs, and Buy links for your Lovable checkout once built.</footer>
+</body>
+</html>
