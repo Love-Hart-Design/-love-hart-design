@@ -1,111 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tiny Dreams Lullaby</title>
 <style>
-:root {
-  --bg: #f2f8f6; --card: #ffffff; --text: #1f2b28; --sub: #6f8580;
-  --accent: #2f8f6e; --accent2: #7dc4a8; --border: #dcecE4;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1613; --card: #152019; --text: #e6f2ec; --sub: #8fac9f;
-    --accent: #7dc4a8; --accent2: #2f8f6e; --border: #22302a;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1613; --card: #152019; --text: #e6f2ec; --sub: #8fac9f;
-  --accent: #7dc4a8; --accent2: #2f8f6e; --border: #22302a;
-}
-html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-* { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Georgia,serif; }
-.backlink { display:block; padding:10px 20px; font-size:0.85rem; color:var(--sub); text-decoration:none; }
-header { text-align:center; padding:20px 20px 12px; }
-h1 { font-family:Georgia,serif; color:var(--accent); margin:0 0 4px; font-size:1.8rem; }
-header p { color:var(--sub); margin:0; font-size:0.9rem; }
-nav.cats {
-  display:flex; gap:8px; overflow-x:auto; padding:14px 16px;
-  border-bottom:1px solid var(--border); -ms-overflow-style:none; scrollbar-width:none;
-}
-nav.cats::-webkit-scrollbar{display:none;}
-nav.cats a {
-  flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
-  color:var(--text); text-decoration:none; font-size:0.85rem; white-space:nowrap;
-}
-nav.cats a:hover { border-color:var(--accent); }
-section.cat { max-width:900px; margin:0 auto; padding:26px 20px 6px; }
-section.cat h2 { font-size:1.2rem; margin:0 0 4px; color:var(--accent); }
-section.cat p.desc { color:var(--sub); font-size:0.85rem; margin:0 0 14px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-.thumb { aspect-ratio:1/1; background:linear-gradient(135deg,var(--accent2),var(--accent)); opacity:0.35; }
-.card-body { padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; }
-.card-body .name { font-size:0.9rem; font-weight:600; }
-.card-body .price { color:var(--sub); font-size:0.85rem; }
-.buy {
-  margin-top:auto; text-align:center; padding:8px; border-radius:8px; background:var(--accent);
-  color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600;
-}
-.note { max-width:900px; margin:20px auto 0; padding:0 20px; }
-.note div { background:var(--card); border:1px dashed var(--border); border-radius:10px; padding:12px 16px; font-size:0.82rem; color:var(--sub); }
-footer { text-align:center; color:var(--sub); font-size:0.78rem; padding:40px 20px 60px; }
+  :root { --bg:#f6f3ff; --ink:#2b2542; --muted:#6d6788; --card:#ffffff; --accent:#7a6ad8; --line:#e3ddf5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Georgia, "Times New Roman", serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
+  .back { display:inline-block; color:var(--accent); text-decoration:none; margin-bottom:16px; }
+  h1 { text-align:center; font-size:2.4rem; margin:8px 0 4px; }
+  .sub { text-align:center; color:var(--muted); margin:0 0 24px; }
+  nav.cats { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
+  nav.cats a { padding:8px 16px; border:1px solid var(--line); border-radius:999px; text-decoration:none; color:var(--ink); background:var(--card); }
+  nav.cats a:hover { border-color:var(--accent); color:var(--accent); }
+  section.cat { margin-bottom:44px; }
+  section.cat h2 { margin:0 0 4px; }
+  section.cat p.blurb { margin:0 0 16px; color:var(--muted); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .card img { width:100%; display:block; aspect-ratio:1/1; object-fit:cover; background:#eee; }
+  .card .body { padding:12px 14px 16px; }
+  .card .name { font-weight:700; margin-bottom:6px; }
+  .card .price { color:var(--muted); margin-bottom:10px; }
+  .card .soon { display:inline-block; padding:6px 14px; border-radius:999px; background:var(--line); color:var(--muted); font-size:.9rem; }
+  .status { text-align:center; color:var(--muted); padding:30px 0; }
+  footer { text-align:center; color:var(--muted); margin-top:40px; font-size:.9rem; }
 </style>
 </head>
 <body>
-<a class="backlink" href="#">&larr; Back to Love Hart Design</a>
-<header>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to Love Hart Design</a>
   <h1>Tiny Dreams Lullaby</h1>
-  <p>Little boys' apparel, browse by category</p>
-</header>
-<nav class="cats">
-  <a href="#dino">Dinosaurs & Adventure</a>
-  <a href="#space">Space & Rockets</a>
-  <a href="#trucks">Trucks & Vehicles</a>
-  <a href="#animals">Animals & Nature</a>
-</nav>
-<section class="cat" id="dino">
-  <h2>Dinosaurs & Adventure</h2>
-  <p class="desc">Roaring dinos and adventure-themed designs.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-  </div>
-</section>
+  <p class="sub">Little boys' apparel, browse by category</p>
+  <nav class="cats" id="cats"></nav>
+  <div id="shop"><div class="status">Loading designs&hellip;</div></div>
+  <footer>&copy; Love Hart Design 2026</footer>
+</div>
 
-<section class="cat" id="space">
-  <h2>Space & Rockets</h2>
-  <p class="desc">Rockets, planets, and starry space art.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-  </div>
-</section>
+<script>
+(function () {
+  var FEED = "https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products";
+  var BRAND = "tiny-dreams-lullaby";
 
-<section class="cat" id="trucks">
-  <h2>Trucks & Vehicles</h2>
-  <p class="desc">Trucks, trains, and vehicle graphics.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-  </div>
-</section>
+  // key = word typed in [brackets] at the start of the Spreadconnect description
+  var CATEGORIES = [
+    { key: "dinosaurs", id: "dino",    title: "Dinosaurs & Adventure", blurb: "Roaring dinos and adventure-themed designs." },
+    { key: "space",     id: "space",   title: "Space & Rockets",       blurb: "Rockets, planets, and starry space art." },
+    { key: "trucks",    id: "trucks",  title: "Trucks & Vehicles",     blurb: "Trucks, trains, and vehicle graphics." },
+    { key: "animals",   id: "animals", title: "Animals & Nature",      blurb: "Friendly animal and nature-themed art." }
+  ];
 
-<section class="cat" id="animals">
-  <h2>Animals & Nature</h2>
-  <p class="desc">Friendly animal and nature-themed art.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="#" onclick="return false;">Coming soon</a></div></div>
-  </div>
-</section>
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
 
-<div class="note"><div>No designs uploaded yet for this brand, so "Buy" is disabled for now &mdash; once designs are ready and uploaded to Spreadconnect, swap these links the same way as the Christmas store.</div></div>
-<footer>Template preview &mdash; swap sample cards for real designs.</footer>
+  function cleanTitle(t) {
+    return String(t).replace(/^Tiny Dreams Lullaby\s*[\u2013\u2014-]\s*/i, "");
+  }
+
+  function categoryOf(p) {
+    var plain = String(p.description || "").replace(/<[^>]*>/g, " ");
+    var m = plain.match(/^\s*\[([^\]]+)\]/);
+    if (!m) return null;
+    var word = m[1].toLowerCase();
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      if (word.indexOf(CATEGORIES[i].key) === 0) return CATEGORIES[i].key;
+    }
+    return null;
+  }
+
+  function card(p) {
+    var c = el("div", "card");
+    if (p.images && p.images[0]) {
+      var img = document.createElement("img");
+      img.src = p.images[0];
+      img.alt = cleanTitle(p.title);
+      c.appendChild(img);
+    }
+    var b = el("div", "body");
+    b.appendChild(el("div", "name", cleanTitle(p.title)));
+    b.appendChild(el("div", "price", "$" + Number(p.price).toFixed(2)));
+    b.appendChild(el("span", "soon", "Coming soon"));
+    c.appendChild(b);
+    return c;
+  }
+
+  function section(id, title, blurb, items) {
+    var s = el("section", "cat");
+    s.id = id;
+    s.appendChild(el("h2", "", title));
+    if (blurb) s.appendChild(el("p", "blurb", blurb));
+    var g = el("div", "grid");
+    items.forEach(function (p) { g.appendChild(card(p)); });
+    s.appendChild(g);
+    return s;
+  }
+
+  function render(products) {
+    var shop = document.getElementById("shop");
+    var cats = document.getElementById("cats");
+    shop.innerHTML = "";
+    cats.innerHTML = "";
+
+    if (!products.length) {
+      shop.appendChild(el("div", "status", "New designs are coming soon."));
+      return;
+    }
+
+    var used = {};
+    CATEGORIES.forEach(function (cat) {
+      var items = products.filter(function (p) { return categoryOf(p) === cat.key; });
+      if (!items.length) return;
+      items.forEach(function (p) { used[p.id] = true; });
+      shop.appendChild(section(cat.id, cat.title, cat.blurb, items));
+      var a = el("a", "", cat.title);
+      a.href = "#" + cat.id;
+      cats.appendChild(a);
+    });
+
+    var rest = products.filter(function (p) { return !used[p.id]; });
+    if (rest.length) {
+      shop.appendChild(section("more", "More designs", "", rest));
+      var m = el("a", "", "More designs");
+      m.href = "#more";
+      cats.appendChild(m);
+    }
+  }
+
+  fetch(FEED)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var list = (data.brands && data.brands[BRAND]) || [];
+      list = list.filter(function (p) { return !/test/i.test(p.title); });
+      render(list);
+    })
+    .catch(function (err) {
+      console.error("Product feed failed:", err);
+      document.getElementById("shop").innerHTML = "";
+      document.getElementById("shop").appendChild(el("div", "status", "Designs couldn't load right now. Please try again soon."));
+    });
+})();
+</script>
 </body>
 </html>
+
