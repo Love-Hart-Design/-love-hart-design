@@ -116,13 +116,13 @@ const ANON_KEY = '';      // Supabase anon (public) key, if the old file sent on
 const CHECKOUT_URL = '';  // Stripe checkout function URL. Leave empty until Stripe is connected.
 
 const AUDIENCES = [
-  {name:'Babies & Toddlers', sub:'Rompers, bodysuits, tees'},
-  {name:'Kids & Youth', sub:'Tees, long sleeves, hoodies'},
-  {name:'Women', sub:'Tees, long sleeves, hoodies'},
-  {name:'Men', sub:'Tees, long sleeves, hoodies'},
-  {name:'Adult Unisex', sub:'Tees, long sleeves, hoodies'}
+  {name:'Babies & Toddlers'},
+  {name:'Kids & Youth'},
+  {name:'Women'},
+  {name:'Men'},
+  {name:'Adult Unisex'}
 ];
-const TYPES = ['T-Shirts','Long Sleeves','Hoodies & Sweatshirts','Rompers & Bodysuits','Tanks'];
+const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
 
 const $ = id => document.getElementById(id);
 const el = (tag, props = {}, kids = []) => {
@@ -142,9 +142,11 @@ function normAudience(s){
 }
 function normType(s){
   s = (s||'').toLowerCase();
-  if(/romper|bodysuit|onesie/.test(s)) return 'Rompers & Bodysuits';
+  if(/romper/.test(s)) return 'Rompers';
+  if(/bodysuit|onesie/.test(s)) return 'Bodysuits';
   if(/long\s*sleeve/.test(s)) return 'Long Sleeves';
-  if(/hood|sweat|crew/.test(s)) return 'Hoodies & Sweatshirts';
+  if(/hood/.test(s)) return 'Hoodies';
+  if(/sweat|crew/.test(s)) return 'Sweatshirts';
   if(/tank/.test(s)) return 'Tanks';
   if(/shirt|tee/.test(s)) return 'T-Shirts';
   return '';
@@ -183,7 +185,7 @@ function renderFilters(){
   const d = $('dreamers'); d.replaceChildren();
   AUDIENCES.forEach(a => {
     const n = products.filter(p => p.audience === a.name).length;
-    const b = el('button', {className:'dreamer'}, [a.name, el('small', {textContent: a.sub})]);
+    const b = el('button', {className:'dreamer', textContent: a.name});
     b.setAttribute('aria-pressed', fAud === a.name);
     b.onclick = () => { fAud = fAud === a.name ? '' : a.name; renderFilters(); renderGrid(); };
     d.append(b);
