@@ -31,13 +31,13 @@ h2{font-family:var(--display);font-weight:600;font-size:1.7rem;margin:42px 0 14p
 .dreamer small{display:block;font-family:var(--body);font-size:.8rem;color:#5b5f88}
 .dreamer[aria-pressed=true]{background:var(--night);border-color:var(--night);color:#fff}
 .dreamer[aria-pressed=true] small{color:var(--moon)}
-.chips{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;background:var(--night);padding:18px 5vw calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(27,31,69,.25)}
+.chips{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;margin-top:10px;padding:14px 6px 12px}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;white-space:nowrap;background:transparent;border:2px solid var(--dusk);border-radius:99px;padding:8px 18px;color:#fff;font-weight:500;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
-.chip[aria-pressed=true]{background:var(--moon);border-color:var(--moon);color:var(--night);font-weight:700}
-@media(hover:hover){.chip:hover,.chip:focus-visible{transform:translateY(-5px) scale(1.1);box-shadow:0 8px 14px rgba(0,0,0,.35);background:var(--dusk);border-color:var(--dusk)}
-.chip[aria-pressed=true]:hover{background:var(--moon);border-color:var(--moon)}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin:22px 0 110px}
+.chip{flex:0 0 auto;white-space:nowrap;background:#fff;border:2px solid var(--dusk);border-radius:99px;padding:8px 18px;color:var(--night);font-weight:500;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+.chip[aria-pressed=true]{background:var(--night);border-color:var(--night);color:#fff;font-weight:700}
+@media(hover:hover){.chip:hover,.chip:focus-visible{transform:translateY(-5px) scale(1.1);box-shadow:0 8px 14px rgba(35,42,92,.25);background:var(--dusk);border-color:var(--dusk);color:#fff}
+.chip[aria-pressed=true]:hover{background:var(--night);border-color:var(--night)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin:14px 0 60px}
 .card{background:#fff;border-radius:18px;border:0;padding:0;text-align:left;overflow:hidden;color:var(--ink);box-shadow:0 2px 0 var(--line)}
 .card img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--mist);display:block}
 .card div{padding:12px 14px 16px}
