@@ -135,11 +135,10 @@ dialog::backdrop{background:rgba(27,31,69,.6)}
 </aside>
 
 <script>
-/* ---- CONFIG: copy FUNCTION_URL and ANON_KEY from the fetch call in the old version of this file ---- */
 const FUNCTION_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products';
-const ANON_KEY = '';      // Supabase anon (public) key, if the old file sent one
+const BRAND_KEY = 'tiny-dreams-lullaby'; // this store's key inside the feed
+const ANON_KEY = '';      // only needed for checkout, if your function wants it
 const CHECKOUT_URL = '';  // Stripe checkout function URL. Leave empty until Stripe is connected.
-const BRAND = '';         // e.g. 'Tiny Dreams Lullaby' to show only products whose title starts with it. Empty shows all.
 
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
 const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
@@ -183,8 +182,8 @@ function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
   const [a, t] = m ? m[1].split('|').map(s => s.trim()) : ['', ''];
-  const title = (p.title || p.name || '').replace(/^tiny dreams lullaby\s*[-:|]?\s*/i, '');
-  const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && (p.images[0].url || p.images[0])) || '';
+  const title = (p.title || p.name || '').replace(/^tiny dreams lullaby\s*[\u2013\u2014:|-]?\s*/i, '');
+  const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
   return {
     id: String(p.id || p.sku || i), title,
     desc: desc.replace(/^\s*\[[^\]]+\]\s*/, ''), img,
@@ -319,10 +318,10 @@ $('checkout').onclick = async () => {
 
 async function load(){
   try{
-    const r = await fetch(FUNCTION_URL, {headers: ANON_KEY ? {Authorization:'Bearer ' + ANON_KEY, apikey:ANON_KEY} : {}});
+    const r = await fetch(FUNCTION_URL);
     const j = await r.json();
-    let arr = Array.isArray(j) ? j : (j.products || j.items || j.data || []);
-    if(BRAND) arr = arr.filter(p => (p.title || p.name || '').toLowerCase().startsWith(BRAND.toLowerCase()));
+    let arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
+    arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
     products = arr.map(normalize).filter(p => p.title);
   }catch(e){
     $('grid').replaceChildren(el('p', {className:'note', textContent:'Products could not load. Refresh the page to try again.'}));
