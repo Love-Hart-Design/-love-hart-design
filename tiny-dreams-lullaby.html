@@ -28,26 +28,25 @@ body.scrolled .hamb{display:block}
 .acct{display:flex;align-items:center;gap:18px;white-space:nowrap}
 .acct a{text-decoration:none}
 .cartbtn{background:none;border:0;display:flex;align-items:center;gap:6px;color:var(--txt)}
-nav.main{background:var(--nav);display:flex;justify-content:center;gap:clamp(18px,3.2vw,52px);padding:0 3vw;overflow-x:auto;scrollbar-width:none}
-nav.main::-webkit-scrollbar{display:none}
-nav.main button{flex:0 0 auto;background:none;border:0;border-bottom:4px solid transparent;color:#fff;text-transform:uppercase;font-weight:700;font-size:1.1rem;letter-spacing:.01em;padding:16px 0 12px;white-space:nowrap}
-nav.main button:hover,nav.main button[aria-pressed=true]{border-bottom-color:var(--accent)}
+nav.main{background:var(--nav);display:flex;justify-content:center;flex-wrap:wrap;gap:0 clamp(18px,3.2vw,52px);padding:0 3vw}
+.ni{position:relative}
+.ni>a{display:block;color:#fff;text-decoration:none;text-transform:uppercase;font-weight:700;font-size:1.1rem;letter-spacing:.01em;padding:16px 0 12px;border-bottom:4px solid transparent;white-space:nowrap}
+.ni>a:hover,.ni>a[aria-current=page],.ni:focus-within>a,.ni.open>a{border-bottom-color:var(--accent)}
+.ni>a.dd::after{content:"\25BE";margin-left:6px;font-size:.8em}
+.dm{display:none;position:absolute;left:0;top:100%;z-index:25;min-width:240px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 20px rgba(0,0,0,.18);padding:8px 0}
+.ni:hover .dm,.ni:focus-within .dm,.ni.open .dm{display:block}
+.dm a{display:block;padding:9px 22px;text-decoration:none;color:var(--txt)}
+.dm a:hover{background:var(--bg);color:var(--brand)}
 body.scrolled nav.main{display:none}
-body.scrolled nav.main.open{display:flex;position:absolute;left:0;right:0;flex-direction:column;gap:0;padding:6px 6vw 10px;box-shadow:0 10px 20px rgba(0,0,0,.2)}
-.types{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:18px 4vw 12px;border-bottom:1px solid var(--line)}
-.types::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;white-space:nowrap;background:#fff;border:1px solid #b9b9b9;border-radius:99px;padding:7px 18px;color:var(--txt);transition:transform .15s,box-shadow .15s,background .15s}
-.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
-@media(hover:hover){.chip:hover,.chip:focus-visible{transform:translateY(-4px) scale(1.08);box-shadow:0 8px 14px rgba(0,0,0,.2);background:var(--nav);border-color:var(--nav);color:#fff}}
-.types{justify-content:safe center}
-.burst{width:clamp(56px,8vw,120px);aspect-ratio:1;background:var(--accent);color:#1d2350;font-weight:700;font-size:clamp(1rem,2.6vw,2rem);display:grid;place-items:center;clip-path:polygon(50% 0,60% 12%,75% 7%,78% 22%,93% 25%,88% 40%,100% 50%,88% 60%,93% 75%,78% 78%,75% 93%,60% 88%,50% 100%,40% 88%,25% 93%,22% 78%,7% 75%,12% 60%,0 50%,12% 40%,7% 25%,22% 22%,25% 7%,40% 12%)}
-.wrap{max-width:1200px;margin:auto;padding:0 20px}
+body.scrolled nav.main.open{display:flex;position:absolute;left:0;right:0;flex-direction:column;flex-wrap:nowrap;padding:6px 6vw 10px;box-shadow:0 10px 20px rgba(0,0,0,.2)}
+body.scrolled nav.main.open .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12)}
+body.scrolled nav.main.open .dm a{color:#fff}
 #hero{background:#000}
-.slider{position:relative;overflow:hidden;background:#000}
+.slider{position:relative;overflow:hidden;background:#000;--h:clamp(120px,14.3vw,267px)}
+.slider.thin{--h:clamp(56px,12.5vw,232px)}
+body.list #mainSlider{display:none}
 .track{display:flex;transition:transform .7s ease}
 .slide{flex:0 0 100%;display:flex;align-items:center;justify-content:center;gap:3vw;text-align:center;color:#fff;position:relative;overflow:hidden;min-height:var(--h)}
-.slider.thin{--h:clamp(56px,12.5vw,232px)}
-.slider{--h:clamp(120px,14.3vw,267px)}
 .slide img{width:100%;display:block}
 .slide.a{background:linear-gradient(120deg,#1d2350,#3a4685)}
 .slide.b{background:#000;color:var(--accent)}
@@ -56,21 +55,36 @@ body.scrolled nav.main.open{display:flex;position:absolute;left:0;right:0;flex-d
 .slide p{color:#fff;letter-spacing:.25em;font-size:clamp(.7rem,1.8vw,1.4rem);margin-top:8px;position:relative}
 .slide .big{font-weight:500;letter-spacing:.14em;font-family:var(--body);font-size:clamp(1rem,3.2vw,2.4rem)}
 .slide .moon{position:absolute;right:6vw;top:50%;margin-top:calc(min(9vw,110px)*-1);width:min(18vw,220px);height:min(18vw,220px);background:transparent;box-shadow:inset -26px 8px 0 0 var(--accent);opacity:.9}
+.burst{width:clamp(56px,8vw,120px);aspect-ratio:1;background:var(--accent);color:#1d2350;font-weight:700;font-size:clamp(1rem,2.6vw,2rem);display:grid;place-items:center;clip-path:polygon(50% 0,60% 12%,75% 7%,78% 22%,93% 25%,88% 40%,100% 50%,88% 60%,93% 75%,78% 78%,75% 93%,60% 88%,50% 100%,40% 88%,25% 93%,22% 78%,7% 75%,12% 60%,0 50%,12% 40%,7% 25%,22% 22%,25% 7%,40% 12%)}
 .dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px}
 .dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.5)}
 .dots button[aria-current=true]{background:#fff}
 .arr{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);color:#fff;border:0;width:36px;height:48px;font-size:1.4rem}
 .arr.l{left:0}.arr.r{right:0}
+.wrap{max-width:1200px;margin:auto;padding:0 20px}
 h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9rem;letter-spacing:.02em;margin:56px 0 30px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:27px}
+.grid.three{grid-template-columns:repeat(3,1fr)}
 .card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block}
 .card .im{position:relative;border:1px solid var(--line);background:#fff;aspect-ratio:1;overflow:hidden}
 .card img{width:100%;height:100%;object-fit:contain;display:block}
 .card .qv{position:absolute;left:0;right:0;bottom:0;background:rgba(47,58,116,.92);color:#fff;text-align:center;padding:9px;font-weight:700;opacity:0;transform:translateY(100%);transition:.18s}
 .card:hover .qv,.card:focus-visible .qv{opacity:1;transform:none}
+.sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
 .card h3{font-family:var(--cond);font-weight:400;font-size:.95rem;text-transform:uppercase;margin-top:14px;line-height:1.45}
 .card .pr{display:block;font-size:1.1rem;margin-top:4px}
 .note{grid-column:1/-1;text-align:center;padding:30px 0;color:#777}
+.crumb{font-size:.85rem;color:#777;margin:36px 0 14px}
+.crumb a{text-decoration:none}.crumb b{color:#555}
+h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
+.lay{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;margin-bottom:60px}
+.fbox{border:1px solid var(--line);padding:6px 20px 14px}
+.fbox h4{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px}
+.fbox a{display:block;text-decoration:none;padding:5px 0}
+.fbox a:hover{color:var(--brand);text-decoration:underline}
+.fbox a[aria-current=true]{font-weight:700;color:var(--brand)}
+.sortbar{border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;padding:0 12px;height:40px;margin-bottom:18px;font-size:.9rem;color:#777}
+.sortbar select{border:0;font:inherit;color:var(--txt);background:none;padding:6px}
 .news{text-align:center;margin:70px 0 60px}
 .news h2{font-size:2rem;font-weight:400;margin-bottom:22px}
 .news form{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
@@ -82,8 +96,8 @@ footer{background:#333;color:#eee;padding:56px 4vw 40px}
 .fcols{max-width:1200px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
 footer h4{font-weight:400;font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px}
 footer h4.n{text-transform:none;font-size:1.6rem}
-footer a,footer button{display:block;color:#ddd;background:none;border:0;padding:3px 0;text-align:left;text-decoration:none}
-footer a:hover,footer button:hover{color:var(--accent);text-decoration:underline}
+footer a{display:block;color:#ddd;padding:3px 0;text-decoration:none}
+footer a:hover{color:var(--accent);text-decoration:underline}
 .copy{max-width:1200px;margin:30px auto 0;font-size:.9rem;color:#aaa}
 dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;color:var(--txt)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
@@ -105,9 +119,9 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .line img{width:64px;height:64px;object-fit:contain;border:1px solid var(--line)}
 .line button{background:none;border:0;color:#777;text-decoration:underline}
 .msg{font-size:.9rem;color:#777;margin-top:8px;min-height:1.3em}
-@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.fcols{grid-template-columns:1fr 1fr}}
-@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:16px}.pd{grid-template-columns:1fr}.top{gap:14px}.slide .moon{opacity:.25}}
-@media(prefers-reduced-motion:reduce){.drawer,.card .qv,.chip,.track{transition:none}.chip:hover{transform:none}}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.grid.three{grid-template-columns:repeat(2,1fr)}.fcols{grid-template-columns:1fr 1fr}.lay{grid-template-columns:1fr}}
+@media(max-width:700px){.grid,.grid.three{grid-template-columns:repeat(2,1fr);gap:16px}.pd{grid-template-columns:1fr}.top{gap:14px}.slide .moon{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.drawer,.card .qv,.track{transition:none}}
 </style>
 </head>
 <body>
@@ -115,24 +129,32 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <div class="hd">
   <header class="top">
     <button class="hamb" id="hamb" aria-label="Open menu"><i></i><i></i><i></i></button>
-    <a class="logo" href="#"><span class="moon" aria-hidden="true"></span><span><b>Tiny Dreams Lullaby</b><small>by Love Hart Design</small></span></a>
+    <a class="logo" href="#/"><span class="moon" aria-hidden="true"></span><span><b>Tiny Dreams Lullaby</b><small>by Love Hart Design</small></span></a>
     <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg><input id="q" type="search" placeholder="What are you looking for?" aria-label="Search products"></label>
     <div class="acct">
       <a href="index.html">Love Hart Design</a>
       <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
     </div>
   </header>
-  <nav class="main" id="nav" aria-label="Shop by dreamer"></nav>
+  <nav class="main" id="nav" aria-label="Store menu"></nav>
 </div>
-
-<div class="types" id="types" aria-label="Product type"></div>
 
 <div id="hero"><div class="slider thin" id="topSlider" aria-label="Announcements"></div><div class="slider" id="mainSlider" aria-label="Featured"></div></div>
 
 <main class="wrap">
-  <div id="newBlock"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div></div>
-  <h2 class="sec" id="shop">All Products</h2>
-  <div class="grid" id="grid" aria-live="polite"><p class="note">Loading products&hellip;</p></div>
+  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div></section>
+
+  <section id="listView" hidden>
+    <p class="crumb" id="crumb"></p>
+    <h1 class="pt" id="pageTitle"></h1>
+    <div class="lay">
+      <aside id="side" aria-label="Filters"></aside>
+      <div>
+        <label class="sortbar">Sort By: <select id="sort"><option value="new">Newest</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option><option value="az">Name: A to Z</option></select></label>
+        <div class="grid three" id="grid" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
 
   <div class="news">
     <h2>Newsletter Signup</h2>
@@ -167,8 +189,9 @@ const BRAND_KEY = 'tiny-dreams-lullaby'; // this store's key inside the feed
 const ANON_KEY = '';        // only needed for checkout, if your function wants it
 const CHECKOUT_URL = '';    // Stripe checkout function URL. Leave empty until Stripe is connected.
 const NEWSLETTER_URL = '';  // Where email signups get sent. Leave empty until it's set up.
-const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs (e.g. 1280x160). Empty uses the text slides below.
+const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the text slides below.
 const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
+const SLIDE_SECONDS = 5;       // how often the two banners rotate
 
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
 const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
@@ -216,74 +239,131 @@ function plain(h){
 function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
-  const [a, t] = m ? m[1].split('|').map(s => s.trim()) : ['', ''];
+  const tags = m ? m[1].split('|').map(s => s.trim()) : [];
   const title = (p.title || p.name || '').replace(/^tiny dreams lullaby\s*[\u2013\u2014:|-]?\s*/i, '');
   const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
+  const priceNum = parseFloat(p.price != null ? p.price : p.retailPrice) || 0;
+  const was = parseFloat(p.compareAtPrice || p.compare_at_price || p.originalPrice || 0);
   return {
-    id: String(p.id || p.sku || i), title,
+    id: String(p.id || p.sku || i), idx: i, title,
     desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
-    price: money(p.price != null ? p.price : p.retailPrice),
-    audience: normAudience(a) || normAudience(title),
-    type: normType(t) || normType(a) || normType(title),
+    price: money(p.price != null ? p.price : p.retailPrice), priceNum,
+    special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
+    audience: tags.map(normAudience).find(Boolean) || normAudience(title),
+    type: tags.map(normType).find(Boolean) || normType(title),
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances)
   };
 }
 
-let products = [], fAud = '', fType = '', fQ = '', cart = [];
+let products = [], fQ = '', cart = [], loaded = false, failed = false;
 try{ cart = JSON.parse(localStorage.getItem('tdl-cart')) || []; }catch(e){}
 
-function setFilter(a, t, jump){
-  fAud = a; fType = t;
-  $('nav').classList.remove('open');
-  renderBars(); renderGrid();
-  if(jump) $('shop').scrollIntoView({behavior:'smooth'});
+/* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
+function href(mode, o = {}){
+  const q = new URLSearchParams();
+  if(o.type) q.set('type', o.type);
+  if(o.aud) q.set('aud', o.aud);
+  const s = q.toString();
+  return '#/' + mode + (s ? '?' + s : '');
 }
-function renderBars(){
-  const nav = $('nav'); nav.replaceChildren();
-  [['Shop All','']].concat(AUDIENCES.map(a => [a,a])).forEach(([label, v]) => {
-    const b = el('button', {type:'button', textContent:label});
-    b.setAttribute('aria-pressed', fAud === v);
-    b.onclick = () => setFilter(v, v ? fType : '', true);
-    nav.append(b);
-  });
-  const ty = $('types'); ty.replaceChildren();
-  ['All'].concat(TYPES).forEach(t => {
-    const v = t === 'All' ? '' : t;
-    const b = el('button', {className:'chip', type:'button', textContent:t});
-    b.setAttribute('aria-pressed', fType === v);
-    b.onclick = () => setFilter(fAud, v, true);
-    ty.append(b);
-  });
+function route(){
+  const h = location.hash.replace(/^#\/?/, '');
+  const [path, qs] = h.split('?');
+  const q = new URLSearchParams(qs || '');
+  const mode = ['all','specials','new'].includes(path) ? path : 'home';
+  return {mode, type: TYPES.includes(q.get('type')) ? q.get('type') : '', aud: AUDIENCES.includes(q.get('aud')) ? q.get('aud') : ''};
 }
+const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
+
+function buildNav(){
+  const types = TYPES.map(t => [t, href('all', {type:t})]);
+  const items = [
+    ['Specials', href('specials'), null],
+    ['All Products', href('all'), [['All Products', href('all')]].concat(types)],
+    ['New Releases', href('new'), null],
+    ['Apparel', href('all'), types],
+    ['Collections', href('all'), AUDIENCES.map(a => [a, href('all', {aud:a})])]
+  ];
+  $('nav').replaceChildren(...items.map(([label, h, dd]) => {
+    const a = el('a', {className: 'ni-link' + (dd ? ' dd' : ''), href:h, textContent:label});
+    const box = el('div', {className:'ni'}, [a]);
+    if(dd){
+      box.append(el('div', {className:'dm'}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
+      a.onclick = e => {
+        if(matchMedia('(hover:none)').matches && !box.classList.contains('open')){
+          e.preventDefault();
+          document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
+          box.classList.add('open');
+        }
+      };
+    }
+    return box;
+  }));
+  $('fCats').replaceChildren(...AUDIENCES.map(a => el('a', {href:href('all', {aud:a}), textContent:a})), ...types.map(([l, u]) => el('a', {href:u, textContent:l})));
+}
+
 function makeCard(p){
-  const c = el('button', {className:'card', type:'button'}, [
-    el('div', {className:'im'}, [el('img', {src:p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]),
-    el('h3', {textContent:p.title}), el('span', {className:'pr', textContent:p.price})
-  ]);
+  const im = el('div', {className:'im'}, [el('img', {src:p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
+  if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
+  const c = el('button', {className:'card', type:'button'}, [im, el('h3', {textContent:p.title}), el('span', {className:'pr', textContent:p.price})]);
   c.onclick = () => openProduct(p);
   return c;
 }
-function renderGrid(){
-  const g = $('grid'); g.replaceChildren();
+function statusNote(){
+  if(failed) return 'Products could not load. Refresh the page to try again.';
+  return loaded ? '' : 'Loading products\u2026';
+}
+function renderHome(){
+  const g = $('newGrid'); g.replaceChildren();
+  const list = products.slice().reverse().slice(0, 8);
+  if(!list.length){ g.append(el('p', {className:'note', textContent: statusNote() || 'Products are on the way. Check back soon.'})); return; }
+  list.forEach(p => g.append(makeCard(p)));
+}
+function renderList(r){
+  const parts = [r.aud, r.type].filter(Boolean);
+  const base = PAGE_NAMES[r.mode];
+  $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
+  const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
+  if(parts.length){ crumb.append(el('a', {href:href(r.mode), textContent:base}), ' / ', el('b', {textContent:parts.join(' / ')})); }
+  else crumb.append(el('b', {textContent:base}));
+  document.title = (parts.join(' / ') || base) + ' | Tiny Dreams Lullaby';
+
+  const s = $('side'); s.replaceChildren();
+  const box = (title, items, current, make) => s.append(el('div', {className:'fbox'}, [el('h4', {textContent:title})].concat(
+    [['All', '']].concat(items.map(v => [v, v])).map(([label, v]) => {
+      const a = el('a', {href:make(v), textContent:label});
+      if(current === v) a.setAttribute('aria-current', 'true');
+      return a;
+    }))));
+  box('Style', TYPES, r.type, v => href(r.mode, {type:v, aud:r.aud}));
+  s.append(el('div', {style:'height:16px'}));
+  box('Collection', AUDIENCES, r.aud, v => href(r.mode, {type:r.type, aud:v}));
+
   const q = fQ.toLowerCase();
-  const list = products.filter(p => (!fAud || p.audience === fAud) && (!fType || p.type === fType) && (!q || p.title.toLowerCase().includes(q)));
-  $('shop').textContent = [fAud, fType].filter(Boolean).join(' / ') || 'All Products';
+  let list = products.filter(p => (r.mode !== 'specials' || p.special) && (!r.type || p.type === r.type) && (!r.aud || p.audience === r.aud) && (!q || p.title.toLowerCase().includes(q)));
+  const sort = $('sort').value;
+  list.sort((a, b) => sort === 'lo' ? a.priceNum - b.priceNum : sort === 'hi' ? b.priceNum - a.priceNum : sort === 'az' ? a.title.localeCompare(b.title) : b.idx - a.idx);
+  const g = $('grid'); g.replaceChildren();
   if(!list.length){
-    g.append(el('p', {className:'note', textContent: products.length ? 'Nothing matches yet. Try another choice.' : 'Products are on the way. Check back soon.'}));
+    const msg = statusNote() || (r.mode === 'specials' && !products.some(p => p.special) ? 'No specials right now. Check back soon.' : products.length ? 'Nothing matches yet. Try another choice.' : 'Products are on the way. Check back soon.');
+    g.append(el('p', {className:'note', textContent:msg}));
     return;
   }
   list.forEach(p => g.append(makeCard(p)));
 }
-function renderNew(){
-  const g = $('newGrid'); g.replaceChildren();
-  products.slice(-8).reverse().forEach(p => g.append(makeCard(p)));
-  $('newBlock').style.display = products.length ? '' : 'none';
-}
-function renderFooter(){
-  $('fCats').replaceChildren(...AUDIENCES.concat(TYPES).map(v => el('button', {textContent:v, onclick:() => AUDIENCES.includes(v) ? setFilter(v, '', true) : setFilter('', v, true)})));
+function render(){
+  const r = route();
+  document.body.classList.toggle('list', r.mode !== 'home');
+  $('homeView').hidden = r.mode !== 'home';
+  $('listView').hidden = r.mode === 'home';
+  $('nav').classList.remove('open');
+  document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
+  if(r.mode === 'home'){ document.title = 'Tiny Dreams Lullaby | Love Hart Design'; renderHome(); } else renderList(r);
 }
 
-$('q').oninput = e => { fQ = e.target.value.trim(); renderGrid(); };
+addEventListener('hashchange', () => { render(); scrollTo(0, 0); });
+$('sort').onchange = render;
+$('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
 addEventListener('scroll', () => { document.body.classList.toggle('scrolled', scrollY > 260); if(scrollY <= 260) $('nav').classList.remove('open'); }, {passive:true});
 
@@ -297,6 +377,34 @@ $('news').onsubmit = async e => {
     msg.textContent = 'Thanks! You are subscribed.'; $('email').value = '';
   }catch(err){ msg.textContent = 'Could not subscribe. Please try again.'; }
 };
+
+/* ---- the two banners rotate on their own ---- */
+function makeSlider(host, slides){
+  const track = el('div', {className:'track'}, slides);
+  const n = slides.length; let i = 0, timer;
+  host.replaceChildren(track);
+  if(n < 2) return;
+  const dots = el('div', {className:'dots'});
+  const btns = slides.map((_, k) => { const b = el('button', {type:'button'}); b.setAttribute('aria-label','Slide ' + (k+1)); b.onclick = () => { go(k); restart(); }; dots.append(b); return b; });
+  const arr = (cls, txt, d) => { const b = el('button', {className:'arr ' + cls, type:'button', textContent:txt}); b.setAttribute('aria-label', d > 0 ? 'Next slide' : 'Previous slide'); b.onclick = () => { go(i + d); restart(); }; return b; };
+  host.append(arr('l','\u2039',-1), arr('r','\u203A',1), dots);
+  function go(k){ i = (k + n) % n; track.style.transform = 'translateX(' + (-100 * i) + '%)'; btns.forEach((b, j) => j === i ? b.setAttribute('aria-current','true') : b.removeAttribute('aria-current')); }
+  function restart(){ clearInterval(timer); timer = setInterval(() => go(i + 1), SLIDE_SECONDS * 1000); }
+  host.onmouseenter = () => clearInterval(timer); host.onmouseleave = restart;
+  go(0); restart();
+}
+const imgSlides = urls => urls.map(u => el('div', {className:'slide'}, el('img', {src:u, alt:''})));
+const txt = (cls, tag, text) => el('div', {className:'slide ' + cls}, [el(tag, {textContent:text})]);
+function renderBanners(){
+  makeSlider($('topSlider'), TOP_BANNER_IMAGES.length ? imgSlides(TOP_BANNER_IMAGES) : [
+    txt('a', 'h2', 'Dream big. Dream sweet. Dream tiny.'),
+    txt('b', 'h2', 'New designs for the whole family')
+  ]);
+  const burst = () => el('span', {className:'burst', textContent:'NEW'});
+  const slide1 = el('div', {className:'slide a'}, [el('span', {className:'moon'}), el('div', {}, [el('h1', {textContent:'Sleepy-time styles for the whole family'}), el('p', {textContent:'SHIRTS, HOODIES AND MORE'})])]);
+  const slide2 = el('div', {className:'slide b'}, [burst(), el('div', {}, [el('h2', {className:'big', textContent:'SWEET DREAMS BEGIN HERE.'}), el('p', {textContent:'DREAM BIG. DREAM SWEET. DREAM TINY.'})]), burst()]);
+  makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2]);
+}
 
 function openProduct(p){
   let size = '', color = '';
@@ -362,33 +470,6 @@ $('checkout').onclick = async () => {
   }catch(e){ msg.textContent = 'Checkout could not start. Please try again.'; }
 };
 
-function makeSlider(host, slides){
-  const track = el('div', {className:'track'}, slides);
-  const n = slides.length; let i = 0, timer;
-  host.replaceChildren(track);
-  if(n < 2) return;
-  const dots = el('div', {className:'dots'});
-  const btns = slides.map((_, k) => { const b = el('button', {type:'button'}); b.setAttribute('aria-label','Slide ' + (k+1)); b.onclick = () => { go(k); restart(); }; dots.append(b); return b; });
-  const arr = (cls, txt, d) => { const b = el('button', {className:'arr ' + cls, type:'button', textContent:txt}); b.setAttribute('aria-label', d > 0 ? 'Next slide' : 'Previous slide'); b.onclick = () => { go(i + d); restart(); }; return b; };
-  host.append(arr('l','\u2039',-1), arr('r','\u203A',1), dots);
-  function go(k){ i = (k + n) % n; track.style.transform = 'translateX(' + (-100 * i) + '%)'; btns.forEach((b, j) => j === i ? b.setAttribute('aria-current','true') : b.removeAttribute('aria-current')); }
-  function restart(){ clearInterval(timer); if(!matchMedia('(prefers-reduced-motion:reduce)').matches) timer = setInterval(() => go(i + 1), 5000); }
-  host.onmouseenter = () => clearInterval(timer); host.onmouseleave = restart;
-  go(0); restart();
-}
-const imgSlides = urls => urls.map(u => el('div', {className:'slide'}, el('img', {src:u, alt:''})));
-const txt = (cls, tag, text, sub) => el('div', {className:'slide ' + cls}, [el(tag, {textContent:text})].concat(sub ? [el('p', {textContent:sub})] : []));
-function renderBanners(){
-  makeSlider($('topSlider'), TOP_BANNER_IMAGES.length ? imgSlides(TOP_BANNER_IMAGES) : [
-    txt('a', 'h2', 'Dream big. Dream sweet. Dream tiny.'),
-    txt('b', 'h2', 'New designs for the whole family')
-  ]);
-  const burst = () => el('span', {className:'burst', textContent:'NEW'});
-  const slide2 = el('div', {className:'slide b'}, [burst(), el('div', {}, [el('h2', {className:'big', textContent:'SWEET DREAMS BEGIN HERE.'}), el('p', {textContent:'DREAM BIG. DREAM SWEET. DREAM TINY.'})]), burst()]);
-  const slide1 = el('div', {className:'slide a'}, [el('span', {className:'moon'}), el('div', {}, [el('h1', {textContent:'Sleepy-time styles for the whole family'}), el('p', {textContent:'SHIRTS, HOODIES AND MORE'})])]);
-  makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2]);
-}
-
 async function load(){
   try{
     const r = await fetch(FUNCTION_URL);
@@ -396,13 +477,10 @@ async function load(){
     let arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
     arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
     products = arr.map(normalize).filter(p => p.title);
-  }catch(e){
-    $('grid').replaceChildren(el('p', {className:'note', textContent:'Products could not load. Refresh the page to try again.'}));
-    return;
-  }
-  renderNew(); renderGrid();
+  }catch(e){ failed = true; }
+  loaded = true; render();
 }
-renderBanners(); renderBars(); renderFooter(); saveCart(); $('newBlock').style.display = 'none'; renderGrid(); load();
+buildNav(); renderBanners(); saveCart(); render(); load();
 </script>
 </body>
 </html>
