@@ -106,7 +106,7 @@ h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.
 .fbox a{display:block;text-decoration:none;padding:5px 0}
 .fbox a:hover{color:var(--brand);text-decoration:underline}
 .fbox a[aria-current=true]{font-weight:700;color:var(--brand)}
-.sortbar{border:1px solid #ccc;display:flex;align-items:center;gap:8px;padding:0 12px;width:216px;height:40px;margin-bottom:30px;font-size:.8rem;color:#888}
+.sortbar{border:1px solid #ccc;display:flex;align-items:center;gap:8px;padding:0 12px;width:216px;height:40px;margin-bottom:0;font-size:.8rem;color:#888}
 .sortbar select{flex:1;border:0;font:inherit;font-size:.8rem;color:#333;background:none;padding:6px 0;cursor:pointer}
 .news{text-align:center;margin:110px 0 80px}
 .news h2{font-size:2rem;font-weight:400;margin-bottom:22px}
@@ -201,6 +201,18 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
  .news{margin:60px 0 50px}
  footer{padding:40px 6vw 30px}
 }
+.tools{display:flex;gap:12px;align-items:center;margin-bottom:30px}
+#filterBtn{display:none;height:40px;padding:0 18px;border:1px solid #333;background:#fff;font-weight:700;text-transform:uppercase;font-size:.85rem;color:#333}
+@media(max-width:1000px){
+ .lay{display:flex;flex-direction:column;gap:0}
+ .lay>div{display:contents}
+ .tools{order:1;margin-bottom:16px}
+ #side{order:2;display:none;margin-bottom:20px}
+ #side.open{display:block}
+ #grid{order:3}
+ #filterBtn{display:block}
+ .sortbar{flex:1;width:auto}
+}
 </style>
 </head>
 <body>
@@ -223,7 +235,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <div id="hero"><div class="slider thin" id="topSlider" aria-label="Announcements"></div><div class="slider" id="mainSlider" aria-label="Featured"></div></div>
 
 <main class="wrap">
-  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div></section>
+  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div><h2 class="sec">Featured Products</h2><div class="grid" id="featGrid"></div><h2 class="sec">Best Selling Products</h2><div class="grid" id="bestGrid"></div></section>
 
   <section id="infoView" hidden>
     <p class="crumb" id="infoCrumb"></p>
@@ -237,7 +249,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
     <div class="lay">
       <aside id="side" aria-label="Filters"></aside>
       <div>
-        <label class="sortbar">Sort By: <select id="sort"><option value="new">Newest</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option><option value="az">Name: A to Z</option></select></label>
+        <div class="tools"><button id="filterBtn" type="button">Filters</button><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new">Newest</option><option value="best" selected>Best Selling</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
         <div class="grid three" id="grid" aria-live="polite"></div>
       </div>
     </div>
@@ -391,6 +403,8 @@ function normalize(p, i){
     desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
     price: money(p.price != null ? p.price : p.retailPrice), priceNum,
     special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
+    featured: p.featured === true || tags.some(t => /^featured$/i.test(t)),
+    best: p.bestSelling === true || p.best_selling === true || tags.some(t => /^best[ -]?sell(er|ers|ing)$/i.test(t)),
     apparel: normApparel(tags, title),
     cats: CATEGORIES.filter(c => tags.some(t => t.toLowerCase() === c.toLowerCase())),
     gcolors: COLORS.filter(c => new RegExp('\\b' + c + '\\b', 'i').test(pickList(p.colors || p.appearances).concat(tags).join(' '))),
@@ -467,10 +481,15 @@ function statusNote(){
   return loaded ? '' : 'Loading products\u2026';
 }
 function renderHome(){
-  const g = $('newGrid'); g.replaceChildren();
-  const list = products.slice().reverse().slice(0, 8);
-  if(!list.length){ g.append(el('p', {className:'note', textContent: statusNote() || 'Products are on the way. Check back soon.'})); return; }
-  list.forEach(p => g.append(makeCard(p)));
+  const fill = (id, list, empty) => {
+    const g = $(id); g.replaceChildren();
+    if(!list.length){ g.append(el('p', {className:'note', textContent: statusNote() || empty})); return; }
+    list.slice(0, 8).forEach(p => g.append(makeCard(p)));
+  };
+  const newest = products.slice().reverse();
+  fill('newGrid', newest, 'Products are on the way. Check back soon.');
+  fill('featGrid', newest.filter(p => p.featured), 'Featured products are coming soon.');
+  fill('bestGrid', newest.filter(p => p.best), 'Best sellers are coming soon.');
 }
 function renderList(r){
   const parts = r.apps.concat(r.cols, r.cats, r.colors, r.auds, r.types);
@@ -500,7 +519,7 @@ function renderList(r){
   groups.forEach(([title, key, allOpts, sel]) => {
     const opts = apparelPage && ['col', 'cat', 'color', 'type'].includes(key) ? allOpts.filter(o => o[2] > 0 || sel.includes(o[1])) : allOpts;
     if(!opts.length) return;
-    const d = el('details', {className:'fs', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})]);
+    const d = el('details', {className:'fs', open:true}, [el('summary', {textContent:title})]);
     opts.forEach(([label, val, n]) => {
       const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
       cb.setAttribute('aria-label', label);
@@ -518,7 +537,8 @@ function renderList(r){
 
   const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
   const sort = $('sort').value;
-  list.sort((a, b) => sort === 'lo' ? a.priceNum - b.priceNum : sort === 'hi' ? b.priceNum - a.priceNum : sort === 'az' ? a.title.localeCompare(b.title) : b.idx - a.idx);
+  const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
+  list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
   const g = $('grid'); g.replaceChildren();
   if(!list.length){
     const msg = statusNote() || (r.mode === 'specials' && !products.some(p => p.special) ? 'No specials right now. Check back soon.' : products.length ? 'Nothing matches yet. Try another choice.' : 'Products are on the way. Check back soon.');
@@ -558,11 +578,18 @@ function render(){
 }
 
 let fromSidebar = false, lastMode = route().mode;
-addEventListener('hashchange', () => { const m = route().mode; render(); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
+addEventListener('hashchange', () => { const m = route().mode; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
 $('sort').onchange = render;
+$('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
-addEventListener('scroll', () => { document.body.classList.toggle('scrolled', scrollY > 260); if(scrollY <= 260) $('nav').classList.remove('open'); }, {passive:true});
+addEventListener('scroll', () => {
+  const now = scrollY > 260;
+  if(now !== document.body.classList.contains('scrolled')){
+    document.body.classList.toggle('scrolled', now);
+    if(innerWidth > 900) $('nav').classList.remove('open');
+  }
+}, {passive:true});
 
 $('news').onsubmit = async e => {
   e.preventDefault();
