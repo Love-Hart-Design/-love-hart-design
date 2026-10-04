@@ -54,6 +54,7 @@ body.scrolled nav.main.open .dm a{color:#fff}
 .slider{position:relative;overflow:hidden;background:#000;--h:clamp(120px,14.3vw,267px)}
 .slider.thin{--h:clamp(56px,12.5vw,232px)}
 body.list #mainSlider{display:none}
+body.list .track{transition-duration:.35s}
 .track{display:flex;transition:transform .7s ease}
 .slide{flex:0 0 100%;display:flex;align-items:center;justify-content:center;gap:3vw;text-align:center;color:#fff;position:relative;overflow:hidden;min-height:var(--h)}
 .slide img{width:100%;display:block}
@@ -281,6 +282,7 @@ const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the te
 const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
 const SIGNIN_URL = '';         // where the Sign in link goes. Leave empty until accounts are set up.
 const REGISTER_URL = '';       // where the Register link goes. Leave empty until accounts are set up.
+const LINK_SLIDE_SECONDS = 2.5; // banners on the link pages (Specials, All Products, Apparel...) change this often
 const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
 const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
 
@@ -311,7 +313,9 @@ const INFO = {
   ]}
 };
 const DEFAULT_SIZES = ['S','M','L','XL','2XL','3XL']; // shown in the Size filter until your feed sends real sizes per product
-const APPAREL = ['Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
+const APPAREL = ['Tie-Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
+const CATEGORIES = ['Animals','Big Face','Birds & Bugs','Cats','Character Cats','Dogs','Dragons','Fantasy','Humor','Myth and Lore','Native American','Nature & Peace','Pets','Wolves'];
+const COLORS = ['Black','Blue','Green','Purple','Red','Yellow'];
 const COLLECTIONS = ['Sleeping Animals','Thanksgiving','Halloween','Christmas'];
 const COLLECTION_MATCH = {'Sleeping Animals': /sleep/i, 'Thanksgiving': /thanksgiving/i, 'Halloween': /halloween/i, 'Christmas': /christmas|xmas/i};
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
@@ -363,7 +367,7 @@ function normApparel(tags, title){
   const t = title.toLowerCase();
   if(/sweatpant|jogger/.test(t)) return 'Sweatpants';
   if(/hood/.test(t)) return /lightweight/.test(t) ? 'Lightweight Hoodies' : 'Classic Hoodies';
-  if(/dye only/.test(t)) return 'Dye Only';
+  if(/tie-?dye|dye only/.test(t)) return 'Tie-Dye Only';
   if(/long\s*sleeve/.test(t)) return 'Long Sleeve T-Shirts';
   if(/v-?neck/.test(t)) return 'V-Neck Triblend T-Shirts';
   if(/crew/.test(t) && /tri-?blend/.test(t)) return 'Crew-Neck Triblend Graphic T-Shirts';
@@ -385,6 +389,8 @@ function normalize(p, i){
     price: money(p.price != null ? p.price : p.retailPrice), priceNum,
     special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
     apparel: normApparel(tags, title),
+    cats: CATEGORIES.filter(c => tags.some(t => t.toLowerCase() === c.toLowerCase())),
+    gcolors: COLORS.filter(c => new RegExp('\\b' + c + '\\b', 'i').test(pickList(p.colors || p.appearances).concat(tags).join(' '))),
     cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
     inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     audience: tags.map(normAudience).find(Boolean) || normAudience(title),
@@ -400,7 +406,7 @@ try{ cart = JSON.parse(localStorage.getItem('tdl-cart')) || []; }catch(e){}
 function href(mode, o = {}){
   const q = new URLSearchParams();
   const put = (k, v) => { const a = [].concat(v || []).filter(Boolean); if(a.length) q.set(k, a.join(',')); };
-  put('type', o.type); put('app', o.app); put('aud', o.aud); put('col', o.col); put('size', o.size);
+  put('type', o.type); put('app', o.app); put('cat', o.cat); put('color', o.color); put('aud', o.aud); put('col', o.col); put('size', o.size);
   if(o.stock) q.set('stock', '1');
   const s = q.toString();
   return '#/' + mode + (s ? '?' + s : '');
@@ -411,7 +417,7 @@ function route(){
   const q = new URLSearchParams(qs || '');
   const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
-  return {mode, apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
+  return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
 const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
 
@@ -464,7 +470,7 @@ function renderHome(){
   list.forEach(p => g.append(makeCard(p)));
 }
 function renderList(r){
-  const parts = r.apps.concat(r.cols, r.auds, r.types);
+  const parts = r.apps.concat(r.cols, r.cats, r.colors, r.auds, r.types);
   const base = r.apps.length ? 'Apparel' : PAGE_NAMES[r.mode];
   $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
   const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
@@ -484,20 +490,19 @@ function renderList(r){
   const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
   groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => hasSize(p, v))]), r.sizes]);
   groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
-  if(apparelPage){
-    groups.push(['Categories', 'app', APPAREL.map(v => [v, v, count(p => p.apparel === v)]), r.apps]);
-    groups.push(['Garment Type', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
-  } else groups.push(['Categories', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
+  groups.push(['Categories', 'cat', CATEGORIES.map(v => [v, v, count(p => p.cats.includes(v))]), r.cats]);
+  groups.push(['Garment Color', 'color', COLORS.map(v => [v, v, count(p => p.gcolors.includes(v))]), r.colors]);
+  groups.push(['Garment Type', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
   const sb = el('div', {className:'sb'});
   groups.forEach(([title, key, allOpts, sel]) => {
-    const opts = apparelPage && ['col', 'app', 'type'].includes(key) ? allOpts.filter(o => o[2] > 0 || sel.includes(o[1])) : allOpts;
+    const opts = apparelPage && ['col', 'cat', 'color', 'type'].includes(key) ? allOpts.filter(o => o[2] > 0 || sel.includes(o[1])) : allOpts;
     if(!opts.length) return;
     const d = el('details', {className:'fs', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})]);
     opts.forEach(([label, val, n]) => {
       const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
       cb.setAttribute('aria-label', label);
       cb.onchange = () => {
-        const cur = {app:r.apps, type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
+        const cur = {app:r.apps, cat:r.cats, color:r.colors, type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
         if(key === 'stock') cur.stock = cb.checked;
         else cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
         fromSidebar = true; location.hash = href(r.mode, cur);
@@ -508,7 +513,7 @@ function renderList(r){
   });
   $('side').replaceChildren(sb);
 
-  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
+  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
   const sort = $('sort').value;
   list.sort((a, b) => sort === 'lo' ? a.priceNum - b.priceNum : sort === 'hi' ? b.priceNum - a.priceNum : sort === 'az' ? a.title.localeCompare(b.title) : b.idx - a.idx);
   const g = $('grid'); g.replaceChildren();
@@ -584,6 +589,7 @@ syncFooter();
 function makeSlider(host, slides, secs){
   const track = el('div', {className:'track'}, slides);
   const n = slides.length; let i = 0, timer;
+  const secsOf = typeof secs === 'function' ? secs : () => secs;
   host.replaceChildren(track);
   if(n < 2) return;
   const dots = el('div', {className:'dots'});
@@ -591,8 +597,9 @@ function makeSlider(host, slides, secs){
   const arr = (cls, txt, d) => { const b = el('button', {className:'arr ' + cls, type:'button', textContent:txt}); b.setAttribute('aria-label', d > 0 ? 'Next slide' : 'Previous slide'); b.onclick = () => { go(i + d); restart(); }; return b; };
   host.append(arr('l','\u2039',-1), arr('r','\u203A',1), dots);
   function go(k){ i = (k + n) % n; track.style.transform = 'translateX(' + (-100 * i) + '%)'; btns.forEach((b, j) => j === i ? b.setAttribute('aria-current','true') : b.removeAttribute('aria-current')); }
-  function restart(){ clearInterval(timer); timer = setInterval(() => go(i + 1), secs * 1000); }
-  host.onmouseenter = () => clearInterval(timer); host.onmouseleave = restart;
+  function tick(){ go(i + 1); timer = setTimeout(tick, secsOf() * 1000); }
+  function restart(){ clearTimeout(timer); timer = setTimeout(tick, secsOf() * 1000); }
+  host.onmouseenter = () => clearTimeout(timer); host.onmouseleave = restart;
   go(0); restart();
 }
 const imgSlides = urls => urls.map(u => el('div', {className:'slide'}, el('img', {src:u, alt:''})));
@@ -601,11 +608,11 @@ function renderBanners(){
   makeSlider($('topSlider'), TOP_BANNER_IMAGES.length ? imgSlides(TOP_BANNER_IMAGES) : [
     txt('a', 'h2', 'Dream big. Dream sweet. Dream tiny.'),
     txt('b', 'h2', 'New designs for the whole family')
-  ], TOP_SLIDE_SECONDS);
+  ], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : TOP_SLIDE_SECONDS);
   const burst = () => el('span', {className:'burst', textContent:'NEW'});
   const slide1 = el('div', {className:'slide a'}, [el('span', {className:'moon'}), el('div', {}, [el('h1', {textContent:'Sleepy-time styles for the whole family'}), el('p', {textContent:'SHIRTS, HOODIES AND MORE'})])]);
   const slide2 = el('div', {className:'slide b'}, [burst(), el('div', {}, [el('h2', {className:'big', textContent:'SWEET DREAMS BEGIN HERE.'}), el('p', {textContent:'DREAM BIG. DREAM SWEET. DREAM TINY.'})]), burst()]);
-  makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2], MAIN_SLIDE_SECONDS);
+  makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : MAIN_SLIDE_SECONDS);
 }
 
 function openProduct(p){
