@@ -86,7 +86,16 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .crumb{font-size:.85rem;color:#777;margin:36px 0 14px}
 .crumb a{text-decoration:none}.crumb b{color:#555}
 h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
-.lay{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;margin-bottom:60px}
+.lay{display:grid;grid-template-columns:300px 1fr;gap:15px;align-items:start;margin-bottom:60px}
+.sb{border:1px solid var(--line);padding:0 20px}
+.fs{border-bottom:1px solid var(--line);padding-bottom:12px}
+.fs:last-child{border-bottom:0}
+.fs summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;text-transform:uppercase;font-size:1rem;padding:20px 0 10px;cursor:pointer}
+.fs summary::-webkit-details-marker{display:none}
+.fs summary::after{content:"";width:9px;height:9px;border-left:2px solid #333;border-top:2px solid #333;transform:rotate(45deg);margin:4px 4px 0 0}
+.fs:not([open]) summary::after{transform:rotate(225deg);margin-top:-2px}
+.fr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
+.fr input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--brand)}
 .fbox{border:1px solid var(--line);padding:6px 20px 14px}
 .fbox+.fbox{margin-top:12px}
 .fbox summary{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px;cursor:pointer}
@@ -298,6 +307,8 @@ const INFO = {
     ['', 'Every design is printed on demand, so each order is made just for you. Tiny Dreams Lullaby is part of Love Hart Design, a family of channels and shops.']
   ]}
 };
+const COLLECTIONS = ['Sleeping Animals','Thanksgiving','Halloween','Christmas'];
+const COLLECTION_MATCH = {'Sleeping Animals': /sleep/i, 'Thanksgiving': /thanksgiving/i, 'Halloween': /halloween/i, 'Christmas': /christmas|xmas/i};
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
 const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
 
@@ -354,6 +365,8 @@ function normalize(p, i){
     desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
     price: money(p.price != null ? p.price : p.retailPrice), priceNum,
     special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
+    cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
+    inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     audience: tags.map(normAudience).find(Boolean) || normAudience(title),
     type: tags.map(normType).find(Boolean) || normType(title),
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances)
@@ -366,8 +379,9 @@ try{ cart = JSON.parse(localStorage.getItem('tdl-cart')) || []; }catch(e){}
 /* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
 function href(mode, o = {}){
   const q = new URLSearchParams();
-  if(o.type) q.set('type', o.type);
-  if(o.aud) q.set('aud', o.aud);
+  const put = (k, v) => { const a = [].concat(v || []).filter(Boolean); if(a.length) q.set(k, a.join(',')); };
+  put('type', o.type); put('aud', o.aud); put('col', o.col); put('size', o.size);
+  if(o.stock) q.set('stock', '1');
   const s = q.toString();
   return '#/' + mode + (s ? '?' + s : '');
 }
@@ -376,7 +390,8 @@ function route(){
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
   const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
-  return {mode, type: TYPES.includes(q.get('type')) ? q.get('type') : '', aud: AUDIENCES.includes(q.get('aud')) ? q.get('aud') : ''};
+  const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
+  return {mode, types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
 const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
 
@@ -387,7 +402,7 @@ function buildNav(){
     ['All Products', href('all'), [['All Products', href('all')]].concat(types)],
     ['New Releases', href('new'), null],
     ['Apparel', href('all'), types],
-    ['Collections', href('all'), AUDIENCES.map(a => [a, href('all', {aud:a})])]
+    ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
   ];
   $('nav').replaceChildren(...items.map(([label, h, dd]) => {
     const a = el('a', {className: 'ni-link' + (dd ? ' dd' : ''), href:h, textContent:label});
@@ -408,7 +423,7 @@ function buildNav(){
   top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
   $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
   $('fBrands').replaceChildren(...BRANDS.map(([l, u]) => el('a', {href:u, textContent:l})));
-  $('fCats').replaceChildren(...AUDIENCES.map(a => el('a', {href:href('all', {aud:a}), textContent:a})), ...types.map(([l, u]) => el('a', {href:u, textContent:l})));
+  $('fCats').replaceChildren(...COLLECTIONS.map(c => el('a', {href:href('all', {col:c}), textContent:c})), ...types.map(([l, u]) => el('a', {href:u, textContent:l})));
 }
 
 function makeCard(p){
@@ -429,26 +444,43 @@ function renderHome(){
   list.forEach(p => g.append(makeCard(p)));
 }
 function renderList(r){
-  const parts = [r.aud, r.type].filter(Boolean);
+  const parts = r.cols.concat(r.auds, r.types);
   const base = PAGE_NAMES[r.mode];
   $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
   const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
-  if(parts.length){ crumb.append(el('a', {href:href(r.mode), textContent:base}), ' / ', el('b', {textContent:parts.join(' / ')})); }
+  if(parts.length) crumb.append(el('a', {href:href(r.mode), textContent:base}), ' / ', el('b', {textContent:parts.join(' / ')}));
   else crumb.append(el('b', {textContent:base}));
   document.title = (parts.join(' / ') || base) + ' | Tiny Dreams Lullaby';
 
-  const s = $('side'); s.replaceChildren();
-  const box = (title, items, current, make) => s.append(el('details', {className:'fbox', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})].concat(
-    [['All', '']].concat(items.map(v => [v, v])).map(([label, v]) => {
-      const a = el('a', {href:make(v), textContent:label});
-      if(current === v) a.setAttribute('aria-current', 'true');
-      return a;
-    }))));
-  box('Style', TYPES, r.type, v => href(r.mode, {type:v, aud:r.aud}));
-  box('Collection', AUDIENCES, r.aud, v => href(r.mode, {type:r.type, aud:v}));
-
   const q = fQ.toLowerCase();
-  let list = products.filter(p => (r.mode !== 'specials' || p.special) && (!r.type || p.type === r.type) && (!r.aud || p.audience === r.aud) && (!q || p.title.toLowerCase().includes(q)));
+  const pool = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
+  const count = fn => pool.filter(fn).length;
+  const order = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
+  const sizes = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
+  const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
+  if(sizes.length) groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => p.sizes.includes(v))]), r.sizes]);
+  groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
+  groups.push(['Categories', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
+  groups.push(['Shop For', 'aud', AUDIENCES.map(v => [v, v, count(p => p.audience === v)]), r.auds]);
+  const sb = el('div', {className:'sb'});
+  groups.forEach(([title, key, opts, sel]) => {
+    const d = el('details', {className:'fs', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})]);
+    opts.forEach(([label, val, n]) => {
+      const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
+      cb.setAttribute('aria-label', label);
+      cb.onchange = () => {
+        const cur = {type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
+        if(key === 'stock') cur.stock = cb.checked;
+        else cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
+        fromSidebar = true; location.hash = href(r.mode, cur);
+      };
+      d.append(el('label', {className:'fr'}, [el('span', {textContent:label + ' (' + n + ')'}), cb]));
+    });
+    sb.append(d);
+  });
+  $('side').replaceChildren(sb);
+
+  const list = pool.filter(p => (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.sizes.length || p.sizes.some(x => r.sizes.includes(x))) && (!r.stock || p.inStock));
   const sort = $('sort').value;
   list.sort((a, b) => sort === 'lo' ? a.priceNum - b.priceNum : sort === 'hi' ? b.priceNum - a.priceNum : sort === 'az' ? a.title.localeCompare(b.title) : b.idx - a.idx);
   const g = $('grid'); g.replaceChildren();
@@ -472,7 +504,7 @@ function renderInfo(r){
   const sec = (h, links) => box.append(el('h3', {textContent:h}), el('ul', {}, links.map(([l, u]) => el('li', {}, el('a', {href:u, textContent:l})))));
   sec('Shop', [['Home', '#/'], ['Specials', href('specials')], ['All Products', href('all')], ['New Releases', href('new')]]);
   sec('Apparel', TYPES.map(t => [t, href('all', {type:t})]));
-  sec('Collections', AUDIENCES.map(a => [a, href('all', {aud:a})]));
+  sec('Collections', COLLECTIONS.map(c => [c, href('all', {col:c})]));
   sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
   sec('Our Brands', BRANDS);
 }
@@ -489,7 +521,8 @@ function render(){
   if(r.mode === 'home'){ document.title = 'Tiny Dreams Lullaby | Love Hart Design'; renderHome(); } else if(isInfo) renderInfo(r); else renderList(r);
 }
 
-addEventListener('hashchange', () => { render(); scrollTo(0, 0); });
+let fromSidebar = false, lastMode = route().mode;
+addEventListener('hashchange', () => { const m = route().mode; render(); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
 $('sort').onchange = render;
 $('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
