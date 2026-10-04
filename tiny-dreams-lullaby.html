@@ -419,7 +419,7 @@ function buildNav(){
   const types = TYPES.map(t => [t, href('all', {type:t})]);
   const items = [
     ['Specials', href('specials'), null],
-    ['All Products', href('all'), [['All Products', href('all')]].concat(types)],
+    ['Tiny Dreams Lullaby', href('all'), null],
     ['New Releases', href('new'), null],
     ['Apparel', href('all'), APPAREL.map(a => [a, href('all', {app:a})])],
     ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
@@ -465,7 +465,7 @@ function renderHome(){
 }
 function renderList(r){
   const parts = r.apps.concat(r.cols, r.auds, r.types);
-  const base = PAGE_NAMES[r.mode];
+  const base = r.apps.length ? 'Apparel' : PAGE_NAMES[r.mode];
   $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
   const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
   if(parts.length) crumb.append(el('a', {href:href(r.mode), textContent:base}), ' / ', el('b', {textContent:parts.join(' / ')}));
@@ -473,7 +473,9 @@ function renderList(r){
   document.title = (parts.join(' / ') || base) + ' | Tiny Dreams Lullaby';
 
   const q = fQ.toLowerCase();
-  const pool = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
+  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
+  const apparelPage = r.apps.length > 0;
+  const pool = apparelPage ? scope.filter(p => r.apps.includes(p.apparel)) : scope;
   const count = fn => pool.filter(fn).length;
   const order = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
   const fromFeed = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
@@ -482,9 +484,14 @@ function renderList(r){
   const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
   groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => hasSize(p, v))]), r.sizes]);
   groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
-  groups.push(['Categories', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
+  if(apparelPage){
+    groups.push(['Categories', 'app', APPAREL.map(v => [v, v, count(p => p.apparel === v)]), r.apps]);
+    groups.push(['Garment Type', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
+  } else groups.push(['Categories', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
   const sb = el('div', {className:'sb'});
-  groups.forEach(([title, key, opts, sel]) => {
+  groups.forEach(([title, key, allOpts, sel]) => {
+    const opts = apparelPage && ['col', 'app', 'type'].includes(key) ? allOpts.filter(o => o[2] > 0 || sel.includes(o[1])) : allOpts;
+    if(!opts.length) return;
     const d = el('details', {className:'fs', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})]);
     opts.forEach(([label, val, n]) => {
       const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
