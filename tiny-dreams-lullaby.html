@@ -27,6 +27,10 @@ body.scrolled .hamb{display:block}
 .search input{flex:1;border:0;outline:0;font:inherit;background:none;min-width:0}
 .acct{display:flex;align-items:center;gap:18px;white-space:nowrap}
 .acct a{text-decoration:none}
+.who{display:flex;align-items:center;gap:6px}
+.sep{border-left:1px solid var(--line);height:28px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 22px;border-radius:6px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
 .cartbtn{background:none;border:0;display:flex;align-items:center;gap:6px;color:var(--txt)}
 nav.main{background:var(--nav);display:flex;justify-content:center;flex-wrap:wrap;gap:0 clamp(18px,3.2vw,52px);padding:0 3vw}
 .ni{position:relative}
@@ -132,7 +136,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
     <a class="logo" href="#/"><span class="moon" aria-hidden="true"></span><span><b>Tiny Dreams Lullaby</b><small>by Love Hart Design</small></span></a>
     <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg><input id="q" type="search" placeholder="What are you looking for?" aria-label="Search products"></label>
     <div class="acct">
-      <a href="index.html">Love Hart Design</a>
+      <span class="who"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><a href="#" id="signin">Sign in</a> or <a href="#" id="register">Register</a></span><span class="sep" aria-hidden="true"></span>
       <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
     </div>
   </header>
@@ -173,6 +177,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
   <p class="copy">&copy; Tiny Dreams Lullaby, part of Love Hart Design</p>
 </footer>
 
+<div class="toast" id="toast" role="status"></div>
+
 <dialog id="dlg"><button class="x" id="closeDlg" aria-label="Close">&times;</button><div class="pd" id="pd"></div></dialog>
 
 <aside class="drawer" id="drawer" aria-label="Cart">
@@ -191,6 +197,8 @@ const CHECKOUT_URL = '';    // Stripe checkout function URL. Leave empty until S
 const NEWSLETTER_URL = '';  // Where email signups get sent. Leave empty until it's set up.
 const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the text slides below.
 const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
+const SIGNIN_URL = '';         // where the Sign in link goes. Leave empty until accounts are set up.
+const REGISTER_URL = '';       // where the Register link goes. Leave empty until accounts are set up.
 const SLIDE_SECONDS = 5;       // how often the two banners rotate
 
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
@@ -377,6 +385,14 @@ $('news').onsubmit = async e => {
     msg.textContent = 'Thanks! You are subscribed.'; $('email').value = '';
   }catch(err){ msg.textContent = 'Could not subscribe. Please try again.'; }
 };
+
+let toastTimer;
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), 3000); }
+[['signin', SIGNIN_URL], ['register', REGISTER_URL]].forEach(([id, url]) => {
+  const a = $(id);
+  if(url) a.href = url;
+  else a.onclick = e => { e.preventDefault(); toast('Accounts are not set up yet.'); };
+});
 
 /* ---- the two banners rotate on their own ---- */
 function makeSlider(host, slides){
