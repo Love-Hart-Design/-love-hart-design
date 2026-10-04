@@ -44,6 +44,7 @@ nav.main{background:var(--nav);display:flex;justify-content:center;flex-wrap:wra
 .ni.open .dm{display:block}
 @media(hover:hover){.ni:hover .dm,.ni:focus-within .dm{display:block}}
 .dm a{display:block;padding:9px 22px;text-decoration:none;color:var(--txt)}
+.dm.caps a{text-transform:uppercase;font-weight:700;letter-spacing:.02em}
 .dm a:hover{background:var(--bg);color:var(--brand)}
 body.scrolled nav.main{display:none}
 body.scrolled nav.main.open{display:flex;position:absolute;left:0;right:0;flex-direction:column;flex-wrap:nowrap;padding:6px 6vw 10px;box-shadow:0 10px 20px rgba(0,0,0,.2)}
@@ -87,23 +88,25 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .crumb a{text-decoration:none}.crumb b{color:#555}
 h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
 .lay{display:grid;grid-template-columns:300px 1fr;gap:15px;align-items:start;margin-bottom:60px}
-.sb{border:1px solid var(--line);padding:0 20px}
-.fs{border-bottom:1px solid var(--line);padding-bottom:12px}
+.sb{border:1px solid #d9d9d9;padding:0 20px}
+.fs{border-bottom:1px solid #e3e3e3;padding-bottom:14px}
 .fs:last-child{border-bottom:0}
-.fs summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;text-transform:uppercase;font-size:1rem;padding:20px 0 10px;cursor:pointer}
+.fs summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;text-transform:uppercase;font-size:.95rem;color:#333;padding:22px 0 12px;cursor:pointer}
 .fs summary::-webkit-details-marker{display:none}
-.fs summary::after{content:"";width:9px;height:9px;border-left:2px solid #333;border-top:2px solid #333;transform:rotate(45deg);margin:4px 4px 0 0}
-.fs:not([open]) summary::after{transform:rotate(225deg);margin-top:-2px}
-.fr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
-.fr input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--brand)}
+.fs summary::after{content:"";width:9px;height:9px;border-left:1.5px solid #444;border-top:1.5px solid #444;transform:rotate(45deg);margin:5px 6px 0 0}
+.fs:not([open]) summary::after{transform:rotate(225deg);margin-top:-3px}
+.fr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;cursor:pointer;font-size:1.1rem;color:#333}
+.fr b{font-weight:600}
+.fr input{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;flex:none;border:1px solid #666;border-radius:2px;background:#fff;cursor:pointer}
+.fr input:checked{background:var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3L13 4.5' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--brand)}
 .fbox{border:1px solid var(--line);padding:6px 20px 14px}
 .fbox+.fbox{margin-top:12px}
 .fbox summary{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px;cursor:pointer}
 .fbox a{display:block;text-decoration:none;padding:5px 0}
 .fbox a:hover{color:var(--brand);text-decoration:underline}
 .fbox a[aria-current=true]{font-weight:700;color:var(--brand)}
-.sortbar{border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;padding:0 12px;height:40px;margin-bottom:18px;font-size:.9rem;color:#777}
-.sortbar select{border:0;font:inherit;color:var(--txt);background:none;padding:6px}
+.sortbar{border:1px solid #ccc;display:flex;align-items:center;gap:8px;padding:0 12px;width:216px;height:40px;margin-bottom:30px;font-size:.8rem;color:#888}
+.sortbar select{flex:1;border:0;font:inherit;font-size:.8rem;color:#333;background:none;padding:6px 0;cursor:pointer}
 .news{text-align:center;margin:70px 0 60px}
 .news h2{font-size:2rem;font-weight:400;margin-bottom:22px}
 .news form{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
@@ -307,6 +310,8 @@ const INFO = {
     ['', 'Every design is printed on demand, so each order is made just for you. Tiny Dreams Lullaby is part of Love Hart Design, a family of channels and shops.']
   ]}
 };
+const DEFAULT_SIZES = ['S','M','L','XL','2XL','3XL']; // shown in the Size filter until your feed sends real sizes per product
+const APPAREL = ['Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
 const COLLECTIONS = ['Sleeping Animals','Thanksgiving','Halloween','Christmas'];
 const COLLECTION_MATCH = {'Sleeping Animals': /sleep/i, 'Thanksgiving': /thanksgiving/i, 'Halloween': /halloween/i, 'Christmas': /christmas|xmas/i};
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
@@ -352,6 +357,20 @@ function plain(h){
     .replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
     .replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
 }
+function normApparel(tags, title){
+  const hit = tags.map(t => APPAREL.find(a => a.toLowerCase() === t.toLowerCase())).find(Boolean);
+  if(hit) return hit;
+  const t = title.toLowerCase();
+  if(/sweatpant|jogger/.test(t)) return 'Sweatpants';
+  if(/hood/.test(t)) return /lightweight/.test(t) ? 'Lightweight Hoodies' : 'Classic Hoodies';
+  if(/dye only/.test(t)) return 'Dye Only';
+  if(/long\s*sleeve/.test(t)) return 'Long Sleeve T-Shirts';
+  if(/v-?neck/.test(t)) return 'V-Neck Triblend T-Shirts';
+  if(/crew/.test(t) && /tri-?blend/.test(t)) return 'Crew-Neck Triblend Graphic T-Shirts';
+  if(/tri-?blend/.test(t)) return 'Tri-Blend T-Shirts';
+  if(/shirt|tee/.test(t)) return /youth|kid/.test(t) ? 'Youth T-Shirts' : 'Classic Graphic T-Shirts';
+  return '';
+}
 function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
@@ -365,6 +384,7 @@ function normalize(p, i){
     desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
     price: money(p.price != null ? p.price : p.retailPrice), priceNum,
     special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
+    apparel: normApparel(tags, title),
     cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
     inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     audience: tags.map(normAudience).find(Boolean) || normAudience(title),
@@ -380,7 +400,7 @@ try{ cart = JSON.parse(localStorage.getItem('tdl-cart')) || []; }catch(e){}
 function href(mode, o = {}){
   const q = new URLSearchParams();
   const put = (k, v) => { const a = [].concat(v || []).filter(Boolean); if(a.length) q.set(k, a.join(',')); };
-  put('type', o.type); put('aud', o.aud); put('col', o.col); put('size', o.size);
+  put('type', o.type); put('app', o.app); put('aud', o.aud); put('col', o.col); put('size', o.size);
   if(o.stock) q.set('stock', '1');
   const s = q.toString();
   return '#/' + mode + (s ? '?' + s : '');
@@ -391,7 +411,7 @@ function route(){
   const q = new URLSearchParams(qs || '');
   const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
-  return {mode, types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
+  return {mode, apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
 const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
 
@@ -401,14 +421,14 @@ function buildNav(){
     ['Specials', href('specials'), null],
     ['All Products', href('all'), [['All Products', href('all')]].concat(types)],
     ['New Releases', href('new'), null],
-    ['Apparel', href('all'), types],
+    ['Apparel', href('all'), APPAREL.map(a => [a, href('all', {app:a})])],
     ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
   ];
   $('nav').replaceChildren(...items.map(([label, h, dd]) => {
     const a = el('a', {className: 'ni-link' + (dd ? ' dd' : ''), href:h, textContent:label});
     const box = el('div', {className:'ni'}, [a]);
     if(dd){
-      box.append(el('div', {className:'dm'}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
+      box.append(el('div', {className:'dm' + (label === 'Apparel' ? ' caps' : '')}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
       a.onclick = e => {
         if(matchMedia('(hover:none), (max-width:900px)').matches && !box.classList.contains('open')){
           e.preventDefault();
@@ -444,7 +464,7 @@ function renderHome(){
   list.forEach(p => g.append(makeCard(p)));
 }
 function renderList(r){
-  const parts = r.cols.concat(r.auds, r.types);
+  const parts = r.apps.concat(r.cols, r.auds, r.types);
   const base = PAGE_NAMES[r.mode];
   $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
   const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
@@ -456,12 +476,13 @@ function renderList(r){
   const pool = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
   const count = fn => pool.filter(fn).length;
   const order = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
-  const sizes = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
+  const fromFeed = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
+  const sizes = fromFeed.length ? fromFeed : DEFAULT_SIZES;
+  const hasSize = (p, v) => !p.sizes.length || p.sizes.includes(v);
   const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
-  if(sizes.length) groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => p.sizes.includes(v))]), r.sizes]);
+  groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => hasSize(p, v))]), r.sizes]);
   groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
   groups.push(['Categories', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
-  groups.push(['Shop For', 'aud', AUDIENCES.map(v => [v, v, count(p => p.audience === v)]), r.auds]);
   const sb = el('div', {className:'sb'});
   groups.forEach(([title, key, opts, sel]) => {
     const d = el('details', {className:'fs', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})]);
@@ -469,18 +490,18 @@ function renderList(r){
       const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
       cb.setAttribute('aria-label', label);
       cb.onchange = () => {
-        const cur = {type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
+        const cur = {app:r.apps, type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
         if(key === 'stock') cur.stock = cb.checked;
         else cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
         fromSidebar = true; location.hash = href(r.mode, cur);
       };
-      d.append(el('label', {className:'fr'}, [el('span', {textContent:label + ' (' + n + ')'}), cb]));
+      d.append(el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]));
     });
     sb.append(d);
   });
   $('side').replaceChildren(sb);
 
-  const list = pool.filter(p => (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.sizes.length || p.sizes.some(x => r.sizes.includes(x))) && (!r.stock || p.inStock));
+  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
   const sort = $('sort').value;
   list.sort((a, b) => sort === 'lo' ? a.priceNum - b.priceNum : sort === 'hi' ? b.priceNum - a.priceNum : sort === 'az' ? a.title.localeCompare(b.title) : b.idx - a.idx);
   const g = $('grid'); g.replaceChildren();
@@ -503,7 +524,7 @@ function renderInfo(r){
   }
   const sec = (h, links) => box.append(el('h3', {textContent:h}), el('ul', {}, links.map(([l, u]) => el('li', {}, el('a', {href:u, textContent:l})))));
   sec('Shop', [['Home', '#/'], ['Specials', href('specials')], ['All Products', href('all')], ['New Releases', href('new')]]);
-  sec('Apparel', TYPES.map(t => [t, href('all', {type:t})]));
+  sec('Apparel', APPAREL.map(a => [a, href('all', {app:a})]));
   sec('Collections', COLLECTIONS.map(c => [c, href('all', {col:c})]));
   sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
   sec('Our Brands', BRANDS);
