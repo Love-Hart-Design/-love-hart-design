@@ -1,130 +1,727 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Christmas Songs All Year Long</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Songs All Year Long | Love Hart Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #fff8f5; --card: #ffffff; --text: #2b1f24; --sub: #7a6870;
-  --accent: #b5303f; --accent2: #2f6b45; --border: #f0dde2;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+:root{--nav:#b3202a;--brand:#8f1a22;--accent:#f4c542;--foot:#1b3a2a;--qv:rgba(143,26,34,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Mountains of Christmas','Georgia',serif}
+html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box;margin:0}
+img{max-width:100%}
+body{font-family:var(--body);font-size:17px;color:var(--txt);background:#fff;line-height:1.45}
+button{font:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#errbar{background:#b00020;color:#fff;padding:10px 14px;font-size:.9rem;word-break:break-word}
+.hd{position:sticky;top:0;z-index:15}
+.top{background:var(--bg);display:flex;align-items:center;justify-content:center;gap:34px;padding:26px 4vw;flex-wrap:wrap}
+.hamb{display:none;background:none;border:0;padding:6px}
+.hamb i{display:block;width:24px;height:3px;background:var(--txt);margin:5px 0}
+body.scrolled .hamb{display:block}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--brand)}
+.moon{width:46px;height:46px;background:#f4c542;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);flex:none}
+.logo b{display:block;font-family:var(--logo);font-weight:600;font-size:2.1rem;line-height:1;letter-spacing:.01em}
+.logo small{display:block;font-weight:700;font-size:.85rem;color:var(--txt);margin-top:4px}
+.search{display:flex;align-items:center;gap:10px;width:min(476px,100%);background:#fff;border:1px solid #222;padding:0 14px;height:46px}
+.search input{flex:1;border:0;outline:0;font:inherit;background:none;min-width:0}
+.acct{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.acct a{text-decoration:none}
+.who{display:flex;align-items:center;gap:6px}
+.sep{border-left:1px solid var(--line);height:28px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 22px;border-radius:6px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.cartbtn{background:none;border:0;display:flex;align-items:center;gap:6px;color:var(--txt)}
+nav.main{background:var(--nav);display:flex;justify-content:center;flex-wrap:wrap;gap:0 clamp(18px,3.2vw,52px);padding:0 3vw}
+.ni{position:relative}
+.ni>a{display:block;color:#fff;text-decoration:none;text-transform:uppercase;font-weight:700;font-size:1.1rem;letter-spacing:.01em;padding:16px 0 12px;border-bottom:4px solid transparent;white-space:nowrap}
+.ni>a:hover,.ni>a[aria-current=page],.ni:focus-within>a,.ni.open>a{border-bottom-color:var(--accent)}
+.ni>a.dd::after{content:"\25BE";margin-left:6px;font-size:.8em}
+.dm{display:none;position:absolute;left:0;top:100%;z-index:25;min-width:240px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 20px rgba(0,0,0,.18);padding:8px 0}
+.ni.open .dm{display:block}
+@media(hover:hover){.ni:hover .dm,.ni:focus-within .dm{display:block}}
+.dm a{display:block;padding:9px 22px;text-decoration:none;color:var(--txt)}
+.dm.caps a{text-transform:uppercase;font-weight:700;letter-spacing:.02em}
+.dm a:hover{background:var(--bg);color:var(--brand)}
+body.scrolled nav.main{display:none}
+body.scrolled nav.main.open{display:flex;position:absolute;left:0;right:0;flex-direction:column;flex-wrap:nowrap;padding:6px 6vw 10px;box-shadow:0 10px 20px rgba(0,0,0,.2)}
+body.scrolled nav.main.open .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12)}
+body.scrolled nav.main.open .dm a{color:#fff}
+#hero{background:#000}
+.slider{position:relative;overflow:hidden;background:#000;--h:clamp(120px,14.3vw,267px)}
+.slider.thin{--h:clamp(56px,12.5vw,232px)}
+body.list #mainSlider{display:none}
+body.list .track{transition-duration:.35s}
+.track{display:flex;transition:transform .7s ease}
+.slide{flex:0 0 100%;display:flex;align-items:center;justify-content:center;gap:3vw;text-align:center;color:#fff;position:relative;overflow:hidden;min-height:var(--h)}
+.slide img{width:100%;display:block}
+.slide.a{background:linear-gradient(120deg,#0f5a2e,#1f8a4c)}
+.slide.b{background:#000;color:var(--accent)}
+.slide h1,.slide h2{font-family:var(--logo);font-weight:600;line-height:1.1;font-size:clamp(1.3rem,4.4vw,3.2rem);position:relative;margin:0}
+.slider.thin .slide h2{font-family:var(--body);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(.9rem,2.6vw,2rem)}
+.slide p{color:#fff;letter-spacing:.25em;font-size:clamp(.7rem,1.8vw,1.4rem);margin-top:8px;position:relative}
+.slide .big{font-weight:500;letter-spacing:.14em;font-family:var(--body);font-size:clamp(1rem,3.2vw,2.4rem)}
+.slide .moon{position:absolute;right:6vw;top:50%;margin-top:calc(min(9vw,110px)*-1);width:min(18vw,220px);height:min(18vw,220px);opacity:.9;background:var(--accent);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.burst{width:clamp(56px,8vw,120px);height:clamp(56px,8vw,120px);background:var(--accent);color:var(--brand);font-weight:700;font-size:clamp(1rem,2.6vw,2rem);display:grid;place-items:center;clip-path:polygon(50% 0,60% 12%,75% 7%,78% 22%,93% 25%,88% 40%,100% 50%,88% 60%,93% 75%,78% 78%,75% 93%,60% 88%,50% 100%,40% 88%,25% 93%,22% 78%,7% 75%,12% 60%,0 50%,12% 40%,7% 25%,22% 22%,25% 7%,40% 12%)}
+.dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px}
+.dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.5)}
+.dots button[aria-current=true]{background:#fff}
+.arr{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);color:#fff;border:0;width:36px;height:48px;font-size:1.4rem}
+.arr.l{left:0}.arr.r{right:0}
+.wrap{max-width:1200px;margin:auto;padding:0 20px}
+h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9rem;letter-spacing:.02em;margin:56px 0 30px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:27px}
+.grid.three{grid-template-columns:repeat(3,1fr)}
+.card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block}
+.card .im{position:relative;border:1px solid var(--line);background:#fff;height:0;padding-bottom:100%;overflow:hidden}
+.card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block}
+.card .qv{position:absolute;left:0;right:0;bottom:0;background:var(--qv);color:#fff;text-align:center;padding:9px;font-weight:700;opacity:0;transform:translateY(100%);transition:.18s}
+.card:focus-visible .qv{opacity:1;transform:none}
+@media(hover:hover){.card:hover .qv{opacity:1;transform:none}}
+.sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
+.card h3{font-family:var(--cond);font-weight:400;font-size:.95rem;text-transform:uppercase;margin-top:14px;line-height:1.45}
+.card .pr{display:block;font-size:1.1rem;margin-top:4px}
+.note{grid-column:1/-1;text-align:center;padding:30px 0;color:#777}
+.crumb{font-size:.85rem;color:#777;margin:36px 0 14px}
+.crumb a{text-decoration:none}.crumb b{color:#555}
+h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
+.lay{display:grid;grid-template-columns:300px 1fr;gap:15px;align-items:start;margin-bottom:60px}
+.sb{border:1px solid #d9d9d9;padding:0 20px}
+.fs{border-bottom:1px solid #e3e3e3;padding-bottom:14px}
+.fs:last-child{border-bottom:0}
+.fs summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;text-transform:uppercase;font-size:.95rem;color:#333;padding:22px 0 12px;cursor:pointer}
+.fs summary::-webkit-details-marker{display:none}
+.fs summary::after{content:"";width:9px;height:9px;border-left:1.5px solid #444;border-top:1.5px solid #444;transform:rotate(45deg);margin:5px 6px 0 0}
+.fs:not([open]) summary::after{transform:rotate(225deg);margin-top:-3px}
+.fr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;cursor:pointer;font-size:1.1rem;color:#333}
+.fr b{font-weight:600}
+.fr input{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;flex:none;border:1px solid #666;border-radius:2px;background:#fff;cursor:pointer}
+.fr input:checked{background:var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3L13 4.5' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--brand)}
+.fbox{border:1px solid var(--line);padding:6px 20px 14px}
+.fbox+.fbox{margin-top:12px}
+.fbox summary{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px;cursor:pointer}
+.fbox a{display:block;text-decoration:none;padding:5px 0}
+.fbox a:hover{color:var(--brand);text-decoration:underline}
+.fbox a[aria-current=true]{font-weight:700;color:var(--brand)}
+.sortbar{border:1px solid #ccc;display:flex;align-items:center;gap:8px;padding:0 12px;width:216px;height:40px;margin-bottom:0;font-size:.8rem;color:#888}
+.sortbar select{flex:1;border:0;font:inherit;font-size:.8rem;color:#333;background:none;padding:6px 0;cursor:pointer}
+.news{text-align:center;margin:110px 0 80px}
+.news h2{font-size:2rem;font-weight:400;margin-bottom:22px}
+.news form{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.news label{display:flex;align-items:center;gap:12px;width:min(485px,100%);border:1px solid var(--line);padding:0 18px;height:54px}
+.news input{border:0;outline:0;font:inherit;flex:1;min-width:0}
+.news button{background:#222;color:#fff;border:0;padding:0 50px;height:54px;font-weight:700;text-transform:uppercase}
+.news p{margin-top:10px;min-height:1.4em;color:#777}
+footer{background:var(--foot);color:#eee;padding:62px 4vw 34px}
+.fcols{max-width:1200px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:30px}
+footer h4{font-weight:400;font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px}
+footer h4.n{text-transform:none;font-size:1.5rem;font-weight:500}
+footer a{display:block;color:#ddd;padding:2px 0;font-size:1.08rem;line-height:1.5;text-decoration:none}
+footer a.soc{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#4d4d4d;padding:0}
+footer a.soc:hover{background:#666}
+footer a:hover{color:var(--accent);text-decoration:underline}
+.fd summary{font-weight:400;font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px;list-style:none;pointer-events:none}
+.fd summary::-webkit-details-marker{display:none}
+.fline{max-width:1200px;margin:38px auto 0;border-top:1px solid #555}
+.copy{max-width:1200px;margin:22px auto 0;font-size:1.05rem;color:#ddd;text-align:right}
+.infobody{max-width:820px;margin-bottom:60px}
+.infobody p{margin-bottom:14px}
+.infobody h3{font-size:1.25rem;margin:28px 0 8px}
+.infobody ul{margin:0 0 10px 22px}
+.infobody li{padding:3px 0}
+.infobody a{color:var(--brand)}
+body.info #hero{display:none}
+dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;max-height:92vh;overflow:auto;color:var(--txt)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.pd{display:grid;grid-template-columns:1fr 1fr}
+.pd img{width:100%;height:100%;object-fit:contain;min-height:260px;background:#fff}
+.pd .info{padding:26px;display:flex;flex-direction:column;gap:12px}
+.pd p{white-space:pre-line;font-size:.95rem;max-height:240px;overflow:auto}
+.pd h3{font-family:var(--cond);font-weight:700;font-size:1.3rem;text-transform:uppercase}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid #bbb;background:#fff;border-radius:4px;padding:6px 12px;min-width:44px}
+.opt[aria-pressed=true]{border-color:var(--brand);background:var(--brand);color:#fff}
+.x{position:absolute;right:12px;top:10px;background:#fff;border:0;border-radius:50%;width:36px;height:36px;font-size:1.2rem}
+.add{background:#222;color:#fff;border:0;padding:13px;font-weight:700;text-transform:uppercase}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(400px,100%);background:#fff;transform:translateX(100%);transition:transform .25s;z-index:30;display:flex;flex-direction:column;padding:20px;box-shadow:-8px 0 24px rgba(0,0,0,.25)}
+.drawer.open{transform:none}
+.drawer h2{margin:0;font-weight:700;font-size:1.3rem}
+.items{flex:1;overflow:auto}
+.line{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.line img{width:64px;height:64px;object-fit:contain;border:1px solid var(--line)}
+.line button{background:none;border:0;color:#777;text-decoration:underline}
+.msg{font-size:.9rem;color:#777;margin-top:8px;min-height:1.3em}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.grid.three{grid-template-columns:repeat(2,1fr)}.fcols{grid-template-columns:1fr 1fr}.lay{grid-template-columns:1fr}}
+@media(max-width:700px){.grid,.grid.three{grid-template-columns:repeat(2,1fr);gap:16px}.pd{grid-template-columns:1fr}.top{gap:14px}.slide .moon{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.drawer,.card .qv,.track{transition:none}}
+
+@media(max-width:900px){
+ html body .hd{position:static}
+ html body .hamb{display:block}
+ html body nav.main{display:none}
+ html body nav.main.open{display:flex;position:static;flex-direction:column;flex-wrap:nowrap;gap:0;padding:4px 6vw 10px;box-shadow:none}
+ .ni>a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.18)}
+ .ni>a:hover,.ni>a[aria-current=page],.ni.open>a{border-bottom-color:rgba(255,255,255,.18);color:var(--accent)}
+ .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12);min-width:0;padding:4px 0}
+ .dm a{color:#fff;padding:10px 16px}
+ .dm a:hover{background:rgba(255,255,255,.12);color:var(--accent)}
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1b1418; --card: #261c21; --text: #f5e9ec; --sub: #b79aa4;
-    --accent: #e8748c; --accent2: #4f9a6b; --border: #3a2a30;
-  }
+@media(max-width:700px){
+ .fcols{gap:0}
+ .fcols>div,.fd{padding:14px 0}
+ .fd{border-bottom:1px solid #4a4a4a}
+ .fd summary{pointer-events:auto;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin:0}
+ .fd summary::after{content:"+";font-size:1.5rem;line-height:1}
+ .fd[open] summary::after{content:"\2212"}
+ .fd[open] summary{margin-bottom:10px}
+ .top{gap:10px;padding:12px 4vw}
+ .hamb{order:0}
+ .logo{order:1;flex:1;min-width:0;gap:8px}
+ .logo b{font-size:1.35rem}
+ .logo small{font-size:.72rem}
+ .moon{width:34px;height:34px}
+ .acct{display:contents}
+ .cartbtn{order:2}
+ .search{order:3;width:100%;flex:1 0 100%}
+ .who{order:4;flex:1 0 100%;justify-content:center;font-size:.9rem}
+ .sep{display:none}
+ .slide{padding:14px 12px;gap:10px}
+ .slide p{letter-spacing:.1em}
+ .slider.thin .slide h2{letter-spacing:.06em}
+ .slide .big{letter-spacing:.06em}
+ .arr{width:28px;height:36px;font-size:1.1rem}
+ h2.sec{font-size:1.5rem;margin:36px 0 20px}
+ h1.pt{font-size:1.7rem;margin-bottom:20px}
+ .fcols{grid-template-columns:1fr}
+ .copy{text-align:center}
+ .news button{padding:0 30px}
+ .news{margin:60px 0 50px}
+ footer{padding:40px 6vw 30px}
 }
-:root[data-theme="dark"] {
-  --bg: #1b1418; --card: #261c21; --text: #f5e9ec; --sub: #b79aa4;
-  --accent: #e8748c; --accent2: #4f9a6b; --border: #3a2a30;
+.tools{display:flex;gap:12px;align-items:center;margin-bottom:30px}
+#filterBtn{display:none;height:40px;padding:0 18px;border:1px solid #333;background:#fff;font-weight:700;text-transform:uppercase;font-size:.85rem;color:#333}
+@media(max-width:1000px){
+ .lay{display:flex;flex-direction:column;gap:0}
+ .lay>div{display:contents}
+ .tools{order:1;margin-bottom:16px}
+ #side{order:2;display:none;margin-bottom:20px}
+ #side.open{display:block}
+ #grid{order:3}
+ #filterBtn{display:block}
+ .sortbar{flex:1;width:auto}
 }
-html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-* { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Georgia,serif; }
-.backlink { display:block; padding:10px 20px; font-size:0.85rem; color:var(--sub); text-decoration:none; }
-header { text-align:center; padding:20px 20px 12px; }
-h1 { font-family:Georgia,serif; color:var(--accent); margin:0 0 4px; font-size:1.8rem; }
-header p { color:var(--sub); margin:0; font-size:0.9rem; }
-nav.cats {
-  display:flex; gap:8px; overflow-x:auto; padding:14px 16px;
-  border-bottom:1px solid var(--border); -ms-overflow-style:none; scrollbar-width:none;
-}
-nav.cats::-webkit-scrollbar{display:none;}
-nav.cats a {
-  flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
-  color:var(--text); text-decoration:none; font-size:0.85rem; white-space:nowrap;
-}
-nav.cats a:hover { border-color:var(--accent); }
-section.cat { max-width:900px; margin:0 auto; padding:26px 20px 6px; }
-section.cat h2 { font-size:1.2rem; margin:0 0 4px; color:var(--accent); }
-section.cat p.desc { color:var(--sub); font-size:0.85rem; margin:0 0 14px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-.thumb { aspect-ratio:1/1; background:linear-gradient(135deg,var(--accent2),var(--accent)); opacity:0.35; }
-.card-body { padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; }
-.card-body .name { font-size:0.9rem; font-weight:600; }
-.card-body .price { color:var(--sub); font-size:0.85rem; }
-.buy {
-  margin-top:auto; text-align:center; padding:8px; border-radius:8px; background:var(--accent);
-  color:#fff; text-decoration:none; font-size:0.82rem; font-weight:600;
-}
-footer { text-align:center; color:var(--sub); font-size:0.78rem; padding:40px 20px 60px; }
+.logo b{font-size:1.55rem}
+@media(max-width:700px){.logo b{font-size:1.1rem}}
 </style>
 </head>
 <body>
-<a class="backlink" href="#">&larr; Back to Love Hart Design</a>
-<header>
-  <h1>Christmas Songs All Year Long</h1>
-  <p>Holiday tees, browse by category</p>
-</header>
-<nav class="cats">
-  <a href="#carols">Classic Carols &amp; Traditional</a>
-  <a href="#singalong">Sing-Along &amp; Music</a>
-  <a href="#funny">Funny &amp; Sarcastic</a>
-  <a href="#family">Family &amp; Matching</a>
-  <a href="#kids">Kids &amp; Baby</a>
-  <a href="#cozy">Cozy Nights</a>
-</nav>
+<div id="errbar" hidden></div>
+<script>window.addEventListener('error',function(e){var b=document.getElementById('errbar');if(!b)return;b.hidden=false;b.textContent='Page error: '+e.message+' (line '+e.lineno+')';});</script>
 
-<section class="cat" id="carols">
-  <h2>Classic Carols &amp; Traditional</h2>
-  <p class="desc">Timeless, nostalgic holiday themes.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 3</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+<div class="hd">
+  <header class="top">
+    <button class="hamb" id="hamb" aria-label="Open menu"><i></i><i></i><i></i></button>
+    <a class="logo" href="#/"><span class="moon" aria-hidden="true"></span><span><b>Christmas Songs All Year Long</b><small>by Love Hart Design</small></span></a>
+    <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg><input id="q" type="search" placeholder="What are you looking for?" aria-label="Search products"></label>
+    <div class="acct">
+      <span class="who"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><a href="#" id="signin">Sign in</a> or <a href="#" id="register">Register</a></span><span class="sep" aria-hidden="true"></span>
+      <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
+    </div>
+  </header>
+  <nav class="main" id="nav" aria-label="Store menu"></nav>
+</div>
+
+<div id="hero"><div class="slider thin" id="topSlider" aria-label="Announcements"></div><div class="slider" id="mainSlider" aria-label="Featured"></div></div>
+
+<main class="wrap">
+  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div><h2 class="sec">Featured Products</h2><div class="grid" id="featGrid"></div><h2 class="sec">Best Selling Products</h2><div class="grid" id="bestGrid"></div></section>
+
+  <section id="infoView" hidden>
+    <p class="crumb" id="infoCrumb"></p>
+    <h1 class="pt" id="infoTitle"></h1>
+    <div class="infobody" id="infoBody"></div>
+  </section>
+
+  <section id="listView" hidden>
+    <p class="crumb" id="crumb"></p>
+    <h1 class="pt" id="pageTitle"></h1>
+    <div class="lay">
+      <aside id="side" aria-label="Filters"></aside>
+      <div>
+        <div class="tools"><button id="filterBtn" type="button">Filters</button><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new">Newest</option><option value="best" selected>Best Selling</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
+        <div class="grid three" id="grid" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="news">
+    <h2>Newsletter Signup</h2>
+    <form id="news"><label><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 6l9 7 9-7"/></svg><input id="email" type="email" placeholder="Enter your email address" aria-label="Email address" required></label><button>Subscribe</button></form>
+    <p id="newsMsg"></p>
   </div>
-</section>
+</main>
 
-<section class="cat" id="singalong">
-  <h2>Sing-Along &amp; Music Themed</h2>
-  <p class="desc">Musical notes, caroling, and song-inspired art.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
+<footer>
+  <div class="fcols">
+    <div><h4 class="n">Christmas Songs All Year Long</h4><p>Christmas songs all year long.</p></div>
+    <details class="fd" open><summary>Categories</summary><div id="fCats"></div></details>
+    <details class="fd" open><summary>Information</summary><div id="fInfo"></div></details>
+    <details class="fd" open><summary>Brands</summary><div id="fBrands"></div></details>
   </div>
-</section>
+  <div class="fline"></div>
+  <p class="copy">&copy; 2026 Christmas Songs All Year Long, part of Love Hart Design</p>
+</footer>
 
-<section class="cat" id="funny">
-  <h2>Funny &amp; Sarcastic Holiday</h2>
-  <p class="desc">Humor and sarcasm for the not-so-jolly.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-  </div>
-</section>
+<div class="toast" id="toast" role="status"></div>
 
-<section class="cat" id="family">
-  <h2>Family &amp; Matching</h2>
-  <p class="desc">Sets for the whole family.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-  </div>
-</section>
+<dialog id="dlg"><button class="x" id="closeDlg" aria-label="Close">&times;</button><div class="pd" id="pd"></div></dialog>
 
-<section class="cat" id="kids">
-  <h2>Kids &amp; Baby Christmas</h2>
-  <p class="desc">Playful holiday designs for little ones.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$19.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$19.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-  </div>
-</section>
+<aside class="drawer" id="drawer" aria-label="Cart">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2>Your cart</h2><button class="x" style="position:static" id="closeCart" aria-label="Close cart">&times;</button></div>
+  <div class="items" id="items"></div>
+  <p><b>Total: <span id="total">$0.00</span></b></p>
+  <button class="add" id="checkout">Check out</button>
+  <p class="msg" id="msg"></p>
+</aside>
 
-<section class="cat" id="cozy">
-  <h2>Cozy Nights</h2>
-  <p class="desc">Fireplace, snow, and cocoa-mug vibes.</p>
-  <div class="grid">
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 1</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-    <div class="card"><div class="thumb"></div><div class="card-body"><div class="name">Sample Design 2</div><div class="price">$24.99</div><a class="buy" href="https://christmassongsallyearlong.myspreadshop.com/" target="_blank" rel="noopener">Buy</a></div></div>
-  </div>
-</section>
+<script>
+if(!Element.prototype.replaceChildren){ Element.prototype.replaceChildren = function(){ while(this.firstChild) this.removeChild(this.firstChild); for(var i = 0; i < arguments.length; i++) this.append(arguments[i]); }; }
+const FUNCTION_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products';
+const BRAND_KEY = 'christmas'; // this store's key inside the feed
+const ANON_KEY = '';        // only needed for checkout, if your function wants it
+const CHECKOUT_URL = '';    // Stripe checkout function URL. Leave empty until Stripe is connected.
+const NEWSLETTER_URL = '';  // Where email signups get sent. Leave empty until it's set up.
+const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the text slides below.
+const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
+const SIGNIN_URL = '';         // where the Sign in link goes. Leave empty until accounts are set up.
+const REGISTER_URL = '';       // where the Register link goes. Leave empty until accounts are set up.
+const LINK_SLIDE_SECONDS = 2.5; // banners on the link pages (Specials, All Products, Apparel...) change this often
+const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
+const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
 
-<footer>Template preview &mdash; swap sample cards for real designs, and Buy links for your Lovable checkout once built.</footer>
+const BRANDS = [
+  ['Angels', 'angels-store.html'],
+  ['Christmas Songs All Year Long', 'christmas-songs-all-year-long.html'],
+  ['Heirloom Hart', 'https://heirloom-hart.lovable.app/'],
+  ['Hush Drift', 'hush-drift.html'],
+  ['Little Princess Lullabies', 'little-princess-lullabies.html'],
+  ['Pure Dream Sounds', 'pure-dream-sounds.html'],
+  ['Skulls After Dark', 'skulls-after-dark.html'],
+  ['Tiny Dreams Lullaby', 'tiny-dreams-lullaby.html'],
+  ['View All Brands', 'index.html']
+];
+const INFO = {
+  privacy: {title:'Privacy Policy', body:[
+    ['', 'Last updated: October 3, 2026'],
+    ['What this page saves on your device', 'Items you add to your cart are saved in your browser so they are still there when you come back. This stays on your device and is not sent to us.'],
+    ['Orders and payments', 'When checkout is turned on, payments are handled by Stripe. Card numbers are entered with Stripe and are not stored on this site.'],
+    ['Shipping your order', 'To make and ship an order, your name, shipping address and order details are shared with our print-and-ship partner, Spreadconnect.'],
+    ['Newsletter', 'If you sign up for the newsletter, we use your email address only to send you updates about Christmas Songs All Year Long.'],
+    ['Fonts', 'This page loads fonts from Google Fonts, so your browser contacts Google when the page loads. This page has no advertising or analytics tools.'],
+    ['Changes', 'We may update this policy as the shop grows. The date at the top shows when it last changed.']
+  ]},
+  about: {title:'About Us', body:[
+    ['', 'Christmas Songs All Year Long is a channel of Christmas music for any time of year, and this is its shop.'],
+    ['', 'Every design is printed on demand, so each order is made just for you. Christmas Songs All Year Long is part of Love Hart Design, a family of channels and shops.']
+  ]}
+};
+const DEFAULT_SIZES = ['S','M','L','XL','2XL','3XL']; // shown in the Size filter until your feed sends real sizes per product
+const APPAREL = ['Tie-Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
+const CATEGORIES = ['Santa','Reindeer','Snowmen','Ornaments','Christmas Trees','Lights','Gingerbread','Nativity','Stockings','Elves'];
+const COLORS = ['Black','Blue','Green','Purple','Red','Yellow'];
+const COLLECTIONS = ['Christmas in July','Classic Carols','Santa Claus','Winter Wonderland','Funny Christmas'];
+const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
+const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
+const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
+
+const $ = id => document.getElementById(id);
+const el = (tag, props = {}, kids = []) => {
+  const e = Object.assign(document.createElement(tag), props);
+  [].concat(kids).forEach(k => e.append(k));
+  return e;
+};
+
+function normAudience(s){
+  s = (s||'').toLowerCase();
+  if(/baby|babies|toddler|infant/.test(s)) return 'Babies & Toddlers';
+  if(/kid|youth|child/.test(s)) return 'Kids & Youth';
+  if(/women|woman|ladies/.test(s)) return 'Women';
+  if(/\bmen|\bman\b/.test(s)) return 'Men';
+  if(/unisex|adult/.test(s)) return 'Adult Unisex';
+  return '';
+}
+function normType(s){
+  s = (s||'').toLowerCase();
+  if(/romper/.test(s)) return 'Rompers';
+  if(/bodysuit|onesie/.test(s)) return 'Bodysuits';
+  if(/long\s*sleeve/.test(s)) return 'Long Sleeves';
+  if(/hood/.test(s)) return 'Hoodies';
+  if(/sweat|crew/.test(s)) return 'Sweatshirts';
+  if(/tank/.test(s)) return 'Tanks';
+  if(/shirt|tee/.test(s)) return 'T-Shirts';
+  return '';
+}
+function money(v){
+  if(typeof v === 'string' && /^\$/.test(v.trim())) return v.trim();
+  const n = parseFloat(v);
+  return isNaN(n) ? '' : '$' + n.toFixed(2);
+}
+function pickList(v){
+  return (Array.isArray(v) ? v : []).map(x => typeof x === 'string' ? x : (x && (x.name || x.label || x.value))).filter(Boolean);
+}
+function plain(h){
+  return String(h).replace(/<br\s*\/?>/gi,'\n').replace(/<\/(p|ul|div|li)>/gi,'\n').replace(/<ul[^>]*>/gi,'\n').replace(/<li[^>]*>/gi,'\u2022 ').replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+    .replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+function normApparel(tags, title){
+  const hit = tags.map(t => APPAREL.find(a => a.toLowerCase() === t.toLowerCase())).find(Boolean);
+  if(hit) return hit;
+  const t = title.toLowerCase();
+  if(/sweatpant|jogger/.test(t)) return 'Sweatpants';
+  if(/hood/.test(t)) return /lightweight/.test(t) ? 'Lightweight Hoodies' : 'Classic Hoodies';
+  if(/tie-?dye|dye only/.test(t)) return 'Tie-Dye Only';
+  if(/long\s*sleeve/.test(t)) return 'Long Sleeve T-Shirts';
+  if(/v-?neck/.test(t)) return 'V-Neck Triblend T-Shirts';
+  if(/crew/.test(t) && /tri-?blend/.test(t)) return 'Crew-Neck Triblend Graphic T-Shirts';
+  if(/tri-?blend/.test(t)) return 'Tri-Blend T-Shirts';
+  if(/shirt|tee/.test(t)) return /youth|kid/.test(t) ? 'Youth T-Shirts' : 'Classic Graphic T-Shirts';
+  return '';
+}
+function normalize(p, i){
+  const desc = p.description || p.desc || '';
+  const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
+  const tags = m ? m[1].split('|').map(s => s.trim()) : [];
+  const title = (p.title || p.name || '').replace(/^christmas\s+songs\s+all\s+year\s+long\s*[\u2013\u2014:|-]?\s*/i, '');
+  const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
+  const priceNum = parseFloat(p.price != null ? p.price : p.retailPrice) || 0;
+  const was = parseFloat(p.compareAtPrice || p.compare_at_price || p.originalPrice || 0);
+  return {
+    id: String(p.id || p.sku || i), idx: i, title,
+    desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
+    price: money(p.price != null ? p.price : p.retailPrice), priceNum,
+    special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
+    featured: p.featured === true || tags.some(t => /^featured$/i.test(t)),
+    best: p.bestSelling === true || p.best_selling === true || tags.some(t => /^best[ -]?sell(er|ers|ing)$/i.test(t)),
+    apparel: normApparel(tags, title),
+    cats: CATEGORIES.filter(c => tags.some(t => t.toLowerCase() === c.toLowerCase())),
+    gcolors: COLORS.filter(c => new RegExp('\\b' + c + '\\b', 'i').test(pickList(p.colors || p.appearances).concat(tags).join(' '))),
+    cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
+    inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
+    audience: tags.map(normAudience).find(Boolean) || normAudience(title),
+    type: tags.map(normType).find(Boolean) || normType(title),
+    sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances)
+  };
+}
+
+let products = [], fQ = '', cart = [], loaded = false, failed = false;
+try{ cart = JSON.parse(localStorage.getItem('christmas-cart')) || []; }catch(e){}
+
+/* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
+function href(mode, o = {}){
+  const q = new URLSearchParams();
+  const put = (k, v) => { const a = [].concat(v || []).filter(Boolean); if(a.length) q.set(k, a.join(',')); };
+  put('type', o.type); put('app', o.app); put('cat', o.cat); put('color', o.color); put('aud', o.aud); put('col', o.col); put('size', o.size);
+  if(o.stock) q.set('stock', '1');
+  const s = q.toString();
+  return '#/' + mode + (s ? '?' + s : '');
+}
+function route(){
+  const h = location.hash.replace(/^#\/?/, '');
+  const [path, qs] = h.split('?');
+  const q = new URLSearchParams(qs || '');
+  const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
+  const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
+  return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
+}
+const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
+
+function buildNav(){
+  const types = TYPES.map(t => [t, href('all', {type:t})]);
+  const items = [
+    ['Specials', href('specials'), null],
+    ['Christmas Songs All Year Long', href('all'), null],
+    ['New Releases', href('new'), null],
+    ['Apparel', href('all'), APPAREL.map(a => [a, href('all', {app:a})])],
+    ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
+  ];
+  $('nav').replaceChildren(...items.map(([label, h, dd]) => {
+    const a = el('a', {className: 'ni-link' + (dd ? ' dd' : ''), href:h, textContent:label});
+    const box = el('div', {className:'ni'}, [a]);
+    if(dd){
+      box.append(el('div', {className:'dm' + (label === 'Apparel' ? ' caps' : '')}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
+      a.onclick = e => {
+        if(matchMedia('(hover:none), (max-width:900px)').matches && !box.classList.contains('open')){
+          e.preventDefault();
+          document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
+          box.classList.add('open');
+        }
+      };
+    }
+    return box;
+  }));
+  const top = el('a', {href:'#/', textContent:'Christmas Songs All Year Long'});
+  top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
+  $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
+  $('fBrands').replaceChildren(...BRANDS.map(([l, u]) => el('a', {href:u, textContent:l})));
+  $('fCats').replaceChildren(...[['Specials', href('specials')], ['Christmas Songs All Year Long', href('all')], ['New Releases', href('new')], ['Apparel', href('all')], ['Collections', href('all')]].map(([l, u]) => el('a', {href:u, textContent:l})));
+}
+
+function makeCard(p){
+  const im = el('div', {className:'im'}, [el('img', {src:p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
+  if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
+  const c = el('button', {className:'card', type:'button'}, [im, el('h3', {textContent:p.title}), el('span', {className:'pr', textContent:p.price})]);
+  c.onclick = () => openProduct(p);
+  return c;
+}
+function statusNote(){
+  if(failed) return 'Products could not load. Refresh the page to try again.';
+  return loaded ? '' : 'Loading products\u2026';
+}
+function renderHome(){
+  const fill = (id, list, empty) => {
+    const g = $(id); g.replaceChildren();
+    if(!list.length){ g.append(el('p', {className:'note', textContent: statusNote() || empty})); return; }
+    list.slice(0, 8).forEach(p => g.append(makeCard(p)));
+  };
+  const newest = products.slice().reverse();
+  fill('newGrid', newest, 'Products are on the way. Check back soon.');
+  fill('featGrid', newest.filter(p => p.featured), 'Featured products are coming soon.');
+  fill('bestGrid', newest.filter(p => p.best), 'Best sellers are coming soon.');
+}
+function renderList(r){
+  const parts = r.apps.concat(r.cols, r.cats, r.colors, r.auds, r.types);
+  const base = r.apps.length ? 'Apparel' : PAGE_NAMES[r.mode];
+  $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
+  const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
+  if(parts.length) crumb.append(el('a', {href:href(r.mode), textContent:base}), ' / ', el('b', {textContent:parts.join(' / ')}));
+  else crumb.append(el('b', {textContent:base}));
+  document.title = (parts.join(' / ') || base) + ' | Christmas Songs All Year Long';
+
+  const q = fQ.toLowerCase();
+  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
+  const apparelPage = r.apps.length > 0;
+  const pool = apparelPage ? scope.filter(p => r.apps.includes(p.apparel)) : scope;
+  const count = fn => pool.filter(fn).length;
+  const order = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
+  const fromFeed = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
+  const sizes = fromFeed.length ? fromFeed : DEFAULT_SIZES;
+  const hasSize = (p, v) => !p.sizes.length || p.sizes.includes(v);
+  const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
+  groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => hasSize(p, v))]), r.sizes]);
+  groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
+  groups.push(['Categories', 'cat', CATEGORIES.map(v => [v, v, count(p => p.cats.includes(v))]), r.cats]);
+  groups.push(['Garment Color', 'color', COLORS.map(v => [v, v, count(p => p.gcolors.includes(v))]), r.colors]);
+  groups.push(['Garment Type', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
+  const sb = el('div', {className:'sb'});
+  groups.forEach(([title, key, allOpts, sel]) => {
+    const opts = apparelPage && ['col', 'cat', 'color', 'type'].includes(key) ? allOpts.filter(o => o[2] > 0 || sel.includes(o[1])) : allOpts;
+    if(!opts.length) return;
+    const d = el('details', {className:'fs', open:true}, [el('summary', {textContent:title})]);
+    opts.forEach(([label, val, n]) => {
+      const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
+      cb.setAttribute('aria-label', label);
+      cb.onchange = () => {
+        const cur = {app:r.apps, cat:r.cats, color:r.colors, type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
+        if(key === 'stock') cur.stock = cb.checked;
+        else cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
+        fromSidebar = true; location.hash = href(r.mode, cur);
+      };
+      d.append(el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]));
+    });
+    sb.append(d);
+  });
+  $('side').replaceChildren(sb);
+
+  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
+  const sort = $('sort').value;
+  const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
+  list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
+  const g = $('grid'); g.replaceChildren();
+  if(!list.length){
+    const msg = statusNote() || (r.mode === 'specials' && !products.some(p => p.special) ? 'No specials right now. Check back soon.' : products.length ? 'Nothing matches yet. Try another choice.' : 'Products are on the way. Check back soon.');
+    g.append(el('p', {className:'note', textContent:msg}));
+    return;
+  }
+  list.forEach(p => g.append(makeCard(p)));
+}
+function renderInfo(r){
+  const title = r.mode === 'sitemap' ? 'Sitemap' : INFO[r.mode].title;
+  $('infoTitle').textContent = title;
+  document.title = title + ' | Christmas Songs All Year Long';
+  $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
+  const box = $('infoBody'); box.replaceChildren();
+  if(r.mode !== 'sitemap'){
+    INFO[r.mode].body.forEach(([h, t]) => { if(h) box.append(el('h3', {textContent:h})); box.append(el('p', {textContent:t})); });
+    return;
+  }
+  const sec = (h, links) => box.append(el('h3', {textContent:h}), el('ul', {}, links.map(([l, u]) => el('li', {}, el('a', {href:u, textContent:l})))));
+  sec('Shop', [['Home', '#/'], ['Specials', href('specials')], ['All Products', href('all')], ['New Releases', href('new')]]);
+  sec('Apparel', APPAREL.map(a => [a, href('all', {app:a})]));
+  sec('Collections', COLLECTIONS.map(c => [c, href('all', {col:c})]));
+  sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
+  sec('Our Brands', BRANDS);
+}
+function render(){
+  const r = route();
+  const isInfo = ['privacy','about','sitemap'].includes(r.mode);
+  document.body.classList.toggle('list', r.mode !== 'home');
+  document.body.classList.toggle('info', isInfo);
+  $('homeView').hidden = r.mode !== 'home';
+  $('listView').hidden = r.mode === 'home' || isInfo;
+  $('infoView').hidden = !isInfo;
+  $('nav').classList.remove('open');
+  document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
+  if(r.mode === 'home'){ document.title = 'Christmas Songs All Year Long | Love Hart Design'; renderHome(); } else if(isInfo) renderInfo(r); else renderList(r);
+}
+
+let fromSidebar = false, lastMode = route().mode;
+addEventListener('hashchange', () => { const m = route().mode; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
+$('sort').onchange = render;
+$('filterBtn').onclick = () => $('side').classList.toggle('open');
+$('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
+$('hamb').onclick = () => $('nav').classList.toggle('open');
+addEventListener('scroll', () => {
+  const now = scrollY > 260;
+  if(now !== document.body.classList.contains('scrolled')){
+    document.body.classList.toggle('scrolled', now);
+    if(innerWidth > 900) $('nav').classList.remove('open');
+  }
+}, {passive:true});
+
+$('news').onsubmit = async e => {
+  e.preventDefault();
+  const msg = $('newsMsg');
+  if(!NEWSLETTER_URL){ msg.textContent = 'Signup is not connected yet. Please check back soon.'; return; }
+  try{
+    const r = await fetch(NEWSLETTER_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:$('email').value})});
+    if(!r.ok) throw new Error();
+    msg.textContent = 'Thanks! You are subscribed.'; $('email').value = '';
+  }catch(err){ msg.textContent = 'Could not subscribe. Please try again.'; }
+};
+
+let toastTimer;
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), 3000); }
+[['signin', SIGNIN_URL], ['register', REGISTER_URL]].forEach(([id, url]) => {
+  const a = $(id);
+  if(url) a.href = url;
+  else a.onclick = e => { e.preventDefault(); toast('Accounts are not set up yet.'); };
+});
+
+const wide = matchMedia('(min-width:701px)');
+const syncFooter = () => document.querySelectorAll('.fd').forEach(d => d.open = wide.matches);
+if(wide.addEventListener) wide.addEventListener('change', syncFooter); else wide.addListener(syncFooter);
+syncFooter();
+
+/* ---- the two banners rotate on their own ---- */
+function makeSlider(host, slides, secs){
+  const track = el('div', {className:'track'}, slides);
+  const n = slides.length; let i = 0, timer;
+  const secsOf = typeof secs === 'function' ? secs : () => secs;
+  host.replaceChildren(track);
+  if(n < 2) return;
+  const dots = el('div', {className:'dots'});
+  const btns = slides.map((_, k) => { const b = el('button', {type:'button'}); b.setAttribute('aria-label','Slide ' + (k+1)); b.onclick = () => { go(k); restart(); }; dots.append(b); return b; });
+  const arr = (cls, txt, d) => { const b = el('button', {className:'arr ' + cls, type:'button', textContent:txt}); b.setAttribute('aria-label', d > 0 ? 'Next slide' : 'Previous slide'); b.onclick = () => { go(i + d); restart(); }; return b; };
+  host.append(arr('l','\u2039',-1), arr('r','\u203A',1), dots);
+  function go(k){ i = (k + n) % n; track.style.transform = 'translateX(' + (-100 * i) + '%)'; btns.forEach((b, j) => j === i ? b.setAttribute('aria-current','true') : b.removeAttribute('aria-current')); }
+  function tick(){ go(i + 1); timer = setTimeout(tick, secsOf() * 1000); }
+  function restart(){ clearTimeout(timer); timer = setTimeout(tick, secsOf() * 1000); }
+  host.onmouseenter = () => clearTimeout(timer); host.onmouseleave = restart;
+  go(0); restart();
+}
+const imgSlides = urls => urls.map(u => el('div', {className:'slide'}, el('img', {src:u, alt:''})));
+const txt = (cls, tag, text) => el('div', {className:'slide ' + cls}, [el(tag, {textContent:text})]);
+function renderBanners(){
+  makeSlider($('topSlider'), TOP_BANNER_IMAGES.length ? imgSlides(TOP_BANNER_IMAGES) : [
+    txt('a', 'h2', 'Christmas songs all year long.'),
+    txt('b', 'h2', 'Christmas in July? Yes, please.')
+  ], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : TOP_SLIDE_SECONDS);
+  const burst = () => el('span', {className:'burst', textContent:'NEW'});
+  const slide1 = el('div', {className:'slide a'}, [el('span', {className:'moon'}), el('div', {}, [el('h1', {textContent:'Christmas all year long'}), el('p', {textContent:'SHIRTS, HOODIES AND MORE'})])]);
+  const slide2 = el('div', {className:'slide b'}, [burst(), el('div', {}, [el('h2', {className:'big', textContent:'MERRY ALL YEAR LONG.'}), el('p', {textContent:'CHRISTMAS SONGS ALL YEAR LONG.'})]), burst()]);
+  makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : MAIN_SLIDE_SECONDS);
+}
+
+function openProduct(p){
+  let size = '', color = '';
+  const info = el('div', {className:'info'}, [el('h3', {textContent:p.title}), el('b', {textContent:p.price}), el('p', {textContent:p.desc})]);
+  const group = (label, vals, set) => {
+    if(!vals.length) return;
+    const row = el('div', {className:'opts', role:'group'});
+    row.setAttribute('aria-label', label);
+    vals.forEach(v => {
+      const b = el('button', {className:'opt', type:'button', textContent:v});
+      b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => { row.querySelectorAll('.opt').forEach(o => o.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); set(v); };
+      row.append(b);
+    });
+    info.append(el('b', {textContent:label}), row);
+  };
+  group('Size', p.sizes, v => size = v);
+  group('Color', p.colors, v => color = v);
+  const err = el('p', {className:'msg'});
+  const add = el('button', {className:'add', type:'button', textContent:'Add to cart'});
+  add.onclick = () => {
+    if(p.sizes.length && !size){ err.textContent = 'Choose a size first.'; return; }
+    if(p.colors.length && !color){ err.textContent = 'Choose a color first.'; return; }
+    const key = [p.id, size, color].join('|');
+    const hit = cart.find(l => l.key === key);
+    hit ? hit.qty++ : cart.push({key, id:p.id, title:p.title, price:p.price, img:p.img, size, color, qty:1});
+    saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
+  };
+  info.append(add, err);
+  $('pd').replaceChildren(el('img', {src:p.img, alt:p.title}), info);
+  { const d = $('dlg'); if(d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+}
+
+function saveCart(){
+  try{ localStorage.setItem('christmas-cart', JSON.stringify(cart)); }catch(e){}
+  $('cartCount').textContent = cart.reduce((s,l) => s + l.qty, 0);
+  const box = $('items'); box.replaceChildren();
+  if(!cart.length) box.append(el('p', {className:'note', textContent:'Your cart is empty.'}));
+  cart.forEach(l => {
+    const rm = el('button', {textContent:'Remove'});
+    rm.onclick = () => { cart = cart.filter(x => x !== l); saveCart(); };
+    box.append(el('div', {className:'line'}, [
+      el('img', {src:l.img, alt:''}),
+      el('div', {}, [el('b', {textContent:l.title}), el('div', {textContent:[l.size, l.color, 'Qty ' + l.qty].filter(Boolean).join(', ')})]),
+      el('div', {}, [el('div', {textContent:l.price}), rm])
+    ]));
+  });
+  const total = cart.reduce((s,l) => s + (parseFloat(String(l.price).replace('$','')) || 0) * l.qty, 0);
+  $('total').textContent = '$' + total.toFixed(2);
+}
+$('openCart').onclick = () => $('drawer').classList.add('open');
+$('closeCart').onclick = () => $('drawer').classList.remove('open');
+$('closeDlg').onclick = () => { const d = $('dlg'); if(d.close) d.close(); else d.removeAttribute('open'); };
+$('checkout').onclick = async () => {
+  const msg = $('msg');
+  if(!cart.length){ msg.textContent = 'Add something to your cart first.'; return; }
+  if(!CHECKOUT_URL){ msg.textContent = 'Checkout opens once Stripe is connected.'; return; }
+  msg.textContent = 'Taking you to checkout...';
+  try{
+    const r = await fetch(CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', ...(ANON_KEY && {Authorization:'Bearer ' + ANON_KEY})}, body:JSON.stringify({cart})});
+    const j = await r.json();
+    if(j.url) location.href = j.url; else throw new Error('No checkout URL');
+  }catch(e){ msg.textContent = 'Checkout could not start. Please try again.'; }
+};
+
+async function load(){
+  try{
+    const r = await fetch(FUNCTION_URL);
+    const j = await r.json();
+    let arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
+    arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
+    products = arr.map(normalize).filter(p => p.title);
+  }catch(e){ failed = true; }
+  loaded = true; render();
+}
+buildNav(); renderBanners(); saveCart(); render(); load();
+</script>
 </body>
 </html>
+
