@@ -97,12 +97,20 @@ h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.
 .news button{background:#222;color:#fff;border:0;padding:0 50px;height:54px;font-weight:700;text-transform:uppercase}
 .news p{margin-top:10px;min-height:1.4em;color:#777}
 footer{background:#333;color:#eee;padding:56px 4vw 40px}
-.fcols{max-width:1200px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+.fcols{max-width:1200px;margin:auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr 1fr;gap:30px}
 footer h4{font-weight:400;font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px}
 footer h4.n{text-transform:none;font-size:1.6rem}
-footer a{display:block;color:#ddd;padding:3px 0;text-decoration:none}
+footer a{display:block;color:#ddd;padding:4px 0;text-decoration:none}
 footer a:hover{color:var(--accent);text-decoration:underline}
-.copy{max-width:1200px;margin:30px auto 0;font-size:.9rem;color:#aaa}
+.fline{max-width:1200px;margin:34px auto 0;border-top:1px solid #4a4a4a}
+.copy{max-width:1200px;margin:18px auto 0;font-size:.9rem;color:#aaa;text-align:right}
+.infobody{max-width:820px;margin-bottom:60px}
+.infobody p{margin-bottom:14px}
+.infobody h3{font-size:1.25rem;margin:28px 0 8px}
+.infobody ul{margin:0 0 10px 22px}
+.infobody li{padding:3px 0}
+.infobody a{color:var(--brand)}
+body.info #hero{display:none}
 dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;color:var(--txt)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 .pd{display:grid;grid-template-columns:1fr 1fr}
@@ -148,6 +156,12 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <main class="wrap">
   <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div></section>
 
+  <section id="infoView" hidden>
+    <p class="crumb" id="infoCrumb"></p>
+    <h1 class="pt" id="infoTitle"></h1>
+    <div class="infobody" id="infoBody"></div>
+  </section>
+
   <section id="listView" hidden>
     <p class="crumb" id="crumb"></p>
     <h1 class="pt" id="pageTitle"></h1>
@@ -171,10 +185,12 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
   <div class="fcols">
     <div><h4 class="n">Tiny Dreams Lullaby</h4><p>Dream big. Dream sweet. Dream tiny.</p></div>
     <div><h4>Categories</h4><div id="fCats"></div></div>
-    <div><h4>Brands</h4><a href="index.html">Love Hart Design</a></div>
+    <div><h4>Information</h4><div id="fInfo"></div></div>
+    <div><h4>Brands</h4><div id="fBrands"></div></div>
     <div><h4>Follow us</h4><a href="https://youtube.com/@TinyDreamsLullaby">YouTube</a></div>
   </div>
-  <p class="copy">&copy; Tiny Dreams Lullaby, part of Love Hart Design</p>
+  <div class="fline"></div>
+  <p class="copy">&copy; 2026 Tiny Dreams Lullaby, part of Love Hart Design</p>
 </footer>
 
 <div class="toast" id="toast" role="status"></div>
@@ -201,6 +217,32 @@ const SIGNIN_URL = '';         // where the Sign in link goes. Leave empty until
 const REGISTER_URL = '';       // where the Register link goes. Leave empty until accounts are set up.
 const SLIDE_SECONDS = 5;       // how often the two banners rotate
 
+const BRANDS = [
+  ['Angels', 'angels-store.html'],
+  ['Christmas Songs All Year Long', 'christmas-songs-all-year-long.html'],
+  ['Heirloom Hart', 'https://heirloom-hart.lovable.app/'],
+  ['Hush Drift', 'hush-drift.html'],
+  ['Little Princess Lullabies', 'little-princess-lullabies.html'],
+  ['Pure Dream Sounds', 'pure-dream-sounds.html'],
+  ['Skulls After Dark', 'skulls-after-dark.html'],
+  ['Tiny Dreams Lullaby', 'tiny-dreams-lullaby.html'],
+  ['View All Brands', 'index.html']
+];
+const INFO = {
+  privacy: {title:'Privacy Policy', body:[
+    ['', 'Last updated: October 3, 2026'],
+    ['What this page saves on your device', 'Items you add to your cart are saved in your browser so they are still there when you come back. This stays on your device and is not sent to us.'],
+    ['Orders and payments', 'When checkout is turned on, payments are handled by Stripe. Card numbers are entered with Stripe and are not stored on this site.'],
+    ['Shipping your order', 'To make and ship an order, your name, shipping address and order details are shared with our print-and-ship partner, Spreadconnect.'],
+    ['Newsletter', 'If you sign up for the newsletter, we use your email address only to send you updates about Tiny Dreams Lullaby.'],
+    ['Fonts', 'This page loads fonts from Google Fonts, so your browser contacts Google when the page loads. This page has no advertising or analytics tools.'],
+    ['Changes', 'We may update this policy as the shop grows. The date at the top shows when it last changed.']
+  ]},
+  about: {title:'About Us', body:[
+    ['', 'Tiny Dreams Lullaby is a channel for little boys, and this is its shop. Dream big. Dream sweet. Dream tiny.'],
+    ['', 'Every design is printed on demand, so each order is made just for you. Tiny Dreams Lullaby is part of Love Hart Design, a family of channels and shops.']
+  ]}
+};
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
 const TYPES = ['T-Shirts','Long Sleeves','Hoodies','Sweatshirts','Rompers','Bodysuits','Tanks'];
 
@@ -278,7 +320,7 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  const mode = ['all','specials','new'].includes(path) ? path : 'home';
+  const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
   return {mode, type: TYPES.includes(q.get('type')) ? q.get('type') : '', aud: AUDIENCES.includes(q.get('aud')) ? q.get('aud') : ''};
 }
 const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
@@ -307,6 +349,10 @@ function buildNav(){
     }
     return box;
   }));
+  const top = el('a', {href:'#/', textContent:'Tiny Dreams Lullaby'});
+  top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
+  $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
+  $('fBrands').replaceChildren(...BRANDS.map(([l, u]) => el('a', {href:u, textContent:l})));
   $('fCats').replaceChildren(...AUDIENCES.map(a => el('a', {href:href('all', {aud:a}), textContent:a})), ...types.map(([l, u]) => el('a', {href:u, textContent:l})));
 }
 
@@ -359,14 +405,34 @@ function renderList(r){
   }
   list.forEach(p => g.append(makeCard(p)));
 }
+function renderInfo(r){
+  const title = r.mode === 'sitemap' ? 'Sitemap' : INFO[r.mode].title;
+  $('infoTitle').textContent = title;
+  document.title = title + ' | Tiny Dreams Lullaby';
+  $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
+  const box = $('infoBody'); box.replaceChildren();
+  if(r.mode !== 'sitemap'){
+    INFO[r.mode].body.forEach(([h, t]) => { if(h) box.append(el('h3', {textContent:h})); box.append(el('p', {textContent:t})); });
+    return;
+  }
+  const sec = (h, links) => box.append(el('h3', {textContent:h}), el('ul', {}, links.map(([l, u]) => el('li', {}, el('a', {href:u, textContent:l})))));
+  sec('Shop', [['Home', '#/'], ['Specials', href('specials')], ['All Products', href('all')], ['New Releases', href('new')]]);
+  sec('Apparel', TYPES.map(t => [t, href('all', {type:t})]));
+  sec('Collections', AUDIENCES.map(a => [a, href('all', {aud:a})]));
+  sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
+  sec('Our Brands', BRANDS);
+}
 function render(){
   const r = route();
+  const isInfo = ['privacy','about','sitemap'].includes(r.mode);
   document.body.classList.toggle('list', r.mode !== 'home');
+  document.body.classList.toggle('info', isInfo);
   $('homeView').hidden = r.mode !== 'home';
-  $('listView').hidden = r.mode === 'home';
+  $('listView').hidden = r.mode === 'home' || isInfo;
+  $('infoView').hidden = !isInfo;
   $('nav').classList.remove('open');
   document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-  if(r.mode === 'home'){ document.title = 'Tiny Dreams Lullaby | Love Hart Design'; renderHome(); } else renderList(r);
+  if(r.mode === 'home'){ document.title = 'Tiny Dreams Lullaby | Love Hart Design'; renderHome(); } else if(isInfo) renderInfo(r); else renderList(r);
 }
 
 addEventListener('hashchange', () => { render(); scrollTo(0, 0); });
