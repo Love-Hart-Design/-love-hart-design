@@ -16,6 +16,7 @@ body{font-family:var(--body);font-size:17px;color:var(--txt);background:#fff;lin
 button{font:inherit;cursor:pointer}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#errbar{background:#b00020;color:#fff;padding:10px 14px;font-size:.9rem;word-break:break-word}
 .hd{position:sticky;top:0;z-index:15}
 .top{background:var(--bg);display:flex;align-items:center;justify-content:center;gap:34px;padding:26px 4vw;flex-wrap:wrap}
 .hamb{display:none;background:none;border:0;padding:6px}
@@ -62,7 +63,7 @@ body.list #mainSlider{display:none}
 .slide p{color:#fff;letter-spacing:.25em;font-size:clamp(.7rem,1.8vw,1.4rem);margin-top:8px;position:relative}
 .slide .big{font-weight:500;letter-spacing:.14em;font-family:var(--body);font-size:clamp(1rem,3.2vw,2.4rem)}
 .slide .moon{position:absolute;right:6vw;top:50%;margin-top:calc(min(9vw,110px)*-1);width:min(18vw,220px);height:min(18vw,220px);background:transparent;box-shadow:inset -26px 8px 0 0 var(--accent);opacity:.9}
-.burst{width:clamp(56px,8vw,120px);aspect-ratio:1;background:var(--accent);color:#1d2350;font-weight:700;font-size:clamp(1rem,2.6vw,2rem);display:grid;place-items:center;clip-path:polygon(50% 0,60% 12%,75% 7%,78% 22%,93% 25%,88% 40%,100% 50%,88% 60%,93% 75%,78% 78%,75% 93%,60% 88%,50% 100%,40% 88%,25% 93%,22% 78%,7% 75%,12% 60%,0 50%,12% 40%,7% 25%,22% 22%,25% 7%,40% 12%)}
+.burst{width:clamp(56px,8vw,120px);height:clamp(56px,8vw,120px);background:var(--accent);color:#1d2350;font-weight:700;font-size:clamp(1rem,2.6vw,2rem);display:grid;place-items:center;clip-path:polygon(50% 0,60% 12%,75% 7%,78% 22%,93% 25%,88% 40%,100% 50%,88% 60%,93% 75%,78% 78%,75% 93%,60% 88%,50% 100%,40% 88%,25% 93%,22% 78%,7% 75%,12% 60%,0 50%,12% 40%,7% 25%,22% 22%,25% 7%,40% 12%)}
 .dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px}
 .dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.5)}
 .dots button[aria-current=true]{background:#fff}
@@ -73,8 +74,8 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:27px}
 .grid.three{grid-template-columns:repeat(3,1fr)}
 .card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block}
-.card .im{position:relative;border:1px solid var(--line);background:#fff;aspect-ratio:1;overflow:hidden}
-.card img{width:100%;height:100%;object-fit:contain;display:block}
+.card .im{position:relative;border:1px solid var(--line);background:#fff;height:0;padding-bottom:100%;overflow:hidden}
+.card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block}
 .card .qv{position:absolute;left:0;right:0;bottom:0;background:rgba(47,58,116,.92);color:#fff;text-align:center;padding:9px;font-weight:700;opacity:0;transform:translateY(100%);transition:.18s}
 .card:focus-visible .qv{opacity:1;transform:none}
 @media(hover:hover){.card:hover .qv{opacity:1;transform:none}}
@@ -187,6 +188,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
+<div id="errbar" hidden></div>
+<script>window.addEventListener('error',function(e){var b=document.getElementById('errbar');if(!b)return;b.hidden=false;b.textContent='Page error: '+e.message+' (line '+e.lineno+')';});</script>
 
 <div class="hd">
   <header class="top">
@@ -256,6 +259,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 </aside>
 
 <script>
+if(!Element.prototype.replaceChildren){ Element.prototype.replaceChildren = function(){ while(this.firstChild) this.removeChild(this.firstChild); for(var i = 0; i < arguments.length; i++) this.append(arguments[i]); }; }
 const FUNCTION_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products';
 const BRAND_KEY = 'tiny-dreams-lullaby'; // this store's key inside the feed
 const ANON_KEY = '';        // only needed for checkout, if your function wants it
@@ -512,7 +516,7 @@ function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('sho
 
 const wide = matchMedia('(min-width:701px)');
 const syncFooter = () => document.querySelectorAll('.fd').forEach(d => d.open = wide.matches);
-wide.addEventListener('change', syncFooter);
+if(wide.addEventListener) wide.addEventListener('change', syncFooter); else wide.addListener(syncFooter);
 syncFooter();
 
 /* ---- the two banners rotate on their own ---- */
@@ -568,11 +572,11 @@ function openProduct(p){
     const key = [p.id, size, color].join('|');
     const hit = cart.find(l => l.key === key);
     hit ? hit.qty++ : cart.push({key, id:p.id, title:p.title, price:p.price, img:p.img, size, color, qty:1});
-    saveCart(); $('dlg').close(); $('drawer').classList.add('open');
+    saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
   };
   info.append(add, err);
   $('pd').replaceChildren(el('img', {src:p.img, alt:p.title}), info);
-  $('dlg').showModal();
+  { const d = $('dlg'); if(d.showModal) d.showModal(); else d.setAttribute('open', ''); }
 }
 
 function saveCart(){
@@ -594,7 +598,7 @@ function saveCart(){
 }
 $('openCart').onclick = () => $('drawer').classList.add('open');
 $('closeCart').onclick = () => $('drawer').classList.remove('open');
-$('closeDlg').onclick = () => $('dlg').close();
+$('closeDlg').onclick = () => { const d = $('dlg'); if(d.close) d.close(); else d.removeAttribute('open'); };
 $('checkout').onclick = async () => {
   const msg = $('msg');
   if(!cart.length){ msg.textContent = 'Add something to your cart first.'; return; }
