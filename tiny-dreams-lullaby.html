@@ -9,7 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root{--nav:#4b5a96;--brand:#2f3a74;--accent:#ffd36e;--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Fredoka','Trebuchet MS',sans-serif}
+html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box;margin:0}
+img{max-width:100%}
 body{font-family:var(--body);font-size:17px;color:var(--txt);background:#fff;line-height:1.45}
 button{font:inherit;cursor:pointer}
 a{color:inherit}
@@ -38,7 +40,8 @@ nav.main{background:var(--nav);display:flex;justify-content:center;flex-wrap:wra
 .ni>a:hover,.ni>a[aria-current=page],.ni:focus-within>a,.ni.open>a{border-bottom-color:var(--accent)}
 .ni>a.dd::after{content:"\25BE";margin-left:6px;font-size:.8em}
 .dm{display:none;position:absolute;left:0;top:100%;z-index:25;min-width:240px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 20px rgba(0,0,0,.18);padding:8px 0}
-.ni:hover .dm,.ni:focus-within .dm,.ni.open .dm{display:block}
+.ni.open .dm{display:block}
+@media(hover:hover){.ni:hover .dm,.ni:focus-within .dm{display:block}}
 .dm a{display:block;padding:9px 22px;text-decoration:none;color:var(--txt)}
 .dm a:hover{background:var(--bg);color:var(--brand)}
 body.scrolled nav.main{display:none}
@@ -73,7 +76,8 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .card .im{position:relative;border:1px solid var(--line);background:#fff;aspect-ratio:1;overflow:hidden}
 .card img{width:100%;height:100%;object-fit:contain;display:block}
 .card .qv{position:absolute;left:0;right:0;bottom:0;background:rgba(47,58,116,.92);color:#fff;text-align:center;padding:9px;font-weight:700;opacity:0;transform:translateY(100%);transition:.18s}
-.card:hover .qv,.card:focus-visible .qv{opacity:1;transform:none}
+.card:focus-visible .qv{opacity:1;transform:none}
+@media(hover:hover){.card:hover .qv{opacity:1;transform:none}}
 .sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
 .card h3{font-family:var(--cond);font-weight:400;font-size:.95rem;text-transform:uppercase;margin-top:14px;line-height:1.45}
 .card .pr{display:block;font-size:1.1rem;margin-top:4px}
@@ -83,7 +87,8 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
 .lay{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;margin-bottom:60px}
 .fbox{border:1px solid var(--line);padding:6px 20px 14px}
-.fbox h4{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px}
+.fbox+.fbox{margin-top:12px}
+.fbox summary{font-size:1rem;text-transform:uppercase;font-weight:700;padding:14px 0 8px;cursor:pointer}
 .fbox a{display:block;text-decoration:none;padding:5px 0}
 .fbox a:hover{color:var(--brand);text-decoration:underline}
 .fbox a[aria-current=true]{font-weight:700;color:var(--brand)}
@@ -111,7 +116,7 @@ footer a:hover{color:var(--accent);text-decoration:underline}
 .infobody li{padding:3px 0}
 .infobody a{color:var(--brand)}
 body.info #hero{display:none}
-dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;color:var(--txt)}
+dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;max-height:92vh;overflow:auto;color:var(--txt)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 .pd{display:grid;grid-template-columns:1fr 1fr}
 .pd img{width:100%;height:100%;object-fit:contain;min-height:260px;background:#fff}
@@ -134,6 +139,42 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.grid.three{grid-template-columns:repeat(2,1fr)}.fcols{grid-template-columns:1fr 1fr}.lay{grid-template-columns:1fr}}
 @media(max-width:700px){.grid,.grid.three{grid-template-columns:repeat(2,1fr);gap:16px}.pd{grid-template-columns:1fr}.top{gap:14px}.slide .moon{opacity:.25}}
 @media(prefers-reduced-motion:reduce){.drawer,.card .qv,.track{transition:none}}
+
+@media(max-width:900px){
+ html body .hd{position:static}
+ html body .hamb{display:block}
+ html body nav.main{display:none}
+ html body nav.main.open{display:flex;position:static;flex-direction:column;flex-wrap:nowrap;gap:0;padding:4px 6vw 10px;box-shadow:none}
+ .ni>a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.18)}
+ .ni>a:hover,.ni>a[aria-current=page],.ni.open>a{border-bottom-color:rgba(255,255,255,.18);color:var(--accent)}
+ .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12);min-width:0;padding:4px 0}
+ .dm a{color:#fff;padding:10px 16px}
+ .dm a:hover{background:rgba(255,255,255,.12);color:var(--accent)}
+}
+@media(max-width:700px){
+ .top{gap:10px;padding:12px 4vw}
+ .hamb{order:0}
+ .logo{order:1;flex:1;min-width:0;gap:8px}
+ .logo b{font-size:1.35rem}
+ .logo small{font-size:.72rem}
+ .moon{width:34px;height:34px;box-shadow:inset -9px 3px 0 0 #f0a93a}
+ .acct{display:contents}
+ .cartbtn{order:2}
+ .search{order:3;width:100%;flex:1 0 100%}
+ .who{order:4;flex:1 0 100%;justify-content:center;font-size:.9rem}
+ .sep{display:none}
+ .slide{padding:14px 12px;gap:10px}
+ .slide p{letter-spacing:.1em}
+ .slider.thin .slide h2{letter-spacing:.06em}
+ .slide .big{letter-spacing:.06em}
+ .arr{width:28px;height:36px;font-size:1.1rem}
+ h2.sec{font-size:1.5rem;margin:36px 0 20px}
+ h1.pt{font-size:1.7rem;margin-bottom:20px}
+ .fcols{grid-template-columns:1fr}
+ .copy{text-align:center}
+ .news button{padding:0 30px}
+ footer{padding:40px 6vw 30px}
+}
 </style>
 </head>
 <body>
@@ -340,7 +381,7 @@ function buildNav(){
     if(dd){
       box.append(el('div', {className:'dm'}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
       a.onclick = e => {
-        if(matchMedia('(hover:none)').matches && !box.classList.contains('open')){
+        if(matchMedia('(hover:none), (max-width:900px)').matches && !box.classList.contains('open')){
           e.preventDefault();
           document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
           box.classList.add('open');
@@ -383,14 +424,13 @@ function renderList(r){
   document.title = (parts.join(' / ') || base) + ' | Tiny Dreams Lullaby';
 
   const s = $('side'); s.replaceChildren();
-  const box = (title, items, current, make) => s.append(el('div', {className:'fbox'}, [el('h4', {textContent:title})].concat(
+  const box = (title, items, current, make) => s.append(el('details', {className:'fbox', open:!matchMedia('(max-width:700px)').matches}, [el('summary', {textContent:title})].concat(
     [['All', '']].concat(items.map(v => [v, v])).map(([label, v]) => {
       const a = el('a', {href:make(v), textContent:label});
       if(current === v) a.setAttribute('aria-current', 'true');
       return a;
     }))));
   box('Style', TYPES, r.type, v => href(r.mode, {type:v, aud:r.aud}));
-  s.append(el('div', {style:'height:16px'}));
   box('Collection', AUDIENCES, r.aud, v => href(r.mode, {type:r.type, aud:v}));
 
   const q = fQ.toLowerCase();
