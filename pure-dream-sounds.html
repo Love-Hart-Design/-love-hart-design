@@ -216,11 +216,22 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
  #filterBtn{display:block}
  .sortbar{flex:1;width:auto}
 }
+.auth{max-width:440px;margin-bottom:70px}
+.auth label{display:block;font-weight:700;font-size:.9rem;margin:16px 0 6px}
+.auth input{width:100%;border:1px solid #bbb;padding:12px 14px;font:inherit;border-radius:2px;background:#fff}
+.auth .abtn{display:block;width:100%;margin-top:22px;background:var(--brand);color:#fff;border:0;padding:14px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.auth .abtn:disabled{opacity:.6;cursor:wait}
+.auth .alt{margin-top:18px;font-size:.95rem}
+.auth .alt a,.auth a{color:var(--brand)}
+.auth .amsg{margin-top:14px;min-height:1.3em;font-size:.95rem}
+.auth .amsg.err{color:#b00020}
+.auth .amsg.ok{color:#1b6e3a}
 </style>
 </head>
 <body>
 <div id="errbar" hidden></div>
 <script>window.addEventListener('error',function(e){var b=document.getElementById('errbar');if(!b)return;b.hidden=false;b.textContent='Page error: '+e.message+' (line '+e.lineno+')';});</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <div class="backbar"><a href="https://lovehartdesign.com/">&larr; Love Hart Design</a></div>
 <div class="hd">
@@ -229,7 +240,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
     <a class="logo" href="#/"><span class="moon" aria-hidden="true"></span><span><b>Pure Dream Sounds</b><small>by Love Hart Design</small></span></a>
     <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg><input id="q" type="search" placeholder="What are you looking for?" aria-label="Search products"></label>
     <div class="acct">
-      <span class="who"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><a href="#" id="signin">Sign in</a> or <a href="#" id="register">Register</a></span><span class="sep" aria-hidden="true"></span>
+      <span class="who" id="who"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><a href="#" id="signin">Sign in</a> or <a href="#" id="register">Register</a></span><span class="sep" aria-hidden="true"></span>
       <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
     </div>
   </header>
@@ -291,6 +302,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 
 <script>
 if(!Element.prototype.replaceChildren){ Element.prototype.replaceChildren = function(){ while(this.firstChild) this.removeChild(this.firstChild); for(var i = 0; i < arguments.length; i++) this.append(arguments[i]); }; }
+const SUPABASE_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ejumddT9HCtukVN5GrmGHA_6EwJ3x0R'; // public key, safe in web pages
 const FUNCTION_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products';
 const BRAND_KEY = 'pure-dream-sounds'; // this store's key inside the feed
 const ANON_KEY = '';        // only needed for checkout, if your function wants it
@@ -298,8 +311,6 @@ const CHECKOUT_URL = '';    // Stripe checkout function URL. Leave empty until S
 const NEWSLETTER_URL = '';  // Where email signups get sent. Leave empty until it's set up.
 const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the text slides below.
 const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
-const SIGNIN_URL = '';         // where the Sign in link goes. Leave empty until accounts are set up.
-const REGISTER_URL = '';       // where the Register link goes. Leave empty until accounts are set up.
 const LINK_SLIDE_SECONDS = 2.5; // banners on the link pages (Specials, All Products, Apparel...) change this often
 const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
 const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
@@ -317,8 +328,9 @@ const BRANDS = [
 ];
 const INFO = {
   privacy: {title:'Privacy Policy', body:[
-    ['', 'Last updated: October 3, 2026'],
+    ['', 'Last updated: October 4, 2026'],
     ['What this page saves on your device', 'Items you add to your cart are saved in your browser so they are still there when you come back. This stays on your device and is not sent to us.'],
+    ['Accounts', 'If you create an account, your email address and name are kept by our sign-in provider, Supabase. Your password is stored in scrambled form that we cannot read.'],
     ['Orders and payments', 'When checkout is turned on, payments are handled by Stripe. Card numbers are entered with Stripe and are not stored on this site.'],
     ['Shipping your order', 'To make and ship an order, your name, shipping address and order details are shared with our print-and-ship partner, Spreadconnect.'],
     ['Newsletter', 'If you sign up for the newsletter, we use your email address only to send you updates about Pure Dream Sounds.'],
@@ -435,7 +447,7 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  const mode = ['all','specials','new','privacy','about','sitemap'].includes(path) ? path : 'home';
+  const mode = ['all','specials','new','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
   return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
@@ -567,17 +579,126 @@ function renderInfo(r){
   sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
   sec('Our Brands', BRANDS);
 }
+const AUTH_MODES = ['signin','register','forgot','reset','account'];
+const AUTH_TITLES = {signin:'Sign In', register:'Create Account', forgot:'Forgot Password', reset:'Reset Password', account:'My Account'};
+let sb = null, user = null, authReady = false;
+try{ if(window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
+function authError(m){
+  m = String(m || '');
+  if(/invalid login/i.test(m)) return 'Wrong email or password.';
+  if(/not confirmed/i.test(m)) return 'Please confirm your email first. Check your inbox for the link.';
+  if(/already registered|already been registered/i.test(m)) return 'That email already has an account. Try signing in.';
+  if(/rate limit|too many|seconds/i.test(m)) return 'Too many tries. Please wait a few minutes and try again.';
+  if(/password/i.test(m) && /(short|least|weak|characters)/i.test(m)) return 'Choose a longer password (at least 8 characters).';
+  return m || 'Something went wrong. Please try again.';
+}
+async function signOut(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.hash = '#/'; }
+function renderAuth(r){
+  const title = AUTH_TITLES[r.mode];
+  $('infoTitle').textContent = title;
+  document.title = title + ' | Pure Dream Sounds';
+  $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
+  const box = $('infoBody'); box.replaceChildren();
+  const wrap = el('div', {className:'auth'}); box.append(wrap);
+  if(!sb){ wrap.append(el('p', {textContent:'Sign in is not available right now. Please try again later.'})); return; }
+  const msg = el('p', {className:'amsg'}); msg.setAttribute('role', 'status');
+  const say = (t, ok) => { msg.textContent = t; msg.className = 'amsg ' + (ok ? 'ok' : 'err'); };
+  const form = el('form'); wrap.append(form);
+  const mk = (label, type, name, extra) => {
+    const input = el('input', Object.assign({type, id:'f-' + name, name, required:true}, extra || {}));
+    form.append(el('label', {htmlFor:'f-' + name, textContent:label}), input);
+    return input;
+  };
+  const submit = (text, fn) => {
+    const b = el('button', {className:'abtn', type:'submit', textContent:text});
+    form.append(b, msg);
+    form.onsubmit = async e => {
+      e.preventDefault(); b.disabled = true; say('');
+      try{ await fn(); }catch(err){ say(authError(err && err.message)); }
+      b.disabled = false;
+    };
+  };
+  const alt = (...nodes) => wrap.append(el('p', {className:'alt'}, nodes));
+  if(r.mode === 'signin'){
+    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
+    const pw = mk('Password', 'password', 'password', {autocomplete:'current-password'});
+    submit('Sign in', async () => {
+      const {error} = await sb.auth.signInWithPassword({email:email.value.trim(), password:pw.value});
+      if(error) throw error;
+      location.hash = '#/account';
+    });
+    alt(el('a', {href:'#/forgot', textContent:'Forgot your password?'}), ' \u00B7 ', el('a', {href:'#/register', textContent:'Create an account'}));
+  } else if(r.mode === 'register'){
+    const name = mk('Your name', 'text', 'name', {autocomplete:'name', required:false});
+    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
+    const pw = mk('Password (at least 8 characters)', 'password', 'password', {autocomplete:'new-password', minLength:8});
+    const pw2 = mk('Confirm password', 'password', 'password2', {autocomplete:'new-password'});
+    submit('Create account', async () => {
+      if(pw.value.length < 8){ say('Choose a password with at least 8 characters.'); return; }
+      if(pw.value !== pw2.value){ say('The two passwords do not match.'); return; }
+      const {data, error} = await sb.auth.signUp({email:email.value.trim(), password:pw.value, options:{data:{full_name:name.value.trim()}, emailRedirectTo:location.href.split('#')[0]}});
+      if(error) throw error;
+      if(data && data.session){ location.hash = '#/account'; return; }
+      say('Almost done! Check your email and click the link to confirm your account, then sign in.', true);
+    });
+    alt('Already have an account? ', el('a', {href:'#/signin', textContent:'Sign in'}));
+  } else if(r.mode === 'forgot'){
+    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
+    submit('Send reset link', async () => {
+      const {error} = await sb.auth.resetPasswordForEmail(email.value.trim(), {redirectTo:location.href.split('#')[0]});
+      if(error) throw error;
+      say('If that email has an account, a reset link is on its way.', true);
+    });
+    alt(el('a', {href:'#/signin', textContent:'Back to sign in'}));
+  } else if(r.mode === 'reset'){
+    if(!user){
+      wrap.replaceChildren(el('p', {textContent:'This reset link has expired or was already used.'}), el('p', {className:'alt'}, [el('a', {href:'#/forgot', textContent:'Request a new link'})]));
+      return;
+    }
+    const pw = mk('New password (at least 8 characters)', 'password', 'password', {autocomplete:'new-password', minLength:8});
+    const pw2 = mk('Confirm new password', 'password', 'password2', {autocomplete:'new-password'});
+    submit('Save new password', async () => {
+      if(pw.value.length < 8){ say('Choose a password with at least 8 characters.'); return; }
+      if(pw.value !== pw2.value){ say('The two passwords do not match.'); return; }
+      const {error} = await sb.auth.updateUser({password:pw.value});
+      if(error) throw error;
+      say('Password updated.', true);
+      setTimeout(() => { location.hash = '#/account'; }, 900);
+    });
+  } else {
+    if(!user){
+      if(authReady) location.hash = '#/signin';
+      else wrap.append(el('p', {textContent:'Loading your account\u2026'}));
+      return;
+    }
+    const nm = user.user_metadata && user.user_metadata.full_name;
+    wrap.append(el('p', {}, ['Signed in as ', el('b', {textContent:user.email})]));
+    if(nm) wrap.append(el('p', {textContent:'Name: ' + nm}));
+    wrap.append(el('button', {className:'abtn', type:'button', textContent:'Sign out', onclick:signOut}));
+  }
+}
+function renderWho(){
+  const w = $('who');
+  const icon = w.querySelector('svg') ? w.querySelector('svg').cloneNode(true) : '';
+  if(user){
+    const nm = (user.user_metadata && user.user_metadata.full_name) || (user.email || '').split('@')[0];
+    w.replaceChildren(icon, el('a', {href:'#/account', textContent:'Hi, ' + nm}), ' | ', el('a', {href:'#/', textContent:'Sign out', onclick:e => { e.preventDefault(); signOut(); }}));
+  } else {
+    w.replaceChildren(icon, el('a', {href:'#/signin', textContent:'Sign in'}), ' or ', el('a', {href:'#/register', textContent:'Register'}));
+  }
+}
 function render(){
   const r = route();
   const isInfo = ['privacy','about','sitemap'].includes(r.mode);
+  const isAuth = AUTH_MODES.includes(r.mode);
   document.body.classList.toggle('list', r.mode !== 'home');
-  document.body.classList.toggle('info', isInfo);
+  document.body.classList.toggle('info', isInfo || isAuth);
   $('homeView').hidden = r.mode !== 'home';
-  $('listView').hidden = r.mode === 'home' || isInfo;
-  $('infoView').hidden = !isInfo;
+  $('listView').hidden = r.mode === 'home' || isInfo || isAuth;
+  $('infoView').hidden = !(isInfo || isAuth);
   $('nav').classList.remove('open');
   document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-  if(r.mode === 'home'){ document.title = 'Pure Dream Sounds | Love Hart Design'; renderHome(); } else if(isInfo) renderInfo(r); else renderList(r);
+  if(r.mode === 'home'){ document.title = 'Pure Dream Sounds | Love Hart Design'; renderHome(); } else if(isInfo) renderInfo(r); else if(isAuth) renderAuth(r); else renderList(r);
 }
 
 let fromSidebar = false, lastMode = route().mode;
@@ -604,14 +725,6 @@ $('news').onsubmit = async e => {
     msg.textContent = 'Thanks! You are subscribed.'; $('email').value = '';
   }catch(err){ msg.textContent = 'Could not subscribe. Please try again.'; }
 };
-
-let toastTimer;
-function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), 3000); }
-[['signin', SIGNIN_URL], ['register', REGISTER_URL]].forEach(([id, url]) => {
-  const a = $(id);
-  if(url) a.href = url;
-  else a.onclick = e => { e.preventDefault(); toast('Accounts are not set up yet.'); };
-});
 
 const wide = matchMedia('(min-width:701px)');
 const syncFooter = () => document.querySelectorAll('.fd').forEach(d => d.open = wide.matches);
@@ -722,6 +835,18 @@ async function load(){
   }catch(e){ failed = true; }
   loaded = true; render();
 }
+renderWho();
+if(sb){
+  sb.auth.onAuthStateChange((event, session) => {
+    user = session ? session.user : null; authReady = true; renderWho();
+    if(event === 'PASSWORD_RECOVERY') location.hash = '#/reset';
+    else if(AUTH_MODES.includes(route().mode)) render();
+  });
+  sb.auth.getSession().then(({data}) => {
+    user = data && data.session ? data.session.user : null; authReady = true; renderWho();
+    if(AUTH_MODES.includes(route().mode)) render();
+  }).catch(() => { authReady = true; });
+} else authReady = true;
 buildNav(); renderBanners(); saveCart(); render(); load();
 </script>
 </body>
