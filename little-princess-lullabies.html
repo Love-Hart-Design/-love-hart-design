@@ -429,7 +429,8 @@ function normalize(p, i){
     inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     audience: tags.map(normAudience).find(Boolean) || normAudience(title),
     type: tags.map(normType).find(Boolean) || normType(title),
-    sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances)
+    sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances),
+    colorImages: (p.colorImages && typeof p.colorImages === 'object') ? p.colorImages : {}
   };
 }
 
@@ -814,7 +815,7 @@ function openProduct(p){
     if(multi) group('Style', vs, x => { v = x; draw(); }, x => x === v, x => x.label);
     if(v){
       group('Size', v.sizes, x => size = x);
-      group('Color', v.colors, x => color = x);
+      group('Color', v.colors, x => { color = x; const u = v.colorImages && v.colorImages[x]; if(u){ imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = v.img; }; imgEl.src = u; } });
     }
     const err = el('p', {className:'msg'});
     const add = el('button', {className:'add', type:'button', textContent:'Add to cart'});
