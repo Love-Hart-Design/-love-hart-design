@@ -344,7 +344,7 @@ const INFO = {
     ['', 'Every design is printed on demand, so each order is made just for you. Little Princess Lullabies is part of Love Hart Design, a family of channels and shops.']
   ]}
 };
-const APPAREL = ['Tie-Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
+let APPAREL = []; // filled from Spreadconnect product types when products load
 const CATEGORIES = ['Princesses','Castles','Crowns','Unicorns','Fairies','Mermaids','Butterflies','Flowers','Bunnies','Stars'];
 const COLORS = ['Black','Blue','Green','Purple','Red','Yellow'];
 const COLLECTIONS = ['Enchanted Little Royals','Princess Dreams','Fairy Tale','Unicorns & Magic'];
@@ -392,20 +392,6 @@ function plain(h){
     .replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
     .replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
 }
-function normApparel(tags, title){
-  const hit = tags.map(t => APPAREL.find(a => a.toLowerCase() === t.toLowerCase())).find(Boolean);
-  if(hit) return hit;
-  const t = title.toLowerCase();
-  if(/sweatpant|jogger/.test(t)) return 'Sweatpants';
-  if(/hood/.test(t)) return /lightweight/.test(t) ? 'Lightweight Hoodies' : 'Classic Hoodies';
-  if(/tie-?dye|dye only/.test(t)) return 'Tie-Dye Only';
-  if(/long\s*sleeve/.test(t)) return 'Long Sleeve T-Shirts';
-  if(/v-?neck/.test(t)) return 'V-Neck Triblend T-Shirts';
-  if(/crew/.test(t) && /tri-?blend/.test(t)) return 'Crew-Neck Triblend Graphic T-Shirts';
-  if(/tri-?blend/.test(t)) return 'Tri-Blend T-Shirts';
-  if(/shirt|tee/.test(t)) return /youth|kid/.test(t) ? 'Youth T-Shirts' : 'Classic Graphic T-Shirts';
-  return '';
-}
 function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
@@ -421,7 +407,7 @@ function normalize(p, i){
     special: tags.some(t => /^(special|specials|sale)$/i.test(t)) || was > priceNum,
     featured: p.featured === true || tags.some(t => /^featured$/i.test(t)),
     best: p.bestSelling === true || p.best_selling === true || tags.some(t => /^best[ -]?sell(er|ers|ing)$/i.test(t)),
-    apparel: normApparel(tags, title),
+    apparel: String(p.productType || '').split('|')[0].trim(),
     cats: CATEGORIES.filter(c => tags.some(t => t.toLowerCase() === c.toLowerCase())),
     gcolors: COLORS.filter(c => new RegExp('\\b' + c + '\\b', 'i').test(pickList(p.colors || p.appearances).concat(tags).join(' '))),
     cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
@@ -461,7 +447,7 @@ function buildNav(){
     ['Specials', href('specials'), null],
     ['Little Princess Lullabies', href('all'), null],
     ['New Releases', href('new'), null],
-    ['Apparel', href('apparel'), APPAREL.map(a => [a, href('all', {app:a})])],
+    ['Apparel', href('apparel'), APPAREL.length ? APPAREL.map(a => [a, href('all', {app:a})]) : null],
     ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
   ];
   $('nav').replaceChildren(...items.map(([label, h, dd]) => {
@@ -878,6 +864,8 @@ async function load(){
     let arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
     arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
     products = arr.map(normalize).filter(p => p.title);
+    APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    buildNav();
   }catch(e){ failed = true; }
   loaded = true; render();
 }
