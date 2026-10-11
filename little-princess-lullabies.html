@@ -546,7 +546,7 @@ function renderList(r){
   const apparelPage = r.apps.length > 0;
   const pool = apparelPage ? scope.filter(p => r.apps.includes(p.apparel)) : scope;
   const count = fn => new Set(pool.filter(fn).map(p => p.title.trim().toLowerCase())).size;
-  const order = ['2T','3T','4T','5T','YS','YM','YL','YXL','XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
+  const order = ['2T','3T','4T','5T','YS','YM','YL','YXL','Youth XS','Youth S','Youth M','Youth L','Youth XL','XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
   const fromFeed = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
   const sizes = fromFeed.length ? fromFeed : DEFAULT_SIZES;
   const hasSize = (p, v) => !p.sizes.length || p.sizes.includes(v);
