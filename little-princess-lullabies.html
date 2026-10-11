@@ -450,11 +450,11 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  const mode = ['all','specials','new','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
+  const mode = ['all','specials','new','apparel','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
   return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), types:list('type', TYPES), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
-const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases'};
+const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases', apparel:'Apparel'};
 
 function buildNav(){
   const types = TYPES.map(t => [t, href('all', {type:t})]);
@@ -462,7 +462,7 @@ function buildNav(){
     ['Specials', href('specials'), null],
     ['Little Princess Lullabies', href('all'), null],
     ['New Releases', href('new'), null],
-    ['Apparel', href('all'), APPAREL.map(a => [a, href('all', {app:a})])],
+    ['Apparel', href('apparel'), APPAREL.map(a => [a, href('all', {app:a})])],
     ['Collections', href('all'), COLLECTIONS.map(c => [c, href('all', {col:c})])]
   ];
   $('nav').replaceChildren(...items.map(([label, h, dd]) => {
@@ -484,7 +484,7 @@ function buildNav(){
   top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
   $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
   $('fBrands').replaceChildren(...BRANDS.map(([l, u]) => el('a', {href:u, textContent:l})));
-  $('fCats').replaceChildren(...[['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Apparel', href('all')], ['Collections', href('all')]].map(([l, u]) => el('a', {href:u, textContent:l})));
+  $('fCats').replaceChildren(...[['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Apparel', href('apparel')], ['Collections', href('all')]].map(([l, u]) => el('a', {href:u, textContent:l})));
 }
 
 function designs(list){
@@ -543,7 +543,7 @@ function renderList(r){
   document.title = (parts.join(' / ') || base) + ' | Little Princess Lullabies';
 
   const q = fQ.toLowerCase();
-  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (!q || p.title.toLowerCase().includes(q)));
+  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (r.mode !== 'apparel' || p.apparel) && (!q || p.title.toLowerCase().includes(q)));
   const apparelPage = r.apps.length > 0;
   const pool = apparelPage ? scope.filter(p => r.apps.includes(p.apparel)) : scope;
   const count = fn => new Set(pool.filter(fn).map(p => p.title.trim().toLowerCase())).size;
