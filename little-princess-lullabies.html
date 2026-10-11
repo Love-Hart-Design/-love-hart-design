@@ -344,7 +344,6 @@ const INFO = {
     ['', 'Every design is printed on demand, so each order is made just for you. Little Princess Lullabies is part of Love Hart Design, a family of channels and shops.']
   ]}
 };
-const DEFAULT_SIZES = ['2T','3T','4T','5T','YS','YM','YL','YXL','S','M','L','XL','2XL','3XL']; // shown in the Size filter until your feed sends real sizes per product
 const APPAREL = ['Tie-Dye Only','Classic Graphic T-Shirts','Youth T-Shirts','Long Sleeve T-Shirts','Classic Hoodies','Crew-Neck Triblend Graphic T-Shirts','Tri-Blend T-Shirts','V-Neck Triblend T-Shirts','Lightweight Hoodies','Sweatpants'];
 const CATEGORIES = ['Princesses','Castles','Crowns','Unicorns','Fairies','Mermaids','Butterflies','Flowers','Bunnies','Stars'];
 const COLORS = ['Black','Blue','Green','Purple','Red','Yellow'];
@@ -505,17 +504,28 @@ function designs(list){
   });
   return out;
 }
+function colorImage(p, colors){
+  if(!colors || !colors.length) return '';
+  for(const v of (p.variants || [p])){
+    const map = v.colorImages || {}, names = Object.keys(map);
+    for(const c of colors){
+      const hit = names.find(n => n.toLowerCase() === c.toLowerCase()) || names.find(n => new RegExp('\\b' + c + '\\b', 'i').test(n));
+      if(hit) return map[hit];
+    }
+  }
+  return '';
+}
 function priceText(p){
   const vs = p.variants || [p];
   const nums = vs.map(x => x.priceNum);
   const lo = Math.min(...nums), hi = Math.max(...nums);
   return vs.length > 1 && lo !== hi ? 'From ' + money(lo) : vs[0].price;
 }
-function makeCard(p){
-  const im = el('div', {className:'im'}, [el('img', {src:p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
+function makeCard(p, colors){
+  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
   const c = el('button', {className:'card', type:'button'}, [im, el('h3', {textContent:p.title}), el('span', {className:'pr', textContent:priceText(p)})]);
-  c.onclick = () => openProduct(p);
+  c.onclick = () => openProduct(p, colors);
   return c;
 }
 function statusNote(){
@@ -547,12 +557,7 @@ function renderList(r){
   const apparelPage = r.apps.length > 0;
   const pool = apparelPage ? scope.filter(p => r.apps.includes(p.apparel)) : scope;
   const count = fn => new Set(pool.filter(fn).map(p => p.title.trim().toLowerCase())).size;
-  const order = ['2T','3T','4T','5T','YS','YM','YL','YXL','Youth XS','Youth S','Youth M','Youth L','Youth XL','XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
-  const fromFeed = Array.from(new Set(pool.reduce((acc, p) => acc.concat(p.sizes), []))).sort((a, b) => ((order.indexOf(a) + 1) || 99) - ((order.indexOf(b) + 1) || 99) || a.localeCompare(b));
-  const sizes = fromFeed.length ? fromFeed : DEFAULT_SIZES;
-  const hasSize = (p, v) => !p.sizes.length || p.sizes.includes(v);
-  const groups = [['Availability', 'stock', [['In Stock', '1', count(p => p.inStock)]], r.stock ? ['1'] : []]];
-  groups.push(['Size', 'size', sizes.map(v => [v, v, count(p => hasSize(p, v))]), r.sizes]);
+  const groups = [];
   groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
   groups.push(['Categories', 'cat', CATEGORIES.map(v => [v, v, count(p => p.cats.includes(v))]), r.cats]);
   groups.push(['Garment Color', 'color', COLORS.map(v => [v, v, count(p => p.gcolors.includes(v))]), r.colors]);
@@ -566,9 +571,8 @@ function renderList(r){
       const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
       cb.setAttribute('aria-label', label);
       cb.onchange = () => {
-        const cur = {app:r.apps, cat:r.cats, color:r.colors, type:r.types, aud:r.auds, col:r.cols, size:r.sizes, stock:r.stock};
-        if(key === 'stock') cur.stock = cb.checked;
-        else cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
+        const cur = {app:r.apps, cat:r.cats, color:r.colors, type:r.types, aud:r.auds, col:r.cols};
+        cur[key] = cb.checked ? cur[key].concat(val) : cur[key].filter(x => x !== val);
         fromSidebar = true; location.hash = href(r.mode, cur);
       };
       d.append(el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]));
@@ -577,7 +581,7 @@ function renderList(r){
   });
   $('side').replaceChildren(sb);
 
-  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))) && (!r.sizes.length || r.sizes.some(x => hasSize(p, x))) && (!r.stock || p.inStock));
+  const list = pool.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.types.length || r.types.includes(p.type)) && (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
   const sort = $('sort').value;
   const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
   list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
@@ -587,7 +591,7 @@ function renderList(r){
     g.append(el('p', {className:'note', textContent:msg}));
     return;
   }
-  designs(list).forEach(p => g.append(makeCard(p)));
+  designs(list).forEach(p => g.append(makeCard(p, r.colors)));
 }
 function renderInfo(r){
   const title = r.mode === 'sitemap' ? 'Sitemap' : INFO[r.mode].title;
@@ -788,7 +792,7 @@ function renderBanners(){
   makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : MAIN_SLIDE_SECONDS);
 }
 
-function openProduct(p){
+function openProduct(p, colors){
   const vs = p.variants && p.variants.length > 1 ? p.variants : [p];
   const multi = vs.length > 1;
   let v = multi ? null : vs[0], size = '', color = '';
@@ -797,7 +801,7 @@ function openProduct(p){
   const draw = () => {
     size = ''; color = '';
     const cur = v || p;
-    imgEl.src = cur.img;
+    imgEl.src = colorImage(cur, colors) || cur.img;
     info.replaceChildren(el('h3', {textContent:p.title}), el('b', {textContent: v ? v.price : priceText(p)}), el('p', {textContent:cur.desc}));
     const group = (label, vals, set, pressed, pick) => {
       if(!vals.length) return;
