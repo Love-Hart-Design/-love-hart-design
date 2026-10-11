@@ -346,7 +346,7 @@ const INFO = {
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
 const CATEGORIES = ['Princesses','Castles','Crowns','Unicorns','Fairies','Mermaids','Butterflies','Flowers','Bunnies','Stars'];
-const COLORS = ['Black','Blue','Green','Purple','Red','Yellow'];
+let COLORS = []; // filled from Spreadconnect colors when products load
 const COLLECTIONS = ['Enchanted Little Royals','Princess Dreams','Fairy Tale','Unicorns & Magic'];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
 const AUDIENCES = ['Babies & Toddlers','Kids & Youth','Women','Men','Adult Unisex'];
@@ -379,6 +379,7 @@ function normType(s){
   if(/shirt|tee/.test(s)) return 'T-Shirts';
   return '';
 }
+function titleCase(t){ return String(t).replace(/\b\w/g, m => m.toUpperCase()); }
 function money(v){
   if(typeof v === 'string' && /^\$/.test(v.trim())) return v.trim();
   const n = parseFloat(v);
@@ -409,7 +410,7 @@ function normalize(p, i){
     best: p.bestSelling === true || p.best_selling === true || tags.some(t => /^best[ -]?sell(er|ers|ing)$/i.test(t)),
     apparel: String(p.productType || '').split('|')[0].trim(),
     cats: CATEGORIES.filter(c => tags.some(t => t.toLowerCase() === c.toLowerCase())),
-    gcolors: COLORS.filter(c => new RegExp('\\b' + c + '\\b', 'i').test(pickList(p.colors || p.appearances).concat(tags).join(' '))),
+    gcolors: Array.from(new Set(pickList(p.colors || p.appearances).map(c => c.trim().toLowerCase()).filter(Boolean))),
     cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
     inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     audience: tags.map(normAudience).find(Boolean) || normAudience(title),
@@ -530,7 +531,7 @@ function renderHome(){
   fill('bestGrid', newest.filter(p => p.best), 'Best sellers are coming soon.');
 }
 function renderList(r){
-  const parts = r.apps.concat(r.cols, r.cats, r.colors, r.auds, r.types);
+  const parts = r.apps.concat(r.cols, r.cats, r.colors.map(titleCase), r.auds, r.types);
   const base = r.apps.length ? 'Apparel' : PAGE_NAMES[r.mode];
   $('pageTitle').textContent = parts.length ? parts.join(' / ') : base;
   const crumb = $('crumb'); crumb.replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ');
@@ -546,7 +547,7 @@ function renderList(r){
   const groups = [];
   groups.push(['Collection', 'col', COLLECTIONS.map(v => [v, v, count(p => p.cols.includes(v))]), r.cols]);
   groups.push(['Categories', 'cat', CATEGORIES.map(v => [v, v, count(p => p.cats.includes(v))]), r.cats]);
-  groups.push(['Garment Color', 'color', COLORS.map(v => [v, v, count(p => p.gcolors.includes(v))]), r.colors]);
+  groups.push(['Garment Color', 'color', COLORS.map(v => [titleCase(v), v, count(p => p.gcolors.includes(v))]), r.colors]);
   groups.push(['Garment Type', 'type', TYPES.map(v => [v, v, count(p => p.type === v)]), r.types]);
   const sb = el('div', {className:'sb'});
   groups.forEach(([title, key, allOpts, sel]) => {
@@ -865,6 +866,7 @@ async function load(){
     arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
     products = arr.map(normalize).filter(p => p.title);
     APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    COLORS = Array.from(new Set(products.reduce((a, p) => a.concat(p.gcolors), []))).sort((a, b) => a.localeCompare(b));
     buildNav();
   }catch(e){ failed = true; }
   loaded = true; render();
