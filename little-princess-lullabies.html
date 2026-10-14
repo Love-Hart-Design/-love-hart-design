@@ -375,12 +375,12 @@ let APPAREL = []; // filled from Spreadconnect product types when products load
 const CATEGORIES = ['Princesses','Castles','Crowns','Unicorns','Fairies','Mermaids','Butterflies','Flowers','Bunnies','Stars'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Enchanted Little Royals','Princess Dreams','Fairy Tale','Unicorns & Magic','Halloween','Thanksgiving','Christmas'];
+const COLLECTIONS = ['Enchanted Little Royals','Halloween','Thanksgiving','Christmas'];
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
-const SOCIAL = [['YouTube',''],['Facebook',''],['Instagram',''],['TikTok',''],['Pinterest','']];
+const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
-const AUDIENCES = ['Men','Women','Unisex','Kids & Babies'];
+const AUDIENCES = ['Men','Women','Unisex','Kids','Babies'];
 const GROUPS = ['Clothing','Accessories','Home & Living','Other'];
 // Sorts a Spreadconnect product type name into Clothing / Accessories / Home & Living by the words in its name.
 const GROUP_WORDS = [
@@ -405,7 +405,8 @@ const el = (tag, props = {}, kids = []) => {
 function normAudience(s){
   s = (s||'').toLowerCase();
   if(/\bwomen|\bwoman|ladies/.test(s)) return 'Women';
-  if(/baby|babies|toddler|infant|kid|youth|child/.test(s)) return 'Kids & Babies';
+  if(/baby|babies|toddler|infant/.test(s)) return 'Babies';
+  if(/kid|youth|child/.test(s)) return 'Kids';
   if(/\bmen\b|\bman\b/.test(s)) return 'Men';
   if(/unisex/.test(s)) return 'Unisex';
   return '';
@@ -477,7 +478,7 @@ const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases',
 function megaApparel(){
   const grps = GROUPS.filter(g => products.some(p => p.group === g));
   const links = arr => arr.map(([l, u]) => el('a', {href:u, textContent:l}));
-  const cats = [['Men', href('men')], ['Women', href('women')]].concat(['Unisex', 'Kids & Babies'].filter(a => products.some(p => p.audience === a)).map(a => [a, href('apparel', {aud:a})]));
+  const cats = [['Men', href('men')], ['Women', href('women')]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.audience === a)).map(a => [a, href('apparel', {aud:a})]));
   const col = (title, nodes) => nodes.length ? el('div', {className:'mc'}, [el('h4', {textContent:title})].concat(nodes)) : null;
   return el('div', {className:'dm mega'}, [el('div', {className:'mg'}, [col('Products', links(grps.map(g => [g, href('apparel', {grp:g})]))), col('Categories', links(cats))].filter(Boolean))]);
 }
@@ -605,7 +606,7 @@ function renderList(r){
   };
   const opts = (arr, key, sel, test, hideZero) => arr.map(v => [v, count(p => test(p, v))]).filter(([v, n]) => n > 0 || sel.includes(v) || (!hideZero && !apparelPage)).map(([v, n]) => row(v, n, key, v, sel));
 
-  // Products: one drop-down per Spreadconnect category (Men, Women, Unisex, Kids & Babies), each listing its product types
+  // Products: one drop-down per Spreadconnect category (Men, Women, Unisex, Kids, Babies), each listing its product types
   const prodNodes = [];
   AUDIENCES.concat(['']).forEach(a => {
     const kinds = APPAREL.filter(k => products.some(p => p.apparel === k && p.audience === a));
@@ -621,18 +622,6 @@ function renderList(r){
   });
   section('Products', prodNodes);
   section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.audience === v, true));
-  const sw = el('div', {className:'swatches'});
-  COLORS.forEach(c => {
-    const n = count(p => p.gcolors.includes(c)), on = r.colors.includes(c);
-    if(!n && !on) return;
-    const b = el('button', {type:'button', className:'sw' + (COLOR_HEX[c] ? '' : ' txt') + (on ? ' on' : ''), title:titleCase(c) + ' (' + n + ')', textContent:COLOR_HEX[c] ? '' : titleCase(c)});
-    b.setAttribute('aria-label', titleCase(c));
-    b.setAttribute('aria-pressed', String(on));
-    if(COLOR_HEX[c]) b.style.background = COLOR_HEX[c];
-    b.onclick = () => go('color', c, !on);
-    sw.append(b);
-  });
-  if(sw.children.length) section('Colors', [sw]);
   section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
   section('Themes', opts(CATEGORIES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
   $('side').replaceChildren(sb);
