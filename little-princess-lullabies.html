@@ -664,8 +664,8 @@ function renderList(r){
     g.append(el('p', {className:'note', textContent:msg}));
     return;
   }
-  // New Releases groups each design's styles on one card. Every other list page shows each product on its own card.
-  const single = r.mode !== 'new';
+  // Every list page, including New Releases, shows each product on its own card.
+  const single = true;
   const cards = single ? list.map(p => Object.assign({}, p, {variants:[p]})) : designs(list);
   const per = r.mode === 'all' ? ALL_PAGE_SIZE : 0;
   const pages = per ? Math.max(1, Math.ceil(cards.length / per)) : 1;
