@@ -255,6 +255,14 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 .tile.off{color:#999}
 .tile small{font-size:.8rem;font-weight:400;text-transform:none;letter-spacing:0}
 @media(max-width:700px){.tiles{grid-template-columns:1fr}}
+
+.card .ty{display:block;font-size:.85rem;color:#777;margin-top:2px}
+.pd small{color:#777;margin-top:-8px}
+#pager{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:34px}
+#pager button{min-width:40px;height:40px;border:1px solid #bbb;background:#fff;color:var(--txt);padding:0 12px}
+#pager button[aria-current=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+#pager button:disabled{opacity:.4;cursor:default}
+@media(max-width:1000px){#pager{order:4}}
 </style>
 </head>
 <body>
@@ -295,6 +303,7 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
       <div>
         <div class="tools"><button id="filterBtn" type="button">Filters</button><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new">Newest</option><option value="best" selected>Best Selling</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
         <div class="grid three" id="grid" aria-live="polite"></div>
+        <nav id="pager" aria-label="Pages"></nav>
       </div>
     </div>
   </section>
@@ -343,6 +352,7 @@ const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text s
 const LINK_SLIDE_SECONDS = 2.5; // banners on the link pages (Specials, All Products, Apparel...) change this often
 const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
 const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
+const ALL_PAGE_SIZE = 12;      // products per page on the All Products page
 
 const BRANDS = [
   ['Angels', 'angels-store.html'],
@@ -378,7 +388,7 @@ let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
 const COLLECTIONS = ['Enchanted Little Royals','Halloween','Thanksgiving','Christmas'];
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
-const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','']];
+const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
 const AUDIENCES = ['Men','Women','Unisex','Kids','Babies'];
 const GROUPS = ['Clothing','Accessories','Home & Living','Other'];
@@ -453,7 +463,7 @@ function normalize(p, i){
   };
 }
 
-let products = [], fQ = '', cart = [], loaded = false, failed = false;
+let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
 try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
 
 /* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
@@ -548,10 +558,13 @@ function priceText(p){
   const lo = Math.min(...nums), hi = Math.max(...nums);
   return vs.length > 1 && lo !== hi ? 'From ' + money(lo) : vs[0].price;
 }
-function makeCard(p, colors){
+function makeCard(p, colors, showType){
   const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
-  const c = el('button', {className:'card', type:'button'}, [im, el('h3', {textContent:p.title}), el('span', {className:'pr', textContent:priceText(p)})]);
+  const kids = [im, el('h3', {textContent:p.title})];
+  if(showType && p.apparel) kids.push(el('span', {className:'ty', textContent:p.apparel}));
+  kids.push(el('span', {className:'pr', textContent:priceText(p)}));
+  const c = el('button', {className:'card', type:'button'}, kids);
   c.onclick = () => openProduct(p, colors);
   return c;
 }
@@ -569,6 +582,20 @@ function renderHome(){
   fill('newGrid', newest, 'Products are on the way. Check back soon.');
   fill('featGrid', newest.filter(p => p.featured), 'Featured products are coming soon.');
   fill('bestGrid', newest.filter(p => p.best), 'Best sellers are coming soon.');
+}
+function renderPager(pages){
+  const pg = $('pager'); pg.replaceChildren();
+  if(pages < 2) return;
+  const btn = (label, n, disabled, current) => {
+    const b = el('button', {type:'button', textContent:label, disabled:!!disabled});
+    if(current) b.setAttribute('aria-current', 'true');
+    b.setAttribute('aria-label', current ? 'Page ' + n + ', current page' : (/^\d+$/.test(label) ? 'Page ' + n : label + ' page'));
+    b.onclick = () => { curPage = n; render(); $('pageTitle').scrollIntoView({behavior:'smooth', block:'start'}); };
+    return b;
+  };
+  pg.append(btn('Previous', curPage - 1, curPage === 1));
+  for(let n = 1; n <= pages; n++) pg.append(btn(String(n), n, false, n === curPage));
+  pg.append(btn('Next', curPage + 1, curPage === pages));
 }
 function renderList(r){
   const parts = r.grps.concat(r.apps, r.cols, r.cats, r.colors.map(titleCase), r.auds);
@@ -631,12 +658,21 @@ function renderList(r){
   const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
   list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
   const g = $('grid'); g.replaceChildren();
+  $('pager').replaceChildren();
   if(!list.length){
     const msg = statusNote() || (r.mode === 'specials' && !products.some(p => p.special) ? 'No specials right now. Check back soon.' : products.length ? 'Nothing matches yet. Try another choice.' : 'Products are on the way. Check back soon.');
     g.append(el('p', {className:'note', textContent:msg}));
     return;
   }
-  designs(list).forEach(p => g.append(makeCard(p, r.colors)));
+  // New Releases groups each design's styles on one card. Every other list page shows each product on its own card.
+  const single = r.mode !== 'new';
+  const cards = single ? list.map(p => Object.assign({}, p, {variants:[p]})) : designs(list);
+  const per = r.mode === 'all' ? ALL_PAGE_SIZE : 0;
+  const pages = per ? Math.max(1, Math.ceil(cards.length / per)) : 1;
+  if(curPage > pages) curPage = pages;
+  const shown = per ? cards.slice((curPage - 1) * per, curPage * per) : cards;
+  shown.forEach(p => g.append(makeCard(p, r.colors, single)));
+  renderPager(pages);
 }
 function tiles(items){
   return el('div', {className:'tiles'}, items.map(([label, url]) => url
@@ -791,10 +827,10 @@ function render(){
 }
 
 let fromSidebar = false, lastMode = route().mode;
-addEventListener('hashchange', () => { const m = route().mode; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
-$('sort').onchange = render;
+addEventListener('hashchange', () => { const m = route().mode; curPage = 1; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
+$('sort').onchange = () => { curPage = 1; render(); };
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
-$('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
+$('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
 // The shrinking header on scroll is for wide screens only. On phones it moved the open menu out of the page and made scrolling jump.
 function syncScrolled(){
@@ -863,7 +899,9 @@ function openProduct(p, colors){
     size = ''; color = '';
     const cur = v || p;
     imgEl.src = colorImage(cur, colors) || cur.img;
-    info.replaceChildren(el('h3', {textContent:p.title}), el('b', {textContent: v ? v.price : priceText(p)}), el('p', {textContent:cur.desc}));
+    info.replaceChildren(el('h3', {textContent:p.title}));
+    if(!multi && cur.apparel) info.append(el('small', {textContent:cur.apparel}));
+    info.append(el('b', {textContent: v ? v.price : priceText(p)}), el('p', {textContent:cur.desc}));
     const group = (label, vals, set, pressed, pick) => {
       if(!vals.length) return;
       const row = el('div', {className:'opts', role:'group'});
@@ -880,7 +918,28 @@ function openProduct(p, colors){
     if(multi) group('Style', vs, x => { v = x; draw(); }, x => x === v, x => x.label);
     if(v){
       group('Size', v.sizes, x => size = x);
-      group('Color', v.colors, x => { color = x; const u = v.colorImages && v.colorImages[x]; if(u){ imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = v.img; }; imgEl.src = u; } });
+      if(v.colors.length){
+        const lab = el('b', {textContent:'Color'});
+        const row = el('div', {className:'swatches', role:'group'});
+        row.setAttribute('aria-label', 'Color');
+        v.colors.forEach(x => {
+          const hex = (v.colorValues && v.colorValues[x]) || COLOR_HEX[String(x).trim().toLowerCase()] || '';
+          const ok = !!hex && window.CSS && CSS.supports && CSS.supports('color', hex);
+          const b = el('button', {className:'sw' + (ok ? '' : ' txt'), type:'button', title:x, textContent: ok ? '' : x});
+          if(ok) b.style.background = hex;
+          b.setAttribute('aria-label', x);
+          b.setAttribute('aria-pressed', 'false');
+          b.onclick = () => {
+            color = x; lab.textContent = 'Color: ' + x;
+            row.querySelectorAll('.sw').forEach(o => { o.classList.remove('on'); o.setAttribute('aria-pressed', 'false'); });
+            b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
+            const u = v.colorImages && v.colorImages[x];
+            if(u){ imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = v.img; }; imgEl.src = u; }
+          };
+          row.append(b);
+        });
+        info.append(lab, row);
+      }
     }
     const err = el('p', {className:'msg'});
     const add = el('button', {className:'add', type:'button', textContent:'Add to cart'});
@@ -890,7 +949,8 @@ function openProduct(p, colors){
       if(v.colors.length && !color){ err.textContent = 'Choose a color first.'; return; }
       const key = [v.id, size, color].join('|');
       const hit = cart.find(l => l.key === key);
-      hit ? hit.qty++ : cart.push({key, id:v.id, title:p.title + (multi ? ' (' + v.label + ')' : ''), price:v.price, img:v.img, size, color, qty:1});
+      const styleName = multi ? v.label : (v.apparel || '');
+      hit ? hit.qty++ : cart.push({key, id:v.id, title:p.title + (styleName ? ' (' + styleName + ')' : ''), price:v.price, img:v.img, size, color, qty:1});
       saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
     };
     info.append(add, err);
