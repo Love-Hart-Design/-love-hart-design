@@ -796,13 +796,16 @@ $('sort').onchange = render;
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
-addEventListener('scroll', () => {
-  const now = scrollY > 260;
+// The shrinking header on scroll is for wide screens only. On phones it moved the open menu out of the page and made scrolling jump.
+function syncScrolled(){
+  const now = innerWidth > 900 && scrollY > 260;
   if(now !== document.body.classList.contains('scrolled')){
     document.body.classList.toggle('scrolled', now);
     if(innerWidth > 900) $('nav').classList.remove('open');
   }
-}, {passive:true});
+}
+addEventListener('scroll', syncScrolled, {passive:true});
+addEventListener('resize', syncScrolled);
 
 $('news').onsubmit = async e => {
   e.preventDefault();
