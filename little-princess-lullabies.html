@@ -263,6 +263,12 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 #pager button[aria-current=true]{background:var(--brand);border-color:var(--brand);color:#fff}
 #pager button:disabled{opacity:.4;cursor:default}
 @media(max-width:1000px){#pager{order:4}}
+/* even product tiles: images line up and prices sit on the same line whatever the title length */
+.grid{align-items:stretch}
+.card{display:flex;flex-direction:column;align-self:stretch;width:100%}
+.card .im{flex:0 0 auto}
+.card h3{overflow-wrap:anywhere}
+.card .pr{margin-top:auto;padding-top:4px}
 </style>
 </head>
 <body>
