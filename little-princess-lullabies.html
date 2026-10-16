@@ -269,6 +269,20 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 .card .im{flex:0 0 auto}
 .card h3{overflow-wrap:anywhere}
 .card .pr{margin-top:auto;padding-top:4px}
+/* floating side menu: slides in from the left, slides back out to the left */
+.ni>a.sd::after{content:"\25B8";margin-left:6px;font-size:.8em}
+.sidepanel{position:fixed;left:0;top:0;bottom:0;width:min(320px,86vw);background:#fff;z-index:35;transform:translateX(-105%);transition:transform .3s ease;display:flex;flex-direction:column;box-shadow:8px 0 24px rgba(0,0,0,.25)}
+.sidepanel.open{transform:none}
+.spshade{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:34;opacity:0;pointer-events:none;transition:opacity .3s}
+.spshade.open{opacity:1;pointer-events:auto}
+.sphead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:var(--nav);color:#fff;font-size:1.2rem}
+.spx{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1}
+.spbody{flex:1;overflow:auto;padding:6px 20px 30px;position:relative}
+.spsec h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#888;margin:22px 0 6px;font-weight:700}
+.spsec a{display:block;padding:10px 0;text-decoration:none;border-bottom:1px solid #eee;transition:transform .15s,color .15s}
+.spsec a:hover{transform:translateX(6px);color:var(--brand)}
+.sptab{position:fixed;left:0;top:45%;z-index:18;writing-mode:vertical-rl;background:var(--brand);color:#fff;border:0;padding:16px 8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:0 8px 8px 0}
+@media(prefers-reduced-motion:reduce){.sidepanel,.spshade,.spsec a{transition:none}}
 </style>
 </head>
 <body>
@@ -331,6 +345,10 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
   <div class="fline"></div>
   <p class="copy">&copy; 2026 Little Princess Lullabies, part of Love Hart Design</p>
 </footer>
+
+<button class="sptab" id="spTab" type="button" aria-label="Open side menu" aria-expanded="false" aria-controls="sidePanel">Menu</button>
+<div class="spshade" id="spShade"></div>
+<aside class="sidepanel" id="sidePanel" aria-label="Side menu"><div class="sphead"><b>Menu</b><button class="spx" id="spClose" type="button" aria-label="Close menu">&times;</button></div><div class="spbody" id="spBody"></div></aside>
 
 <div class="toast" id="toast" role="status"></div>
 
@@ -485,43 +503,48 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  const mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
+  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
-  return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), grps:list('grp', GROUPS), auds:list('aud', AUDIENCES), cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
+  let auds = list('aud', AUDIENCES);
+  if(path === 'men' || path === 'women'){ if(!auds.length) auds = [path === 'men' ? 'Men' : 'Women']; mode = 'apparel'; }
+  return {mode, cats:list('cat', CATEGORIES), colors:list('color', COLORS), apps:list('app', APPAREL), grps:list('grp', GROUPS), auds, cols:list('col', COLLECTIONS), sizes:list('size'), stock:q.get('stock') === '1'};
 }
 const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases', apparel:'Apparel', men:'Men', women:'Women'};
 
-function megaApparel(){
+function buildSidePanel(){
   const grps = GROUPS.filter(g => products.some(p => p.group === g));
-  const links = arr => arr.map(([l, u]) => el('a', {href:u, textContent:l}));
-  const cats = [['Men', href('men')], ['Women', href('women')]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.audience === a)).map(a => [a, href('apparel', {aud:a})]));
-  const col = (title, nodes) => nodes.length ? el('div', {className:'mc'}, [el('h4', {textContent:title})].concat(nodes)) : null;
-  return el('div', {className:'dm mega'}, [el('div', {className:'mg'}, [col('Products', links(grps.map(g => [g, href('apparel', {grp:g})]))), col('Categories', links(cats))].filter(Boolean))]);
+  const auds = [['Men', href('apparel', {aud:'Men'})], ['Women', href('apparel', {aud:'Women'})]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.audience === a)).map(a => [a, href('apparel', {aud:a})]));
+  const sec = (id, title, links) => links.length ? el('div', {className:'spsec', id:'sp-' + id}, [el('h4', {textContent:title})].concat(links.map(([l, u]) => el('a', {href:u, textContent:l})))) : null;
+  $('spBody').replaceChildren(...[
+    sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')]]),
+    sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
+    sec('aud', 'Apparel Categories', auds),
+    sec('collections', 'Collections', [['Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})], ['Holidays', href('holidays')]])
+  ].filter(Boolean));
+}
+function openPanel(id){
+  $('sidePanel').classList.add('open'); $('spShade').classList.add('open'); $('spTab').setAttribute('aria-expanded', 'true');
+  const t = id && $('sp-' + id);
+  $('spBody').scrollTop = t ? Math.max(0, t.offsetTop - 8) : 0;
+}
+function closePanel(){
+  $('sidePanel').classList.remove('open'); $('spShade').classList.remove('open'); $('spTab').setAttribute('aria-expanded', 'false');
 }
 function buildNav(){
   const items = [
     ['Specials', href('specials'), null],
     ['Little Princess Lullabies', href('all'), null],
     ['New Releases', href('new'), null],
-    ['Apparel', href('apparel'), megaApparel()],
-    ['Collections', href('all'), [['Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})], ['Holidays', href('holidays')]]],
+    ['Apparel', href('apparel'), 'apparel'],
+    ['Collections', href('all'), 'collections'],
     ['Social Media', href('social'), null]
   ];
-  $('nav').replaceChildren(...items.map(([label, h, dd]) => {
-    const a = el('a', {className: 'ni-link' + (dd ? ' dd' : ''), href:h, textContent:label});
-    const box = el('div', {className:'ni'}, [a]);
-    if(dd){
-      box.append(dd instanceof Element ? dd : el('div', {className:'dm'}, dd.map(([l, u]) => el('a', {href:u, textContent:l}))));
-      a.onclick = e => {
-        if(matchMedia('(hover:none), (max-width:900px)').matches && !box.classList.contains('open')){
-          e.preventDefault();
-          document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-          box.classList.add('open');
-        }
-      };
-    }
-    return box;
+  $('nav').replaceChildren(...items.map(([label, h, panel]) => {
+    const a = el('a', {className: 'ni-link' + (panel ? ' sd' : ''), href:h, textContent:label});
+    if(panel) a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); openPanel(panel); };
+    return el('div', {className:'ni'}, [a]);
   }));
+  buildSidePanel();
   const top = el('a', {href:'#/', textContent:'Little Princess Lullabies'});
   top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
   $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
@@ -622,6 +645,7 @@ function renderList(r){
   const go = (key, val, on) => {
     const cur = {app:r.apps, grp:r.grps, cat:r.cats, color:r.colors, aud:r.auds, col:r.cols};
     if(on && (key === 'grp' || key === 'app')){ cur.grp = []; cur.app = []; } // Products: only one box at a time
+    if(on && key === 'app') cur.aud = []; // a product type already belongs to one audience, so drop the audience filter
     cur[key] = on ? cur[key].concat(val) : cur[key].filter(x => x !== val);
     fromSidebar = true; location.hash = href(r.mode, cur);
   };
@@ -838,6 +862,11 @@ $('sort').onchange = () => { curPage = 1; render(); };
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 $('hamb').onclick = () => $('nav').classList.toggle('open');
+$('spTab').onclick = () => openPanel();
+$('spClose').onclick = closePanel;
+$('spShade').onclick = closePanel;
+$('sidePanel').onclick = e => { if(e.target.closest('a')) closePanel(); };
+addEventListener('keydown', e => { if(e.key === 'Escape') closePanel(); });
 // The shrinking header on scroll is for wide screens only. On phones it moved the open menu out of the page and made scrolling jump.
 function syncScrolled(){
   const now = innerWidth > 900 && scrollY > 260;
