@@ -1045,9 +1045,9 @@ async function load(){
     if(cached){ applyFeed(JSON.parse(cached)); loaded = true; render(); }
   }catch(e){ cached = ''; }
   try{
-    const r = await fetch(FUNCTION_URL);
+    const r = await fetch(FUNCTION_URL + '?brand=' + BRAND_KEY);
     const j = await r.json();
-    const arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
+    const arr = Array.isArray(j.products) ? j.products : ((j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []));
     const fresh = JSON.stringify(arr);
     if(fresh !== cached){
       applyFeed(arr);
