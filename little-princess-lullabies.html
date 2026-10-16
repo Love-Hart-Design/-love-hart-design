@@ -305,6 +305,36 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 .wlhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:28px 0 6px}
 .wlhead h3{margin:0}
 .wlhead button,.line .vw{background:none;border:0;color:var(--brand);text-decoration:underline}
+
+/* image protection: no dragging or selecting pictures */
+img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/* reviews + magnifier */
+.rline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.95rem}
+.stars{color:#e8a200;letter-spacing:.08em}
+.wrev{background:none;border:0;color:var(--brand);font-weight:700;text-decoration:underline;padding:0}
+.rbox{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.rv{border-top:1px solid var(--line);padding-top:10px;font-size:.9rem}
+.rv small{display:block;color:#777;margin:0}
+.pd img{cursor:zoom-in}
+#rdlg{max-width:900px;width:94vw}
+.rvhead{text-align:center;text-transform:uppercase;font-size:1.5rem;padding:20px 50px;border-bottom:1px solid var(--line)}
+.rvbody{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:26px}
+.rvbody img{width:100%;object-fit:contain;max-height:300px;cursor:default}
+.rvbody .nm{font-size:.85rem;text-transform:uppercase;color:#555;margin-top:10px}
+.rf{margin-bottom:14px}
+.rf label{display:flex;justify-content:space-between;align-items:baseline;font-size:1.05rem;margin-bottom:6px}
+.rf label small{font-size:.65rem;color:#777;text-transform:uppercase}
+.rf input,.rf select,.rf textarea{width:100%;border:1px solid #ccc;padding:12px;font:inherit;background:#fff}
+.rf textarea{min-height:110px;resize:vertical}
+.rf.hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+.rvgo{background:#222;color:#fff;border:0;padding:14px 26px;font-weight:700;text-transform:uppercase}
+.rvgo:disabled{opacity:.6}
+@media(max-width:700px){.rvbody{grid-template-columns:1fr}}
+#zdlg{width:auto;max-width:96vw;overflow:hidden;background:#fff}
+.zstage{overflow:hidden;cursor:zoom-in;line-height:0}
+.zstage.on{cursor:zoom-out}
+.zstage img{display:block;max-width:min(92vw,900px);max-height:88vh;cursor:inherit;transition:transform .2s}
+.zstage.on img{transform:scale(2.6)}
 </style>
 </head>
 <body>
@@ -374,6 +404,8 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 <div class="toast" id="toast" role="status"></div>
 
 <dialog id="dlg"><button class="x" id="closeDlg" aria-label="Close">&times;</button><div class="pd" id="pd"></div></dialog>
+<dialog id="rdlg" aria-label="Write a review"></dialog>
+<dialog id="zdlg" aria-label="Magnified picture"></dialog>
 
 <aside class="drawer" id="drawer" aria-label="Cart">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2>Your cart</h2><button class="x" style="position:static" id="closeCart" aria-label="Close cart">&times;</button></div>
@@ -511,12 +543,17 @@ function normalize(p, i){
 let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
 try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
 
-/* ---- wish lists: saved in this browser ---- */
-const WISH_KEY = 'little-princess-wishlists';
+/* ---- wish lists: kept on the signed-in account (Supabase user data), so they follow the customer to any device ---- */
 const WISH_DEFAULT = 'My Wish List';
+const PENDING_KEY = 'lpl-pending-wish';
 let wishes = [];
-try{ const w = JSON.parse(localStorage.getItem(WISH_KEY)); if(Array.isArray(w)) wishes = w.filter(l => l && l.name && Array.isArray(l.items)); }catch(e){}
-function saveWishes(){ try{ localStorage.setItem(WISH_KEY, JSON.stringify(wishes)); }catch(e){} }
+function loadWishes(){
+  const w = user && user.user_metadata && user.user_metadata.wishlists;
+  wishes = Array.isArray(w) ? w.filter(l => l && l.name && Array.isArray(l.items)) : [];
+}
+function saveWishes(){
+  if(sb && user){ try{ sb.auth.updateUser({data:{wishlists:wishes}}).catch(function(){}); }catch(e){} }
+}
 function findWish(name){ return wishes.find(l => l.name.toLowerCase() === String(name).trim().toLowerCase()); }
 function addToWish(name, item){
   name = String(name).trim() || WISH_DEFAULT;
@@ -525,6 +562,100 @@ function addToWish(name, item){
   if(item && !l.items.some(i => i.id === item.id)) l.items.push(item);
   saveWishes();
   return l.name;
+}
+function pendingGet(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)); }catch(e){ return null; } }
+function hasPending(){ return !!pendingGet(); }
+function toast(t){ const b = $('toast'); b.textContent = t; b.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => b.classList.remove('show'), 3500); }
+// Not signed in: remember the item, send the customer to Sign In, and save it as soon as they are in (like The Mountain).
+function wishOrLogin(name, item){
+  if(!user){
+    if(!authReady) return false;
+    try{ localStorage.setItem(PENDING_KEY, JSON.stringify({name, item})); }catch(e){}
+    $('closeDlg').onclick();
+    toast('Please sign in or create an account to save to your Wish List.');
+    location.hash = '#/signin';
+    return null;
+  }
+  return addToWish(name, item);
+}
+function syncUser(){
+  loadWishes();
+  const pd = user && pendingGet();
+  if(pd){
+    try{ localStorage.removeItem(PENDING_KEY); }catch(e){}
+    addToWish(pd.name, pd.item);
+    toast('Saved to your Wish List.');
+    location.hash = '#/wishlist';
+  }
+}
+const AUTHY = () => { const m = route().mode; return AUTH_MODES.includes(m) || m === 'wishlist'; };
+
+/* ---- reviews: stored in the Supabase table product_reviews; only approved ones show ---- */
+const REV_URL = SUPABASE_URL + '/rest/v1/product_reviews';
+const revCache = {};
+const stars = n => '\u2605'.repeat(Math.round(n)) + '\u2606'.repeat(5 - Math.round(n));
+async function fetchReviews(key){
+  if(revCache[key]) return revCache[key];
+  try{
+    const r = await fetch(REV_URL + '?select=rating,name,subject,comments,created_at&approved=eq.true&order=created_at.desc&limit=50&product_key=eq.' + encodeURIComponent(key), {headers:{apikey:SUPABASE_KEY}});
+    if(!r.ok) throw new Error();
+    return revCache[key] = await r.json();
+  }catch(e){ return []; }
+}
+function loadReviews(p, line, box, writeBtn){
+  fetchReviews(p.title.trim().toLowerCase()).then(list => {
+    const n = list.length, avg = n ? list.reduce((s, x) => s + x.rating, 0) / n : 0;
+    line.replaceChildren(el('span', {className:'stars', textContent: n ? stars(avg) : stars(0)}), ' (' + n + (n === 1 ? ' review' : ' reviews') + ') ', writeBtn);
+    box.replaceChildren(...list.slice(0, 5).map(x => el('div', {className:'rv'}, [
+      el('span', {className:'stars', textContent:stars(x.rating)}),
+      el('b', {textContent:' ' + x.subject}),
+      el('small', {textContent:'Posted by ' + x.name}),
+      el('p', {textContent:x.comments})
+    ])));
+  });
+}
+function openReview(p, src){
+  const d = $('rdlg');
+  const close = el('button', {className:'x', type:'button', textContent:'\u00D7'});
+  close.setAttribute('aria-label', 'Close'); close.onclick = () => d.close();
+  const sel = el('select', {id:'rv-rating', required:true}, [el('option', {value:'', textContent:'Select Rating'})].concat([5,4,3,2,1].map(n => el('option', {value:String(n), textContent:n + (n > 1 ? ' stars' : ' star')}))));
+  const nm = el('input', {id:'rv-name', type:'text', required:true, maxLength:60});
+  const sub = el('input', {id:'rv-sub', type:'text', required:true, maxLength:100});
+  const com = el('textarea', {id:'rv-com', required:true, maxLength:2000});
+  const hp = el('input', {id:'rv-web', type:'text', tabIndex:-1, autocomplete:'off'});
+  const fld = (label, node, id, extra) => el('div', {className:'rf' + (extra || '')}, [el('label', {htmlFor:id}, [label, el('small', {textContent: extra ? '' : 'Required'})]), node]);
+  const msg = el('p', {className:'msg'});
+  const btn = el('button', {className:'rvgo', type:'submit', textContent:'Submit review'});
+  const form = el('form', {}, [fld('Rating', sel, 'rv-rating'), fld('Name', nm, 'rv-name'), fld('Review Subject', sub, 'rv-sub'), fld('Comments', com, 'rv-com'), fld('Website', hp, 'rv-web', ' hp'), btn, msg]);
+  form.onsubmit = async e => {
+    e.preventDefault();
+    if(hp.value) return;
+    btn.disabled = true; msg.textContent = '';
+    try{
+      const r = await fetch(REV_URL, {method:'POST', headers:{apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'}, body:JSON.stringify({product_key:p.title.trim().toLowerCase(), product_title:p.title, rating:parseInt(sel.value, 10), name:nm.value.trim(), subject:sub.value.trim(), comments:com.value.trim()})});
+      if(!r.ok) throw new Error();
+      form.replaceChildren(el('p', {textContent:'Thank you! Your review was sent and will appear once it is approved.'}));
+    }catch(err){ msg.textContent = 'Could not send your review right now. Please try again later.'; btn.disabled = false; }
+  };
+  const left = el('div', {}, [el('img', {src, alt:p.title}), el('div', {className:'nm', textContent:'Little Princess Lullabies'}), el('div', {textContent:p.title.toUpperCase()})]);
+  d.replaceChildren(close, el('div', {className:'rvhead', textContent:'Write a review'}), el('div', {className:'rvbody'}, [left, form]));
+  if(d.showModal) d.showModal(); else d.setAttribute('open', '');
+}
+
+/* ---- picture magnifier: click the picture, then click again to zoom, move to pan ---- */
+function openZoom(src, title){
+  const d = $('zdlg');
+  const close = el('button', {className:'x', type:'button', textContent:'\u00D7'});
+  close.setAttribute('aria-label', 'Close'); close.onclick = () => d.close();
+  const im = el('img', {src, alt:title});
+  const stage = el('div', {className:'zstage'}, [im]);
+  let on = false;
+  const move = e => { const r = stage.getBoundingClientRect(), pt = e.touches ? e.touches[0] : e; im.style.transformOrigin = ((pt.clientX - r.left) / r.width * 100) + '% ' + ((pt.clientY - r.top) / r.height * 100) + '%'; };
+  stage.onclick = e => { move(e); on = !on; stage.classList.toggle('on', on); };
+  stage.onmousemove = move; stage.ontouchmove = move;
+  d.onclick = e => { if(e.target === d) d.close(); };
+  d.replaceChildren(close, stage);
+  if(d.showModal) d.showModal(); else d.setAttribute('open', '');
 }
 
 /* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
@@ -776,6 +907,11 @@ function renderWishlist(){
   document.title = title + ' | Little Princess Lullabies';
   $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
   const box = $('infoBody'); box.replaceChildren();
+  if(!user){
+    box.append(el('p', {textContent: authReady ? 'Sign in to save items to your Wish List. Your lists follow you to any device.' : 'Loading\u2026'}));
+    if(authReady) box.append(el('p', {}, [el('a', {href:'#/signin', textContent:'Sign in'}), ' or ', el('a', {href:'#/register', textContent:'Create an account'})]));
+    return;
+  }
   const nm = el('input', {type:'text', placeholder:'New wish list name', maxLength:60});
   nm.setAttribute('aria-label', 'New wish list name');
   const f = el('form', {className:'wlnew'}, [nm, el('button', {type:'submit', textContent:'Create'})]);
@@ -841,6 +977,7 @@ function renderAuth(r){
   $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
   const box = $('infoBody'); box.replaceChildren();
   const wrap = el('div', {className:'auth'}); box.append(wrap);
+  if(hasPending() && (r.mode === 'signin' || r.mode === 'register')) wrap.append(el('p', {textContent:'Sign in or create an account to save this item to your Wish List.'}));
   if(!sb){ wrap.append(el('p', {textContent: authReady ? 'Sign in is not available right now. Please try again later.' : 'Loading\u2026'})); return; }
   const msg = el('p', {className:'amsg'}); msg.setAttribute('role', 'status');
   const say = (t, ok) => { msg.textContent = t; msg.className = 'amsg ' + (ok ? 'ok' : 'err'); };
@@ -864,9 +1001,10 @@ function renderAuth(r){
     const email = mk('Email', 'email', 'email', {autocomplete:'email'});
     const pw = mk('Password', 'password', 'password', {autocomplete:'current-password'});
     submit('Sign in', async () => {
+      const had = hasPending();
       const {error} = await sb.auth.signInWithPassword({email:email.value.trim(), password:pw.value});
       if(error) throw error;
-      location.hash = '#/account';
+      location.hash = had ? '#/wishlist' : '#/account';
     });
     alt(el('a', {href:'#/forgot', textContent:'Forgot your password?'}), ' \u00B7 ', el('a', {href:'#/register', textContent:'Create an account'}));
   } else if(r.mode === 'register'){
@@ -877,9 +1015,10 @@ function renderAuth(r){
     submit('Create account', async () => {
       if(pw.value.length < 8){ say('Choose a password with at least 8 characters.'); return; }
       if(pw.value !== pw2.value){ say('The two passwords do not match.'); return; }
+      const hadPending = hasPending();
       const {data, error} = await sb.auth.signUp({email:email.value.trim(), password:pw.value, options:{data:{full_name:name.value.trim()}, emailRedirectTo:location.href.split('#')[0]}});
       if(error) throw error;
-      if(data && data.session){ location.hash = '#/account'; return; }
+      if(data && data.session){ location.hash = hadPending ? '#/wishlist' : '#/account'; return; }
       say('Almost done! Check your email and click the link to confirm your account, then sign in.', true);
     });
     alt('Already have an account? ', el('a', {href:'#/signin', textContent:'Sign in'}));
@@ -1015,7 +1154,8 @@ function openProduct(p, colors){
   const vs = p.variants && p.variants.length > 1 ? p.variants : [p];
   const multi = vs.length > 1;
   let v = multi ? null : vs[0], size = '', color = '';
-  const imgEl = el('img', {src:p.img, alt:p.title});
+  const imgEl = el('img', {src:p.img, alt:p.title, title:'Click to magnify'});
+  imgEl.onclick = () => openZoom(imgEl.src, p.title);
   const info = el('div', {className:'info'});
   const draw = () => {
     size = ''; color = '';
@@ -1023,7 +1163,12 @@ function openProduct(p, colors){
     imgEl.src = colorImage(cur, colors) || cur.img;
     info.replaceChildren(el('h3', {textContent:p.title}));
     if(!multi && cur.apparel) info.append(el('small', {textContent:cur.apparel}));
-    info.append(el('b', {textContent: v ? v.price : priceText(p)}), el('p', {textContent:cur.desc}));
+    const wr = el('button', {className:'wrev', type:'button', textContent:'+ Write a Review'});
+    wr.onclick = () => openReview(p, imgEl.src);
+    const rline = el('div', {className:'rline'}, [el('span', {className:'stars', textContent:stars(0)}), ' (0 reviews) ', wr]);
+    const rbox = el('div', {className:'rbox'});
+    loadReviews(p, rline, rbox, wr);
+    info.append(el('b', {textContent: v ? v.price : priceText(p)}), rline, el('p', {textContent:cur.desc}));
     const group = (label, vals, set, pressed, pick) => {
       if(!vals.length) return;
       const row = el('div', {className:'opts', role:'group'});
@@ -1076,7 +1221,7 @@ function openProduct(p, colors){
       saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
     };
 
-    // Add to wish list: drop-down with "Add to my wish list" and "Create wish list"
+    // Add to wish list: drop-down with "Add to my wish list" and "Create wish list". Saving needs a signed-in account.
     const wbtn = el('button', {className:'wlbtn', type:'button', textContent:'Add to wish list'});
     wbtn.setAttribute('aria-expanded', 'false');
     const wmsg = el('p', {className:'msg'});
@@ -1086,19 +1231,23 @@ function openProduct(p, colors){
       lk.onclick = () => $('closeDlg').onclick();
       wmsg.replaceChildren('Added to ' + name + '. ', lk);
     };
+    const tryWish = name => {
+      const r = wishOrLogin(name, wishItem());
+      if(r) doneMsg(r); else if(r === false) wmsg.textContent = 'One moment, checking your sign in. Please try again.';
+    };
     const addBtn = el('button', {type:'button', textContent:'Add to my wish list'});
-    addBtn.onclick = () => { doneMsg(addToWish(WISH_DEFAULT, wishItem())); };
+    addBtn.onclick = () => tryWish(WISH_DEFAULT);
     const newBtn = el('button', {type:'button', textContent:'Create wish list'});
     const wname = el('input', {type:'text', placeholder:'Wish list name', maxLength:60});
     wname.setAttribute('aria-label', 'Wish list name');
     const wform = el('form', {}, [wname, el('button', {type:'submit', textContent:'Save'})]);
     wform.hidden = true;
-    wform.onsubmit = e => { e.preventDefault(); if(!wname.value.trim()) return; doneMsg(addToWish(wname.value, wishItem())); wname.value = ''; wform.hidden = true; };
+    wform.onsubmit = e => { e.preventDefault(); if(!wname.value.trim()) return; tryWish(wname.value); wname.value = ''; wform.hidden = true; };
     newBtn.onclick = () => { wform.hidden = !wform.hidden; if(!wform.hidden) wname.focus(); };
     const wmenu = el('div', {className:'wlmenu'}, [addBtn, newBtn, wform]);
     wmenu.hidden = true;
     wbtn.onclick = () => { wmenu.hidden = !wmenu.hidden; wbtn.setAttribute('aria-expanded', String(!wmenu.hidden)); };
-    info.append(add, err, wbtn, wmenu, wmsg);
+    info.append(add, err, wbtn, wmenu, wmsg, rbox);
   };
   draw();
   $('pd').replaceChildren(imgEl, info);
@@ -1174,19 +1323,19 @@ async function load(){
 let authInjected = false;
 function authDone(){
   authReady = true;
-  if(AUTH_MODES.includes(route().mode)) render();
+  if(AUTHY()) render();
 }
 function initAuth(){
   try{ if(window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
   if(!sb){ authDone(); return; }
   sb.auth.onAuthStateChange((event, session) => {
-    user = session ? session.user : null; authReady = true; renderWho();
+    user = session ? session.user : null; authReady = true; renderWho(); syncUser();
     if(event === 'PASSWORD_RECOVERY') location.hash = '#/reset';
-    else if(AUTH_MODES.includes(route().mode)) render();
+    else if(AUTHY()) render();
   });
   sb.auth.getSession().then(({data}) => {
-    user = data && data.session ? data.session.user : null; authReady = true; renderWho();
-    if(AUTH_MODES.includes(route().mode)) render();
+    user = data && data.session ? data.session.user : null; authReady = true; renderWho(); syncUser();
+    if(AUTHY()) render();
   }).catch(() => { authReady = true; });
 }
 function injectAuth(){
@@ -1199,6 +1348,13 @@ function injectAuth(){
   s.onerror = authDone;
   document.head.appendChild(s);
 }
+/* ---- deterrents: no right-click save, no picture dragging, no view-source / developer-tools shortcuts ---- */
+addEventListener('contextmenu', e => { if(!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
+addEventListener('dragstart', e => { if(e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase(), c = e.ctrlKey || e.metaKey;
+  if(e.key === 'F12' || (c && (k === 'u' || k === 's')) || (c && e.shiftKey && 'ijck'.includes(k)) || (e.metaKey && e.altKey && 'ijcu'.includes(k))) e.preventDefault();
+});
 renderWho();
 buildNav(); renderBanners(); saveCart(); render();
 load().then(injectAuth, injectAuth);
