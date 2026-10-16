@@ -81,12 +81,15 @@ body.list .track{transition-duration:.35s}
 h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9rem;letter-spacing:.02em;margin:56px 0 30px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:27px}
 .grid.three{grid-template-columns:repeat(3,1fr)}
-.card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block}
+.card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block;cursor:pointer}
 .card .im{position:relative;border:1px solid var(--line);background:#fff;height:0;padding-bottom:100%;overflow:hidden}
 .card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block}
-.card .qv{position:absolute;left:0;right:0;bottom:0;background:var(--qv);color:#fff;text-align:center;padding:9px;font-weight:700;opacity:0;transform:translateY(100%);transition:.18s}
-.card:focus-visible .qv{opacity:1;transform:none}
-@media(hover:hover){.card:hover .qv{opacity:1;transform:none}}
+/* Quick view / View options buttons on the picture, shown on hover (like The Mountain) */
+.card .acts{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:8px;opacity:0;transform:translateY(8px);transition:.18s}
+.card .acts button{flex:1;border:1px solid #222;background:#fff;color:#222;font-weight:700;text-transform:uppercase;font-size:.78rem;line-height:1.2;padding:10px 6px}
+.card .acts button:last-child{background:#222;color:#fff}
+.card:focus-within .acts{opacity:1;transform:none}
+@media(hover:hover){.card:hover .acts{opacity:1;transform:none}}
 .sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
 .card h3{font-family:var(--cond);font-weight:400;font-size:.95rem;text-transform:uppercase;margin-top:14px;line-height:1.45}
 .card .pr{display:block;font-size:1.1rem;margin-top:4px}
@@ -140,7 +143,7 @@ footer a:hover{color:var(--accent);text-decoration:underline}
 .infobody li{padding:3px 0}
 .infobody a{color:var(--brand)}
 body.info #hero{display:none}
-dialog{border:0;border-radius:6px;padding:0;max-width:760px;width:92vw;max-height:92vh;overflow:auto;color:var(--txt)}
+dialog{border:0;border-radius:6px;padding:0;margin:auto;max-width:760px;width:92vw;max-height:92vh;overflow:auto;color:var(--txt)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 .pd{display:grid;grid-template-columns:1fr 1fr}
 .pd img{width:100%;height:100%;object-fit:contain;min-height:260px;background:#fff}
@@ -162,7 +165,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .msg{font-size:.9rem;color:#777;margin-top:8px;min-height:1.3em}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.grid.three{grid-template-columns:repeat(2,1fr)}.fcols{grid-template-columns:1fr 1fr}.lay{grid-template-columns:1fr}}
 @media(max-width:700px){.grid,.grid.three{grid-template-columns:repeat(2,1fr);gap:16px}.pd{grid-template-columns:1fr}.top{gap:14px}.slide .moon{opacity:.25}}
-@media(prefers-reduced-motion:reduce){.drawer,.card .qv,.track{transition:none}}
+@media(prefers-reduced-motion:reduce){.drawer,.card .acts,.track{transition:none}}
 
 @media(max-width:900px){
  html body .hd{position:static}
@@ -288,6 +291,20 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 @media(prefers-reduced-motion:reduce){.sidepanel,.spshade,.spsec a{transition:none}}
 .ticon{display:block;line-height:0}
 .ticon svg{width:60px;height:60px;display:block}
+/* wish list: drop-down in the pop-out card, plus the Wish Lists page */
+.wlbtn{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid #333;background:#fff;color:#222;padding:12px 16px;font-weight:700;text-transform:uppercase;font-size:.9rem}
+.wlbtn::after{content:"\25BE"}
+.wlmenu{border:1px solid var(--line);border-top:0}
+.wlmenu>button{display:block;width:100%;text-align:left;background:#fff;border:0;padding:12px 16px;font-weight:600;text-transform:uppercase;font-size:.85rem;color:var(--txt)}
+.wlmenu>button:hover{background:var(--bg);color:var(--brand)}
+.wlmenu form{display:flex;gap:6px;padding:10px 12px}
+.wlmenu form[hidden]{display:none}
+.wlmenu input,.wlnew input{flex:1;min-width:0;border:1px solid #bbb;padding:8px 10px;font:inherit}
+.wlmenu form button,.wlnew button{background:var(--brand);color:#fff;border:0;padding:8px 14px;font-weight:700;text-transform:uppercase;font-size:.85rem}
+.wlnew{display:flex;gap:8px;max-width:440px;margin:18px 0 10px}
+.wlhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:28px 0 6px}
+.wlhead h3{margin:0}
+.wlhead button,.line .vw{background:none;border:0;color:var(--brand);text-decoration:underline}
 </style>
 </head>
 <body>
@@ -494,6 +511,22 @@ function normalize(p, i){
 let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
 try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
 
+/* ---- wish lists: saved in this browser ---- */
+const WISH_KEY = 'little-princess-wishlists';
+const WISH_DEFAULT = 'My Wish List';
+let wishes = [];
+try{ const w = JSON.parse(localStorage.getItem(WISH_KEY)); if(Array.isArray(w)) wishes = w.filter(l => l && l.name && Array.isArray(l.items)); }catch(e){}
+function saveWishes(){ try{ localStorage.setItem(WISH_KEY, JSON.stringify(wishes)); }catch(e){} }
+function findWish(name){ return wishes.find(l => l.name.toLowerCase() === String(name).trim().toLowerCase()); }
+function addToWish(name, item){
+  name = String(name).trim() || WISH_DEFAULT;
+  let l = findWish(name);
+  if(!l){ l = {name, items:[]}; wishes.push(l); }
+  if(item && !l.items.some(i => i.id === item.id)) l.items.push(item);
+  saveWishes();
+  return l.name;
+}
+
 /* ---- routes: #/  #/all  #/specials  #/new   plus ?type=...&aud=... ---- */
 function href(mode, o = {}){
   const q = new URLSearchParams();
@@ -507,7 +540,7 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
+  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','wishlist','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
   let auds = list('aud', AUDIENCES);
   if(path === 'men' || path === 'women'){ if(!auds.length) auds = [path === 'men' ? 'Men' : 'Women']; mode = 'apparel'; }
@@ -551,7 +584,7 @@ function buildNav(){
   buildSidePanel();
   const top = el('a', {href:'#/', textContent:'Little Princess Lullabies'});
   top.onclick = e => { if(route().mode === 'home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); } };
-  $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
+  $('fInfo').replaceChildren(el('a', {href:'#/privacy', textContent:'Privacy Policy'}), top, el('a', {href:'#/about', textContent:'About Us'}), el('a', {href:'#/wishlist', textContent:'Wish Lists'}), el('a', {href:'#/sitemap', textContent:'Sitemap'}));
   $('fBrands').replaceChildren(...BRANDS.map(([l, u]) => el('a', {href:u, textContent:l})));
   $('fCats').replaceChildren(...[['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Apparel', href('apparel')], ['Collections', href('all')]].map(([l, u]) => el('a', {href:u, textContent:l})));
 }
@@ -592,12 +625,14 @@ function priceText(p){
   return vs.length > 1 && lo !== hi ? 'From ' + money(lo) : vs[0].price;
 }
 function makeCard(p, colors, showType){
-  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy', decoding:'async'}), el('div', {className:'qv', textContent:'Quick view'})]);
+  // Quick view and View options both open the same pop-out card as clicking the card itself.
+  const acts = el('div', {className:'acts'}, [el('button', {type:'button', textContent:'Quick view'}), el('button', {type:'button', textContent:'View options'})]);
+  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy', decoding:'async'}), acts]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
   const kids = [im, el('h3', {textContent:p.title})];
   if(showType && p.apparel) kids.push(el('span', {className:'ty', textContent:p.apparel}));
   kids.push(el('span', {className:'pr', textContent:priceText(p)}));
-  const c = el('button', {className:'card', type:'button'}, kids);
+  const c = el('div', {className:'card'}, kids);
   c.onclick = () => openProduct(p, colors);
   return c;
 }
@@ -606,10 +641,11 @@ function statusNote(){
   return loaded ? '' : 'Loading products\u2026';
 }
 function renderHome(){
+  // Same as every other page: each product on its own card, with its own style and price.
   const fill = (id, list, empty) => {
     const g = $(id); g.replaceChildren();
     if(!list.length){ g.append(el('p', {className:'note', textContent: statusNote() || empty})); return; }
-    designs(list).slice(0, 8).forEach(p => g.append(makeCard(p)));
+    list.slice(0, 8).forEach(p => g.append(makeCard(Object.assign({}, p, {variants:[p]}), null, true)));
   };
   const newest = products.slice().reverse();
   fill('newGrid', newest, 'Products are on the way. Check back soon.');
@@ -734,6 +770,40 @@ function renderSimplePage(title, intro, items){
 }
 function renderHolidays(){ renderSimplePage('Holidays', 'Pick a holiday to see its designs.', HOLIDAYS.map(h => [h, href('all', {col:h})])); }
 function renderSocial(){ renderSimplePage('Social Media', 'Find Little Princess Lullabies on these sites.', SOCIAL); }
+function renderWishlist(){
+  const title = 'Wish Lists';
+  $('infoTitle').textContent = title;
+  document.title = title + ' | Little Princess Lullabies';
+  $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
+  const box = $('infoBody'); box.replaceChildren();
+  const nm = el('input', {type:'text', placeholder:'New wish list name', maxLength:60});
+  nm.setAttribute('aria-label', 'New wish list name');
+  const f = el('form', {className:'wlnew'}, [nm, el('button', {type:'submit', textContent:'Create'})]);
+  f.onsubmit = e => { e.preventDefault(); if(!nm.value.trim()) return; addToWish(nm.value, null); renderWishlist(); };
+  box.append(f);
+  if(!wishes.length){ box.append(el('p', {textContent:'You have no wish lists yet. Open any product and choose Add to wish list.'})); return; }
+  wishes.forEach(l => {
+    const head = el('div', {className:'wlhead'}, [el('h3', {textContent:l.name})]);
+    if(l.name !== WISH_DEFAULT){
+      const del = el('button', {type:'button', textContent:'Delete list'});
+      del.onclick = () => { wishes = wishes.filter(x => x !== l); saveWishes(); renderWishlist(); };
+      head.append(del);
+    }
+    box.append(head);
+    if(!l.items.length){ box.append(el('p', {textContent:'This list is empty.'})); return; }
+    l.items.forEach(it => {
+      const vw = el('button', {type:'button', className:'vw', textContent:'View'});
+      vw.onclick = () => { const pr = products.find(x => x.id === it.id); if(pr) openProduct(Object.assign({}, pr, {variants:[pr]})); };
+      const rm = el('button', {type:'button', textContent:'Remove'});
+      rm.onclick = () => { l.items = l.items.filter(x => x !== it); saveWishes(); renderWishlist(); };
+      box.append(el('div', {className:'line'}, [
+        el('img', {src:it.img, alt:''}),
+        el('div', {}, [el('b', {textContent:it.title}), el('div', {textContent:[it.apparel, it.price].filter(Boolean).join(' \u00B7 ')})]),
+        el('div', {}, [vw, el('br'), rm])
+      ]));
+    });
+  });
+}
 function renderInfo(r){
   const title = r.mode === 'sitemap' ? 'Sitemap' : INFO[r.mode].title;
   $('infoTitle').textContent = title;
@@ -748,7 +818,7 @@ function renderInfo(r){
   sec('Shop', [['Home', '#/'], ['Specials', href('specials')], ['All Products', href('all')], ['New Releases', href('new')]]);
   sec('Apparel', APPAREL.map(a => [a, href('all', {app:a})]));
   sec('Collections', COLLECTIONS.map(c => [c, href('all', {col:c})]));
-  sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Sitemap', '#/sitemap']]);
+  sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Wish Lists', '#/wishlist'], ['Sitemap', '#/sitemap']]);
   sec('Our Brands', BRANDS);
 }
 const AUTH_MODES = ['signin','register','forgot','reset','account'];
@@ -860,7 +930,7 @@ function renderWho(){
 }
 function render(){
   const r = route();
-  const isInfo = ['privacy','about','sitemap','holidays','social'].includes(r.mode);
+  const isInfo = ['privacy','about','sitemap','holidays','social','wishlist'].includes(r.mode);
   const isAuth = AUTH_MODES.includes(r.mode);
   if(isAuth) injectAuth();
   document.body.classList.toggle('list', r.mode !== 'home');
@@ -870,7 +940,7 @@ function render(){
   $('infoView').hidden = !(isInfo || isAuth);
   $('nav').classList.remove('open');
   document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(isInfo) renderInfo(r); else if(isAuth) renderAuth(r); else renderList(r);
+  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(r.mode === 'wishlist') renderWishlist(); else if(isInfo) renderInfo(r); else if(isAuth) renderAuth(r); else renderList(r);
 }
 
 let fromSidebar = false, lastMode = route().mode;
@@ -1005,7 +1075,30 @@ function openProduct(p, colors){
       hit ? hit.qty++ : cart.push({key, id:v.id, title:p.title + (styleName ? ' (' + styleName + ')' : ''), price:v.price, img:v.img, size, color, qty:1});
       saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
     };
-    info.append(add, err);
+
+    // Add to wish list: drop-down with "Add to my wish list" and "Create wish list"
+    const wbtn = el('button', {className:'wlbtn', type:'button', textContent:'Add to wish list'});
+    wbtn.setAttribute('aria-expanded', 'false');
+    const wmsg = el('p', {className:'msg'});
+    const wishItem = () => { const c = v || p; return {id:c.id, title:p.title, apparel:c.apparel || '', price:v ? v.price : priceText(p), img:c.img}; };
+    const doneMsg = name => {
+      const lk = el('a', {href:'#/wishlist', textContent:'View wish lists'});
+      lk.onclick = () => $('closeDlg').onclick();
+      wmsg.replaceChildren('Added to ' + name + '. ', lk);
+    };
+    const addBtn = el('button', {type:'button', textContent:'Add to my wish list'});
+    addBtn.onclick = () => { doneMsg(addToWish(WISH_DEFAULT, wishItem())); };
+    const newBtn = el('button', {type:'button', textContent:'Create wish list'});
+    const wname = el('input', {type:'text', placeholder:'Wish list name', maxLength:60});
+    wname.setAttribute('aria-label', 'Wish list name');
+    const wform = el('form', {}, [wname, el('button', {type:'submit', textContent:'Save'})]);
+    wform.hidden = true;
+    wform.onsubmit = e => { e.preventDefault(); if(!wname.value.trim()) return; doneMsg(addToWish(wname.value, wishItem())); wname.value = ''; wform.hidden = true; };
+    newBtn.onclick = () => { wform.hidden = !wform.hidden; if(!wform.hidden) wname.focus(); };
+    const wmenu = el('div', {className:'wlmenu'}, [addBtn, newBtn, wform]);
+    wmenu.hidden = true;
+    wbtn.onclick = () => { wmenu.hidden = !wmenu.hidden; wbtn.setAttribute('aria-expanded', String(!wmenu.hidden)); };
+    info.append(add, err, wbtn, wmenu, wmsg);
   };
   draw();
   $('pd').replaceChildren(imgEl, info);
