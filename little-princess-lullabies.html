@@ -358,7 +358,7 @@ const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text s
 const LINK_SLIDE_SECONDS = 2.5; // banners on the link pages (Specials, All Products, Apparel...) change this often
 const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
 const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
-const ALL_PAGE_SIZE = 12;      // products per page on the All Products page
+const ALL_PAGE_SIZE = 12;      // products per page on every list page
 
 const BRANDS = [
   ['Angels', 'angels-store.html'],
@@ -565,7 +565,7 @@ function priceText(p){
   return vs.length > 1 && lo !== hi ? 'From ' + money(lo) : vs[0].price;
 }
 function makeCard(p, colors, showType){
-  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy'}), el('div', {className:'qv', textContent:'Quick view'})]);
+  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy', decoding:'async'}), el('div', {className:'qv', textContent:'Quick view'})]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
   const kids = [im, el('h3', {textContent:p.title})];
   if(showType && p.apparel) kids.push(el('span', {className:'ty', textContent:p.apparel}));
@@ -673,7 +673,7 @@ function renderList(r){
   // Every list page, including New Releases, shows each product on its own card.
   const single = true;
   const cards = single ? list.map(p => Object.assign({}, p, {variants:[p]})) : designs(list);
-  const per = r.mode === 'all' ? ALL_PAGE_SIZE : 0;
+  const per = ALL_PAGE_SIZE;
   const pages = per ? Math.max(1, Math.ceil(cards.length / per)) : 1;
   if(curPage > pages) curPage = pages;
   const shown = per ? cards.slice((curPage - 1) * per, curPage * per) : cards;
@@ -998,19 +998,34 @@ $('checkout').onclick = async () => {
   }catch(e){ msg.textContent = 'Checkout could not start. Please try again.'; }
 };
 
+/* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
+const CACHE_KEY = 'lpl-products-cache-v1';
+function applyFeed(arr){
+  arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
+  products = arr.map(normalize).filter(p => p.title);
+  APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  COLORS = Array.from(new Set(products.reduce((a, p) => a.concat(p.gcolors), []))).sort((a, b) => a.localeCompare(b));
+  COLOR_HEX = {};
+  products.forEach(p => Object.keys(p.colorValues).forEach(n => { const k = n.trim().toLowerCase(); if(!COLOR_HEX[k]) COLOR_HEX[k] = p.colorValues[n]; }));
+  buildNav();
+}
 async function load(){
+  let cached = '';
   try{
-    const r = await fetch(FUNCTION_URL + '?t=' + Date.now(), {cache:'no-store'});
+    cached = localStorage.getItem(CACHE_KEY) || '';
+    if(cached){ applyFeed(JSON.parse(cached)); loaded = true; render(); }
+  }catch(e){ cached = ''; }
+  try{
+    const r = await fetch(FUNCTION_URL);
     const j = await r.json();
-    let arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
-    arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
-    products = arr.map(normalize).filter(p => p.title);
-    APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-    COLORS = Array.from(new Set(products.reduce((a, p) => a.concat(p.gcolors), []))).sort((a, b) => a.localeCompare(b));
-    COLOR_HEX = {};
-    products.forEach(p => Object.keys(p.colorValues).forEach(n => { const k = n.trim().toLowerCase(); if(!COLOR_HEX[k]) COLOR_HEX[k] = p.colorValues[n]; }));
-    buildNav();
-  }catch(e){ failed = true; }
+    const arr = (j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []);
+    const fresh = JSON.stringify(arr);
+    if(fresh !== cached){
+      applyFeed(arr);
+      try{ localStorage.setItem(CACHE_KEY, fresh); }catch(e){}
+    }
+    failed = false;
+  }catch(e){ if(!cached) failed = true; }
   loaded = true; render();
 }
 renderWho();
