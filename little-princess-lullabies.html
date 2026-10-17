@@ -232,6 +232,16 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .auth .amsg{margin-top:14px;min-height:1.3em;font-size:.95rem}
 .auth .amsg.err{color:#b00020}
 .auth .amsg.ok{color:#1b6e3a}
+.stripebtn{display:block;width:100%;background:#635bff;color:#fff;border:0;border-radius:3px;padding:13px;font-weight:700;font-size:1rem}
+.stripebtn:hover{background:#4f46e5}
+.stripebtn:disabled{opacity:.6;cursor:wait}
+.cards{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.cards svg{width:38px;height:24px;display:block}
+.pwbox{position:relative}
+.pwbox input{padding-right:48px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;line-height:0;color:#555}
+.eye:hover{color:var(--brand)}
+.eye svg{width:22px;height:22px;display:block}
 .logo b{font-size:1.55rem}
 @media(max-width:700px){.logo b{font-size:1.1rem}}
 
@@ -1160,7 +1170,16 @@ function renderAuth(r){
   const form = el('form'); wrap.append(form);
   const mk = (label, type, name, extra) => {
     const input = el('input', Object.assign({type, id:'f-' + name, name, required:true}, extra || {}));
-    form.append(el('label', {htmlFor:'f-' + name, textContent:label}), input);
+    form.append(el('label', {htmlFor:'f-' + name, textContent:label}));
+    if(type !== 'password'){ form.append(input); return input; }
+    // password boxes get an eye button: click to show the password, click again to hide it
+    const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+    const eye = el('button', {type:'button', className:'eye'});
+    const setEye = shown => { input.type = shown ? 'text' : 'password'; eye.innerHTML = shown ? EYE_OFF : EYE; eye.setAttribute('aria-label', shown ? 'Hide password' : 'Show password'); eye.setAttribute('aria-pressed', String(shown)); };
+    eye.onclick = () => setEye(input.type === 'password');
+    setEye(false);
+    form.append(el('div', {className:'pwbox'}, [input, eye]));
     return input;
   };
   const submit = (text, fn) => {
@@ -1326,6 +1345,30 @@ function renderBanners(){
   makeSlider($('mainSlider'), MAIN_BANNER_IMAGES.length ? imgSlides(MAIN_BANNER_IMAGES) : [slide1, slide2], () => document.body.classList.contains('list') ? LINK_SLIDE_SECONDS : MAIN_SLIDE_SECONDS);
 }
 
+/* ---- card symbols shown under the Stripe button (drawn right in the page, nothing extra to load) ---- */
+const CARD_ICONS = [
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><text x="19" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="11" fill="#1a1f71">VISA</text></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><circle cx="15" cy="12" r="7" fill="#eb001b"/><circle cx="23" cy="12" r="7" fill="#f79e1b" fill-opacity=".85"/></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#2e77bc" stroke="#2e77bc"/><text x="19" y="15.500" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.500" fill="#fff">AMEX</text></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><text x="13" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.200" fill="#231f20">DISCOVER</text><circle cx="31" cy="12" r="4" fill="#f68121"/></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><circle cx="19" cy="12" r="8" fill="#0079be"/><circle cx="19" cy="12" r="5.500" fill="#fff"/><rect x="18" y="5" width="2" height="14" fill="#0079be"/></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><rect x="6" y="5" width="8" height="14" rx="2" fill="#0e4c96"/><rect x="15" y="5" width="8" height="14" rx="2" fill="#c8102e"/><rect x="24" y="5" width="8" height="14" rx="2" fill="#00964e"/><g font-family="Arial,sans-serif" font-weight="700" font-size="7" fill="#fff" text-anchor="middle"><text x="10" y="15">J</text><text x="19" y="15">C</text><text x="28" y="15">B</text></g></svg>'
+].join('');
+// Buy now: sends just this one item straight to Stripe, without touching what is already in the cart
+async function checkoutNow(items, out){
+  if(!CHECKOUT_URL){ out.textContent = 'Checkout opens once Stripe is connected.'; return; }
+  out.textContent = 'Taking you to checkout...';
+  try{
+    try{ sessionStorage.setItem('lpl-buynow', '1'); }catch(e){}
+    const r = await fetch(CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', ...(ANON_KEY && {Authorization:'Bearer ' + ANON_KEY})}, body:JSON.stringify({cart:items, returnUrl:location.href.split('#')[0].split('?')[0]})});
+    const j = await r.json();
+    if(j.url) location.href = j.url; else throw new Error(j.error || 'No checkout URL');
+  }catch(e){
+    try{ sessionStorage.removeItem('lpl-buynow'); }catch(x){}
+    out.textContent = (e && e.message && e.message !== 'No checkout URL' && e.message !== 'Failed to fetch') ? e.message : 'Checkout could not start. Please try again.';
+  }
+}
+
 function openProduct(p, colors){
   const vs = p.variants && p.variants.length > 1 ? p.variants : [p];
   const multi = vs.length > 1;
@@ -1394,16 +1437,31 @@ function openProduct(p, colors){
     }
     const err = el('p', {className:'msg'});
     const add = el('button', {className:'add', type:'button', textContent:'Add to cart'});
-    add.onclick = () => {
-      if(!v){ err.textContent = 'Choose a style first.'; return; }
-      if(v.sizes.length && !size){ err.textContent = 'Choose a size first.'; return; }
-      if(v.colors.length && !color){ err.textContent = 'Choose a color first.'; return; }
-      const key = [v.id, size, color].join('|');
-      const hit = cart.find(l => l.key === key);
+    // checks that a style, size and color were chosen, and returns the cart line (or nothing, with a message)
+    const pickLine = () => {
+      if(!v){ err.textContent = 'Choose a style first.'; return null; }
+      if(v.sizes.length && !size){ err.textContent = 'Choose a size first.'; return null; }
+      if(v.colors.length && !color){ err.textContent = 'Choose a color first.'; return null; }
       const styleName = multi ? v.label : (v.apparel || '');
-      hit ? hit.qty++ : cart.push({key, id:v.id, title:p.title + (styleName ? ' (' + styleName + ')' : ''), price:v.price, img:v.img, size, color, qty:1});
+      return {key:[v.id, size, color].join('|'), id:v.id, title:p.title + (styleName ? ' (' + styleName + ')' : ''), price:v.price, img:v.img, size, color, qty:1};
+    };
+    add.onclick = () => {
+      const line = pickLine();
+      if(!line) return;
+      const hit = cart.find(l => l.key === line.key);
+      hit ? hit.qty++ : cart.push(line);
       saveCart(); $('closeDlg').onclick(); $('drawer').classList.add('open');
     };
+    const stripeBtn = el('button', {className:'stripebtn', type:'button', textContent:'Buy now with Stripe'});
+    stripeBtn.onclick = () => {
+      const line = pickLine();
+      if(!line) return;
+      stripeBtn.disabled = true;
+      checkoutNow([line], err).then(() => { stripeBtn.disabled = false; });
+    };
+    const cards = el('div', {className:'cards', role:'img'});
+    cards.setAttribute('aria-label', 'Accepted cards: Visa, Mastercard, American Express, Discover, Diners Club, JCB');
+    cards.innerHTML = CARD_ICONS;
 
     // Add to wish list: drop-down with "Add to my wish list" and "Create wish list". Saving needs a signed-in account.
     const wbtn = el('button', {className:'wlbtn', type:'button', textContent:'Add to wish list'});
@@ -1431,7 +1489,7 @@ function openProduct(p, colors){
     const wmenu = el('div', {className:'wlmenu'}, [addBtn, newBtn, wform]);
     wmenu.hidden = true;
     wbtn.onclick = () => { wmenu.hidden = !wmenu.hidden; wbtn.setAttribute('aria-expanded', String(!wmenu.hidden)); };
-    info.append(add, err, wbtn, wmenu, wmsg, rbox);
+    info.append(add, stripeBtn, cards, err, wbtn, wmenu, wmsg, rbox);
   };
   draw();
   $('pd').replaceChildren(zwrap, info);
@@ -1544,7 +1602,9 @@ buildNav(); renderBanners(); saveCart(); render();
 // coming back from Stripe: paid empties the cart, canceled keeps it
 (function(){
   const q = new URLSearchParams(location.search);
-  if(q.get('paid') === '1'){ cart = []; saveCart(); toast('Thank you! Your order was received.'); }
+  let now = false;
+  try{ now = sessionStorage.getItem('lpl-buynow') === '1'; sessionStorage.removeItem('lpl-buynow'); }catch(e){}
+  if(q.get('paid') === '1'){ if(!now){ cart = []; saveCart(); } toast('Thank you! Your order was received.'); }
   else if(q.get('canceled') === '1'){ toast('Checkout canceled. Your cart is still here.'); }
   if(q.has('paid') || q.has('canceled')) history.replaceState(null, '', location.pathname + location.hash);
 })();
