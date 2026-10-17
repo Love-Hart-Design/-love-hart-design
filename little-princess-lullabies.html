@@ -11,11 +11,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Pacifico&display=swap" rel="stylesheet"></noscript>
 <style>
-:root{--nav:#d6709a;--brand:#a8457a;--accent:#ffd27f;--foot:#4a2442;--qv:rgba(168,69,122,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Pacifico','Brush Script MT',cursive}
+:root{--page:#fdeff4;--nav:#d6709a;--brand:#a8457a;--accent:#ffd27f;--foot:#4a2442;--qv:rgba(168,69,122,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Pacifico','Brush Script MT',cursive}
 html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box;margin:0}
 img{max-width:100%}
-body{font-family:var(--body);font-size:17px;color:var(--txt);background:#fff;line-height:1.45}
+body{font-family:var(--body);font-size:17px;color:var(--txt);background:var(--page);line-height:1.45}
 button{font:inherit;cursor:pointer}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -364,8 +364,7 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
     <a class="logo" href="#/"><span class="moon" aria-hidden="true"></span><span><b>Little Princess Lullabies</b><small>by Love Hart Design</small></span></a>
     <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg><input id="q" type="search" placeholder="What are you looking for?" aria-label="Search products"></label>
     <div class="acct">
-      <span class="who" id="who"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><a href="#" id="signin">Sign in</a> or <a href="#" id="register">Register</a></span><span class="sep" aria-hidden="true"></span>
-      <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
+            <button class="cartbtn" id="openCart" aria-label="Open cart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" aria-hidden="true"><path d="M3 9h18l-2 11H5zM8 9l4-6 4 6"/></svg>(<span id="cartCount">0</span>)</button>
     </div>
   </header>
   <nav class="main" id="nav" aria-label="Store menu"></nav>
@@ -459,9 +458,9 @@ const BRANDS = [
 ];
 const INFO = {
   privacy: {title:'Privacy Policy', body:[
-    ['', 'Last updated: October 4, 2026'],
+    ['', 'Last updated: October 17, 2026'],
     ['What this page saves on your device', 'Items you add to your cart are saved in your browser so they are still there when you come back. This stays on your device and is not sent to us.'],
-    ['Accounts', 'If you create an account, your email address and name are kept by our sign-in provider, Supabase. Your password is stored in scrambled form that we cannot read.'],
+    ['Wish lists', 'Wish lists are saved in your browser on your own device. They are not sent to us.'],
     ['Orders and payments', 'When checkout is turned on, payments are handled by Stripe. Card numbers are entered with Stripe and are not stored on this site.'],
     ['Shipping your order', 'To make and ship an order, your name, shipping address and order details are shared with our print-and-ship partner, Spreadconnect.'],
     ['Newsletter', 'If you sign up for the newsletter, we use your email address only to send you updates about Little Princess Lullabies.'],
@@ -745,17 +744,17 @@ function normalize(p, i){
 let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
 try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
 
-/* ---- wish lists: kept on the signed-in account (Supabase user data), so they follow the customer to any device ---- */
+/* ---- wish lists: saved in the visitor's own browser (no account needed) ---- */
 const WISH_DEFAULT = 'My Wish List';
-const PENDING_KEY = 'lpl-pending-wish';
+const WISH_KEY = 'lpl-wishlists';
 let wishes = [];
 function loadWishes(){
-  const w = user && user.user_metadata && user.user_metadata.wishlists;
-  wishes = Array.isArray(w) ? w.filter(l => l && l.name && Array.isArray(l.items)) : [];
+  try{
+    const w = JSON.parse(localStorage.getItem(WISH_KEY));
+    wishes = Array.isArray(w) ? w.filter(l => l && l.name && Array.isArray(l.items)) : [];
+  }catch(e){ wishes = []; }
 }
-function saveWishes(){
-  if(sb && user){ try{ sb.auth.updateUser({data:{wishlists:wishes}}).catch(function(){}); }catch(e){} }
-}
+function saveWishes(){ try{ localStorage.setItem(WISH_KEY, JSON.stringify(wishes)); }catch(e){} }
 function findWish(name){ return wishes.find(l => l.name.toLowerCase() === String(name).trim().toLowerCase()); }
 function addToWish(name, item){
   name = String(name).trim() || WISH_DEFAULT;
@@ -765,32 +764,7 @@ function addToWish(name, item){
   saveWishes();
   return l.name;
 }
-function pendingGet(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)); }catch(e){ return null; } }
-function hasPending(){ return !!pendingGet(); }
 function toast(t){ const b = $('toast'); b.textContent = t; b.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => b.classList.remove('show'), 3500); }
-// Not signed in: remember the item, send the customer to Sign In, and save it as soon as they are in (like The Mountain).
-function wishOrLogin(name, item){
-  if(!user){
-    if(!authReady) return false;
-    try{ localStorage.setItem(PENDING_KEY, JSON.stringify({name, item})); }catch(e){}
-    $('closeDlg').onclick();
-    toast('Please sign in or create an account to save to your Wish List.');
-    location.hash = '#/signin';
-    return null;
-  }
-  return addToWish(name, item);
-}
-function syncUser(){
-  loadWishes();
-  const pd = user && pendingGet();
-  if(pd){
-    try{ localStorage.removeItem(PENDING_KEY); }catch(e){}
-    addToWish(pd.name, pd.item);
-    toast('Saved to your Wish List.');
-    location.hash = '#/wishlist';
-  }
-}
-const AUTHY = () => { const m = route().mode; return AUTH_MODES.includes(m) || m === 'wishlist'; };
 
 /* ---- reviews: stored in the Supabase table product_reviews; only approved ones show ---- */
 const REV_URL = SUPABASE_URL + '/rest/v1/product_reviews';
@@ -857,7 +831,7 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','wishlist','signin','register','forgot','reset','account'].includes(path) ? path : 'home';
+  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','wishlist'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
   let auds = list('aud', AUDIENCES);
   if(path === 'men' || path === 'women'){ if(!auds.length) auds = [path === 'men' ? 'Men' : 'Women']; mode = 'apparel'; }
@@ -1093,11 +1067,7 @@ function renderWishlist(){
   document.title = title + ' | Little Princess Lullabies';
   $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
   const box = $('infoBody'); box.replaceChildren();
-  if(!user){
-    box.append(el('p', {textContent: authReady ? 'Sign in to save items to your Wish List. Your lists follow you to any device.' : 'Loading\u2026'}));
-    if(authReady) box.append(el('p', {}, [el('a', {href:'#/signin', textContent:'Sign in'}), ' or ', el('a', {href:'#/register', textContent:'Create an account'})]));
-    return;
-  }
+  box.append(el('p', {textContent:'Your wish lists are saved on this device.'}));
   const nm = el('input', {type:'text', placeholder:'New wish list name', maxLength:60});
   nm.setAttribute('aria-label', 'New wish list name');
   const f = el('form', {className:'wlnew'}, [nm, el('button', {type:'submit', textContent:'Create'})]);
@@ -1143,130 +1113,10 @@ function renderInfo(r){
   sec('Information', [['Privacy Policy', '#/privacy'], ['About Us', '#/about'], ['Wish Lists', '#/wishlist'], ['Sitemap', '#/sitemap']]);
   sec('Our Brands', BRANDS);
 }
-const AUTH_MODES = ['signin','register','forgot','reset','account'];
-const AUTH_TITLES = {signin:'Sign In', register:'Create Account', forgot:'Forgot Password', reset:'Reset Password', account:'My Account'};
-let sb = null, user = null, authReady = false;
-function authError(m){
-  m = String(m || '');
-  if(/invalid login/i.test(m)) return 'Wrong email or password.';
-  if(/not confirmed/i.test(m)) return 'Please confirm your email first. Check your inbox for the link.';
-  if(/already registered|already been registered/i.test(m)) return 'That email already has an account. Try signing in.';
-  if(/rate limit|too many|seconds/i.test(m)) return 'Too many tries. Please wait a few minutes and try again.';
-  if(/password/i.test(m) && /(short|least|weak|characters)/i.test(m)) return 'Choose a longer password (at least 8 characters).';
-  return m || 'Something went wrong. Please try again.';
-}
-async function signOut(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.hash = '#/'; }
-function renderAuth(r){
-  const title = AUTH_TITLES[r.mode];
-  $('infoTitle').textContent = title;
-  document.title = title + ' | Little Princess Lullabies';
-  $('infoCrumb').replaceChildren(el('a', {href:'#/', textContent:'Home'}), ' / ', el('b', {textContent:title}));
-  const box = $('infoBody'); box.replaceChildren();
-  const wrap = el('div', {className:'auth'}); box.append(wrap);
-  if(hasPending() && (r.mode === 'signin' || r.mode === 'register')) wrap.append(el('p', {textContent:'Sign in or create an account to save this item to your Wish List.'}));
-  if(!sb){ wrap.append(el('p', {textContent: authReady ? 'Sign in is not available right now. Please try again later.' : 'Loading\u2026'})); return; }
-  const msg = el('p', {className:'amsg'}); msg.setAttribute('role', 'status');
-  const say = (t, ok) => { msg.textContent = t; msg.className = 'amsg ' + (ok ? 'ok' : 'err'); };
-  const form = el('form'); wrap.append(form);
-  const mk = (label, type, name, extra) => {
-    const input = el('input', Object.assign({type, id:'f-' + name, name, required:true}, extra || {}));
-    form.append(el('label', {htmlFor:'f-' + name, textContent:label}));
-    if(type !== 'password'){ form.append(input); return input; }
-    // password boxes get an eye button: click to show the password, click again to hide it
-    const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
-    const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
-    const eye = el('button', {type:'button', className:'eye'});
-    const setEye = shown => { input.type = shown ? 'text' : 'password'; eye.innerHTML = shown ? EYE_OFF : EYE; eye.setAttribute('aria-label', shown ? 'Hide password' : 'Show password'); eye.setAttribute('aria-pressed', String(shown)); };
-    eye.onclick = () => setEye(input.type === 'password');
-    setEye(false);
-    form.append(el('div', {className:'pwbox'}, [input, eye]));
-    return input;
-  };
-  const submit = (text, fn) => {
-    const b = el('button', {className:'abtn', type:'submit', textContent:text});
-    form.append(b, msg);
-    form.onsubmit = async e => {
-      e.preventDefault(); b.disabled = true; say('');
-      try{ await fn(); }catch(err){ say(authError(err && err.message)); }
-      b.disabled = false;
-    };
-  };
-  const alt = (...nodes) => wrap.append(el('p', {className:'alt'}, nodes));
-  if(r.mode === 'signin'){
-    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
-    const pw = mk('Password', 'password', 'password', {autocomplete:'current-password'});
-    submit('Sign in', async () => {
-      const had = hasPending();
-      const {error} = await sb.auth.signInWithPassword({email:email.value.trim(), password:pw.value});
-      if(error) throw error;
-      location.hash = had ? '#/wishlist' : '#/account';
-    });
-    alt(el('a', {href:'#/forgot', textContent:'Forgot your password?'}), ' \u00B7 ', el('a', {href:'#/register', textContent:'Create an account'}));
-  } else if(r.mode === 'register'){
-    const name = mk('Your name', 'text', 'name', {autocomplete:'name', required:false});
-    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
-    const pw = mk('Password (at least 8 characters)', 'password', 'password', {autocomplete:'new-password', minLength:8});
-    const pw2 = mk('Confirm password', 'password', 'password2', {autocomplete:'new-password'});
-    submit('Create account', async () => {
-      if(pw.value.length < 8){ say('Choose a password with at least 8 characters.'); return; }
-      if(pw.value !== pw2.value){ say('The two passwords do not match.'); return; }
-      const hadPending = hasPending();
-      const {data, error} = await sb.auth.signUp({email:email.value.trim(), password:pw.value, options:{data:{full_name:name.value.trim()}, emailRedirectTo:location.href.split('#')[0]}});
-      if(error) throw error;
-      if(data && data.session){ location.hash = hadPending ? '#/wishlist' : '#/account'; return; }
-      say('Almost done! Check your email and click the link to confirm your account, then sign in.', true);
-    });
-    alt('Already have an account? ', el('a', {href:'#/signin', textContent:'Sign in'}));
-  } else if(r.mode === 'forgot'){
-    const email = mk('Email', 'email', 'email', {autocomplete:'email'});
-    submit('Send reset link', async () => {
-      const {error} = await sb.auth.resetPasswordForEmail(email.value.trim(), {redirectTo:location.href.split('#')[0]});
-      if(error) throw error;
-      say('If that email has an account, a reset link is on its way.', true);
-    });
-    alt(el('a', {href:'#/signin', textContent:'Back to sign in'}));
-  } else if(r.mode === 'reset'){
-    if(!user){
-      wrap.replaceChildren(el('p', {textContent:'This reset link has expired or was already used.'}), el('p', {className:'alt'}, [el('a', {href:'#/forgot', textContent:'Request a new link'})]));
-      return;
-    }
-    const pw = mk('New password (at least 8 characters)', 'password', 'password', {autocomplete:'new-password', minLength:8});
-    const pw2 = mk('Confirm new password', 'password', 'password2', {autocomplete:'new-password'});
-    submit('Save new password', async () => {
-      if(pw.value.length < 8){ say('Choose a password with at least 8 characters.'); return; }
-      if(pw.value !== pw2.value){ say('The two passwords do not match.'); return; }
-      const {error} = await sb.auth.updateUser({password:pw.value});
-      if(error) throw error;
-      say('Password updated.', true);
-      setTimeout(() => { location.hash = '#/account'; }, 900);
-    });
-  } else {
-    if(!user){
-      if(authReady) location.hash = '#/signin';
-      else wrap.append(el('p', {textContent:'Loading your account\u2026'}));
-      return;
-    }
-    const nm = user.user_metadata && user.user_metadata.full_name;
-    wrap.append(el('p', {}, ['Signed in as ', el('b', {textContent:user.email})]));
-    if(nm) wrap.append(el('p', {textContent:'Name: ' + nm}));
-    wrap.append(el('button', {className:'abtn', type:'button', textContent:'Sign out', onclick:signOut}));
-  }
-}
-function renderWho(){
-  const w = $('who');
-  const icon = w.querySelector('svg') ? w.querySelector('svg').cloneNode(true) : '';
-  if(user){
-    const nm = (user.user_metadata && user.user_metadata.full_name) || (user.email || '').split('@')[0];
-    w.replaceChildren(icon, el('a', {href:'#/account', textContent:'Hi, ' + nm}), ' | ', el('a', {href:'#/', textContent:'Sign out', onclick:e => { e.preventDefault(); signOut(); }}));
-  } else {
-    w.replaceChildren(icon, el('a', {href:'#/signin', textContent:'Sign in'}), ' or ', el('a', {href:'#/register', textContent:'Register'}));
-  }
-}
 function render(){
   const r = route();
   const isInfo = ['privacy','about','sitemap','holidays','social','wishlist'].includes(r.mode);
-  const isAuth = AUTH_MODES.includes(r.mode);
-  if(isAuth) injectAuth();
+  const isAuth = false;
   document.body.classList.toggle('list', r.mode !== 'home');
   document.body.classList.toggle('info', isInfo || isAuth);
   $('homeView').hidden = r.mode !== 'home';
@@ -1274,7 +1124,7 @@ function render(){
   $('infoView').hidden = !(isInfo || isAuth);
   $('nav').classList.remove('open');
   document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(r.mode === 'wishlist') renderWishlist(); else if(isInfo) renderInfo(r); else if(isAuth) renderAuth(r); else renderList(r);
+  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(r.mode === 'wishlist') renderWishlist(); else if(isInfo) renderInfo(r); else renderList(r);
 }
 
 let fromSidebar = false, lastMode = route().mode;
@@ -1473,10 +1323,7 @@ function openProduct(p, colors){
       lk.onclick = () => $('closeDlg').onclick();
       wmsg.replaceChildren('Added to ' + name + '. ', lk);
     };
-    const tryWish = name => {
-      const r = wishOrLogin(name, wishItem());
-      if(r) doneMsg(r); else if(r === false) wmsg.textContent = 'One moment, checking your sign in. Please try again.';
-    };
+    const tryWish = name => { doneMsg(addToWish(name, wishItem())); };
     const addBtn = el('button', {type:'button', textContent:'Add to my wish list'});
     addBtn.onclick = () => tryWish(WISH_DEFAULT);
     const newBtn = el('button', {type:'button', textContent:'Create wish list'});
@@ -1561,35 +1408,6 @@ async function load(){
   loaded = true; render();
 }
 
-/* ---- sign-in library: loaded after the page is showing, so it never holds up the products ---- */
-let authInjected = false;
-function authDone(){
-  authReady = true;
-  if(AUTHY()) render();
-}
-function initAuth(){
-  try{ if(window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
-  if(!sb){ authDone(); return; }
-  sb.auth.onAuthStateChange((event, session) => {
-    user = session ? session.user : null; authReady = true; renderWho(); syncUser();
-    if(event === 'PASSWORD_RECOVERY') location.hash = '#/reset';
-    else if(AUTHY()) render();
-  });
-  sb.auth.getSession().then(({data}) => {
-    user = data && data.session ? data.session.user : null; authReady = true; renderWho(); syncUser();
-    if(AUTHY()) render();
-  }).catch(() => { authReady = true; });
-}
-function injectAuth(){
-  if(authInjected) return;
-  authInjected = true;
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.async = true;
-  s.onload = initAuth;
-  s.onerror = authDone;
-  document.head.appendChild(s);
-}
 /* ---- deterrents: no right-click save, no picture dragging, no view-source / developer-tools shortcuts ---- */
 addEventListener('contextmenu', e => { if(!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 addEventListener('dragstart', e => { if(e.target && e.target.tagName === 'IMG') e.preventDefault(); });
@@ -1597,7 +1415,7 @@ addEventListener('keydown', e => {
   const k = (e.key || '').toLowerCase(), c = e.ctrlKey || e.metaKey;
   if(e.key === 'F12' || (c && (k === 'u' || k === 's')) || (c && e.shiftKey && 'ijck'.includes(k)) || (e.metaKey && e.altKey && 'ijcu'.includes(k))) e.preventDefault();
 });
-renderWho();
+loadWishes();
 buildNav(); renderBanners(); saveCart(); render();
 // coming back from Stripe: paid empties the cart, canceled keeps it
 (function(){
@@ -1608,7 +1426,7 @@ buildNav(); renderBanners(); saveCart(); render();
   else if(q.get('canceled') === '1'){ toast('Checkout canceled. Your cart is still here.'); }
   if(q.has('paid') || q.has('canceled')) history.replaceState(null, '', location.pathname + location.hash);
 })();
-load().then(injectAuth, injectAuth);
+load();
 </script>
 </body>
 </html>
