@@ -330,11 +330,17 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .rvgo{background:#222;color:#fff;border:0;padding:14px 26px;font-weight:700;text-transform:uppercase}
 .rvgo:disabled{opacity:.6}
 @media(max-width:700px){.rvbody{grid-template-columns:1fr}}
-#zdlg{width:auto;max-width:96vw;overflow:hidden;background:#fff}
-.zstage{overflow:hidden;cursor:zoom-in;line-height:0}
-.zstage.on{cursor:zoom-out}
-.zstage img{display:block;max-width:min(92vw,900px);max-height:88vh;cursor:inherit;transition:transform .2s}
-.zstage.on img{transform:scale(2.6)}
+/* picture enlarge: happens inside the same popup, on the picture itself (click to zoom, move to pan, click again to go back) */
+.zwrap{position:relative;overflow:hidden;min-height:260px;background:#fff;cursor:zoom-in;line-height:0}
+.zwrap img{position:absolute;left:0;top:0;width:100%;height:100%;min-height:0;object-fit:contain;cursor:inherit;transition:transform .2s}
+.zwrap.on{cursor:zoom-out}
+.zwrap.on img{transform:scale(2.6)}
+@media(max-width:700px){.zwrap{min-height:0;aspect-ratio:1/1}}
+/* garment info card (after the description in the popup) */
+.gi{border-top:1px solid var(--line);padding-top:10px;font-size:.9rem}
+.gi h4{font-family:var(--cond);font-weight:700;font-size:1rem;text-transform:uppercase;margin-bottom:6px}
+.gi ul{margin:0 0 0 18px}
+.gi li{padding:2px 0}
 </style>
 </head>
 <body>
@@ -405,7 +411,6 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 
 <dialog id="dlg"><button class="x" id="closeDlg" aria-label="Close">&times;</button><div class="pd" id="pd"></div></dialog>
 <dialog id="rdlg" aria-label="Write a review"></dialog>
-<dialog id="zdlg" aria-label="Magnified picture"></dialog>
 
 <aside class="drawer" id="drawer" aria-label="Cart">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2>Your cart</h2><button class="x" style="position:static" id="closeCart" aria-label="Close cart">&times;</button></div>
@@ -481,6 +486,29 @@ function groupOf(type){
   for(const [g, re] of GROUP_WORDS) if(re.test(t)) return g;
   return 'Other';
 }
+// Garment info card shown after the description in the popup. Every garment is DTG printed.
+// To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
+const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
+const GARMENT_INFO = [
+  [/baby.*fleece.*(one.?piece|onesie)/i, [
+    'Material: 60% combed ringspun cotton, 40% polyester (Heather oatmeal: 55% combed ringspun cotton, 45% polyester) | Fabric weight: 7.4 oz (midweight)',
+    'Ribbed collar, sleeve, and leg cuffs',
+    'Innovative snap tape closure for easy changing',
+    'Reinforced crotch inseam',
+    'Side seam construction',
+    'Brand: Rabbit Skins',
+    'Imported product, printed & processed in the USA'
+  ]]
+];
+function garmentInfo(c){
+  const type = (c && c.apparel) || '';
+  if(!type) return null;
+  const hit = GARMENT_INFO.find(([re]) => re.test(type));
+  const fromFeed = Array.isArray(c.garmentInfo) ? c.garmentInfo : [];
+  if(!hit && !fromFeed.length && c.group !== 'Clothing') return null;
+  const lines = (hit ? hit[1] : fromFeed).concat(DTG_LINE);
+  return el('div', {className:'gi'}, [el('h4', {textContent:type}), el('ul', {}, lines.map(t => el('li', {textContent:t})))]);
+}
 
 const $ = id => document.getElementById(id);
 const el = (tag, props = {}, kids = []) => {
@@ -536,7 +564,8 @@ function normalize(p, i){
     audience: normAudience(String(p.productType || '')) || tags.map(normAudience).find(Boolean) || normAudience(title),
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances),
     colorImages: (p.colorImages && typeof p.colorImages === 'object') ? p.colorImages : {},
-    colorValues: (p.colorValues && typeof p.colorValues === 'object') ? p.colorValues : {}
+    colorValues: (p.colorValues && typeof p.colorValues === 'object') ? p.colorValues : {},
+    garmentInfo: Array.isArray(p.garmentInfo) ? p.garmentInfo.filter(x => typeof x === 'string' && x.trim()) : []
   };
 }
 
@@ -639,22 +668,6 @@ function openReview(p, src){
   };
   const left = el('div', {}, [el('img', {src, alt:p.title}), el('div', {className:'nm', textContent:'Little Princess Lullabies'}), el('div', {textContent:p.title.toUpperCase()})]);
   d.replaceChildren(close, el('div', {className:'rvhead', textContent:'Write a review'}), el('div', {className:'rvbody'}, [left, form]));
-  if(d.showModal) d.showModal(); else d.setAttribute('open', '');
-}
-
-/* ---- picture magnifier: click the picture, then click again to zoom, move to pan ---- */
-function openZoom(src, title){
-  const d = $('zdlg');
-  const close = el('button', {className:'x', type:'button', textContent:'\u00D7'});
-  close.setAttribute('aria-label', 'Close'); close.onclick = () => d.close();
-  const im = el('img', {src, alt:title});
-  const stage = el('div', {className:'zstage'}, [im]);
-  let on = false;
-  const move = e => { const r = stage.getBoundingClientRect(), pt = e.touches ? e.touches[0] : e; im.style.transformOrigin = ((pt.clientX - r.left) / r.width * 100) + '% ' + ((pt.clientY - r.top) / r.height * 100) + '%'; };
-  stage.onclick = e => { move(e); on = !on; stage.classList.toggle('on', on); };
-  stage.onmousemove = move; stage.ontouchmove = move;
-  d.onclick = e => { if(e.target === d) d.close(); };
-  d.replaceChildren(close, stage);
   if(d.showModal) d.showModal(); else d.setAttribute('open', '');
 }
 
@@ -1154,11 +1167,17 @@ function openProduct(p, colors){
   const vs = p.variants && p.variants.length > 1 ? p.variants : [p];
   const multi = vs.length > 1;
   let v = multi ? null : vs[0], size = '', color = '';
-  const imgEl = el('img', {src:p.img, alt:p.title, title:'Click to magnify'});
-  imgEl.onclick = () => openZoom(imgEl.src, p.title);
+  const imgEl = el('img', {src:p.img, alt:p.title, title:'Click to enlarge'});
+  // Enlarge happens right here in the popup: click the picture to zoom, move to pan, click again to go back.
+  const zwrap = el('div', {className:'zwrap'}, [imgEl]);
+  let zon = false;
+  const zmove = e => { const r = zwrap.getBoundingClientRect(), pt = e.touches ? e.touches[0] : e; imgEl.style.transformOrigin = ((pt.clientX - r.left) / r.width * 100) + '% ' + ((pt.clientY - r.top) / r.height * 100) + '%'; };
+  zwrap.onclick = e => { zmove(e); zon = !zon; zwrap.classList.toggle('on', zon); };
+  zwrap.onmousemove = zmove; zwrap.ontouchmove = zmove;
   const info = el('div', {className:'info'});
   const draw = () => {
     size = ''; color = '';
+    zon = false; zwrap.classList.remove('on');
     const cur = v || p;
     imgEl.src = colorImage(cur, colors) || cur.img;
     info.replaceChildren(el('h3', {textContent:p.title}));
@@ -1169,6 +1188,8 @@ function openProduct(p, colors){
     const rbox = el('div', {className:'rbox'});
     loadReviews(p, rline, rbox, wr);
     info.append(el('b', {textContent: v ? v.price : priceText(p)}), rline, el('p', {textContent:cur.desc}));
+    const gi = garmentInfo(cur);
+    if(gi) info.append(gi);
     const group = (label, vals, set, pressed, pick) => {
       if(!vals.length) return;
       const row = el('div', {className:'opts', role:'group'});
@@ -1250,7 +1271,7 @@ function openProduct(p, colors){
     info.append(add, err, wbtn, wmenu, wmsg, rbox);
   };
   draw();
-  $('pd').replaceChildren(imgEl, info);
+  $('pd').replaceChildren(zwrap, info);
   { const d = $('dlg'); if(d.showModal) d.showModal(); else d.setAttribute('open', ''); }
 }
 
