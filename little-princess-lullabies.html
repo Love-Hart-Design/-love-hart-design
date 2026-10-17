@@ -427,7 +427,7 @@ const SUPABASE_KEY = 'sb_publishable_ejumddT9HCtukVN5GrmGHA_6EwJ3x0R'; // public
 const FUNCTION_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products';
 const BRAND_KEY = 'little-princess-lullabies'; // this store's key inside the feed
 const ANON_KEY = '';        // only needed for checkout, if your function wants it
-const CHECKOUT_URL = '';    // Stripe checkout function URL. Leave empty until Stripe is connected.
+const CHECKOUT_URL = 'https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/create-checkout'; // Stripe checkout function
 const NEWSLETTER_URL = '';  // Where email signups get sent. Leave empty until it's set up.
 const TOP_BANNER_IMAGES = [];  // thin top banner: image URLs. Empty uses the text slides below.
 const MAIN_BANNER_IMAGES = []; // main banner: image URLs. Empty uses the text slides below.
@@ -1464,10 +1464,10 @@ $('checkout').onclick = async () => {
   if(!CHECKOUT_URL){ msg.textContent = 'Checkout opens once Stripe is connected.'; return; }
   msg.textContent = 'Taking you to checkout...';
   try{
-    const r = await fetch(CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', ...(ANON_KEY && {Authorization:'Bearer ' + ANON_KEY})}, body:JSON.stringify({cart})});
+    const r = await fetch(CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', ...(ANON_KEY && {Authorization:'Bearer ' + ANON_KEY})}, body:JSON.stringify({cart, returnUrl:location.href.split('#')[0].split('?')[0]})});
     const j = await r.json();
-    if(j.url) location.href = j.url; else throw new Error('No checkout URL');
-  }catch(e){ msg.textContent = 'Checkout could not start. Please try again.'; }
+    if(j.url) location.href = j.url; else throw new Error(j.error || 'No checkout URL');
+  }catch(e){ msg.textContent = (e && e.message && e.message !== 'No checkout URL' && e.message !== 'Failed to fetch') ? e.message : 'Checkout could not start. Please try again.'; }
 };
 
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
@@ -1541,6 +1541,13 @@ addEventListener('keydown', e => {
 });
 renderWho();
 buildNav(); renderBanners(); saveCart(); render();
+// coming back from Stripe: paid empties the cart, canceled keeps it
+(function(){
+  const q = new URLSearchParams(location.search);
+  if(q.get('paid') === '1'){ cart = []; saveCart(); toast('Thank you! Your order was received.'); }
+  else if(q.get('canceled') === '1'){ toast('Checkout canceled. Your cart is still here.'); }
+  if(q.has('paid') || q.has('canceled')) history.replaceState(null, '', location.pathname + location.hash);
+})();
 load().then(injectAuth, injectAuth);
 </script>
 </body>
