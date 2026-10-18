@@ -85,8 +85,8 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .card .im{position:relative;border:1px solid var(--line);background:#fff;height:0;padding-bottom:100%;overflow:hidden}
 .card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block}
 /* Quick view button on the picture, shown on hover (like The Mountain) */
-.card .acts{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:8px;opacity:0;transform:translateY(8px);transition:.18s}
-.card .acts button{flex:1;border:1px solid #222;background:#fff;color:#222;font-weight:700;text-transform:uppercase;font-size:.78rem;line-height:1.2;padding:10px 6px}
+.card .acts{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:center;gap:8px;opacity:0;transform:translateY(8px);transition:.18s}
+.card .acts button{flex:0 0 auto;border:1px solid #222;background:#fff;color:#222;font-weight:700;text-transform:uppercase;font-size:.78rem;line-height:1.2;padding:10px 20px}
 .card:focus-within .acts{opacity:1;transform:none}
 @media(hover:hover){.card:hover .acts{opacity:1;transform:none}}
 .sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
@@ -350,6 +350,13 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .gi h4{font-family:var(--cond);font-weight:700;font-size:1rem;text-transform:uppercase;margin-bottom:6px}
 .gi ul{margin:0 0 0 18px}
 .gi li{padding:2px 0}
+/* phone: the floating Menu tab is replaced by the menu button in the top bar */
+@media(max-width:900px){.sptab{display:none}}
+/* small "coming soon" pop-up */
+#soon{max-width:340px;width:86vw}
+.soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.soonbox h3{font-family:var(--cond);font-weight:700;font-size:1.4rem;text-transform:uppercase}
+.soonbox p{font-size:1.05rem;color:#777}
 </style>
 </head>
 <body>
@@ -419,6 +426,7 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 
 <dialog id="dlg"><button class="x" id="closeDlg" aria-label="Close">&times;</button><div class="pd" id="pd"></div></dialog>
 <dialog id="rdlg" aria-label="Write a review"></dialog>
+<dialog id="soon" aria-label="Coming soon"><div class="soonbox"><h3 id="soonTitle"></h3><p>Coming soon</p><button class="add" id="soonOk" type="button">OK</button></div></dialog>
 
 <aside class="drawer" id="drawer" aria-label="Cart">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2>Your cart</h2><button class="x" style="position:static" id="closeCart" aria-label="Close cart">&times;</button></div>
@@ -481,6 +489,8 @@ const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
 const AUDIENCES = ['Men','Women','Unisex','Kids','Babies'];
+// Product types that are listed under BOTH Men and Women (instead of Other). To add another: add /words in the product type name/.
+const MEN_AND_WOMEN = [/ultra.?cotton.*adult/i];
 const GROUPS = ['Clothing','Accessories','Home & Living','Other'];
 // Sorts a Spreadconnect product type name into Clothing / Accessories / Home & Living by the words in its name.
 const GROUP_WORDS = [
@@ -498,6 +508,12 @@ function groupOf(type){
 // To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
 const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
 const GARMENT_INFO = [
+  [/ultra.?cotton.*adult/i, [
+    'Fabric weight: 6 oz (heavyweight)',
+    'Material: 100% preshrunk cotton (Heather gray is 90% cotton/10% polyester. Deep heather is 50% cotton/50% polyester)',
+    'Double-needle stitching, seamless collar',
+    'Imported product, printed & processed in the USA'
+  ]],
   [/baby.*fleece.*(one.?piece|onesie)/i, [
     'Material: 60% combed ringspun cotton, 40% polyester (Heather oatmeal: 55% combed ringspun cotton, 45% polyester) | Fabric weight: 7.4 oz (midweight)',
     'Ribbed collar, sleeve, and leg cuffs',
@@ -719,6 +735,9 @@ function normalize(p, i){
   const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
   const priceNum = parseFloat(p.price != null ? p.price : p.retailPrice) || 0;
   const was = parseFloat(p.compareAtPrice || p.compare_at_price || p.originalPrice || 0);
+  const kind = String(p.productType || '').split('|')[0].trim();
+  const aud = normAudience(String(p.productType || '')) || tags.map(normAudience).find(Boolean) || normAudience(title);
+  const auds = MEN_AND_WOMEN.some(re => re.test(kind)) ? ['Men', 'Women'] : [aud];
   return {
     id: String(p.id || p.sku || i), idx: i, title,
     desc: plain(desc.replace(/^\s*\[[^\]]+\]\s*/, '')), img,
@@ -732,7 +751,7 @@ function normalize(p, i){
     cols: COLLECTIONS.filter(c => tags.some(t => COLLECTION_MATCH[c].test(t)) || COLLECTION_MATCH[c].test(title)),
     inStock: !(p.inStock === false || p.in_stock === false || p.available === false),
     group: groupOf(String(p.productType || '').split('|')[0].trim()),
-    audience: normAudience(String(p.productType || '')) || tags.map(normAudience).find(Boolean) || normAudience(title),
+    audience: auds[0], auds,
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances),
     colorImages: (p.colorImages && typeof p.colorImages === 'object') ? p.colorImages : {},
     colorValues: (p.colorValues && typeof p.colorValues === 'object') ? p.colorValues : {},
@@ -741,6 +760,7 @@ function normalize(p, i){
 }
 
 let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
+const openSecs = new Set(); // filter drop-downs the visitor has opened (they start closed)
 try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
 
 /* ---- wish lists: saved in the visitor's own browser (no account needed) ---- */
@@ -840,10 +860,10 @@ const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases',
 
 function buildSidePanel(){
   const grps = GROUPS.filter(g => products.some(p => p.group === g));
-  const auds = [['Men', href('apparel', {aud:'Men'})], ['Women', href('apparel', {aud:'Women'})]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.audience === a)).map(a => [a, href('apparel', {aud:a})]));
-  const sec = (id, title, links) => links.length ? el('div', {className:'spsec', id:'sp-' + id}, [el('h4', {textContent:title})].concat(links.map(([l, u]) => el('a', {href:u, textContent:l})))) : null;
+  const auds = [['Men', href('apparel', {aud:'Men'})], ['Women', href('apparel', {aud:'Women'})]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.auds.includes(a))).map(a => [a, href('apparel', {aud:a})]));
+  const sec = (id, title, links) => links.length ? el('div', {className:'spsec', id:'sp-' + id}, [el('h4', {textContent:title})].concat(links.map(([l, u, s]) => { const a = el('a', {href:u, textContent:l}); if(s) a.onclick = e => { e.preventDefault(); showSoon(l); }; return a; }))) : null;
   $('spBody').replaceChildren(...[
-    sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')]]),
+    sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', '#', 1], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
     sec('aud', 'Apparel Categories', auds),
     sec('collections', 'Collections', [['Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})], ['Holidays', href('holidays')]])
@@ -857,6 +877,12 @@ function openPanel(id){
 function closePanel(){
   $('sidePanel').classList.remove('open'); $('spShade').classList.remove('open'); $('spTab').setAttribute('aria-expanded', 'false');
 }
+function showSoon(label){
+  $('soonTitle').textContent = label;
+  const d = $('soon');
+  if(d.showModal) d.showModal(); else d.setAttribute('open', '');
+}
+function closeSoon(){ const d = $('soon'); if(d.close) d.close(); else d.removeAttribute('open'); }
 function buildNav(){
   const items = [
     ['Specials', href('specials'), null],
@@ -864,11 +890,15 @@ function buildNav(){
     ['New Releases', href('new'), null],
     ['Apparel', href('apparel'), 'apparel'],
     ['Collections', href('all'), 'collections'],
-    ['Social Media', href('social'), null]
+    ['Social Media', href('social'), null],
+    ['Music', '#', 'soon'],
+    ['Books', '#', 'soon'],
+    ['Coloring App', '#', 'soon']
   ];
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
-    const a = el('a', {className: 'ni-link' + (panel ? ' sd' : ''), href:h, textContent:label});
-    if(panel) a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); openPanel(panel); };
+    const a = el('a', {className: 'ni-link' + (panel && panel !== 'soon' ? ' sd' : ''), href:h, textContent:label});
+    if(panel === 'soon') a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); showSoon(label); };
+    else if(panel) a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); openPanel(panel); };
     return el('div', {className:'ni'}, [a]);
   }));
   buildSidePanel();
@@ -966,7 +996,7 @@ function renderList(r){
   document.title = (parts.join(' / ') || base) + ' | Little Princess Lullabies';
 
   const q = fQ.toLowerCase();
-  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (r.mode !== 'apparel' || p.apparel) && (r.mode !== 'men' || p.audience === 'Men') && (r.mode !== 'women' || p.audience === 'Women') && (!q || p.title.toLowerCase().includes(q)));
+  const scope = products.filter(p => (r.mode !== 'specials' || p.special) && (r.mode !== 'apparel' || p.apparel) && (r.mode !== 'men' || p.auds.includes('Men')) && (r.mode !== 'women' || p.auds.includes('Women')) && (!q || p.title.toLowerCase().includes(q)));
   const apparelPage = r.apps.length > 0 || r.grps.length > 0;
   const pool = scope.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.grps.length || r.grps.includes(p.group)));
   const uniq = (arr, fn) => new Set(arr.filter(fn).map(p => p.title.trim().toLowerCase())).size;
@@ -987,7 +1017,8 @@ function renderList(r){
   };
   const section = (title, nodes) => {
     if(!nodes.length) return;
-    const d = el('details', {className:'fs', open:true}, [el('summary', {textContent:title})]);
+    const d = el('details', {className:'fs', open:openSecs.has(title)}, [el('summary', {textContent:title})]);
+    d.addEventListener('toggle', () => { if(d.open) openSecs.add(title); else openSecs.delete(title); });
     nodes.forEach(x => d.append(x));
     sb.append(d);
   };
@@ -996,7 +1027,7 @@ function renderList(r){
   // Products: one drop-down per Spreadconnect category (Men, Women, Unisex, Kids, Babies), each listing its product types
   const prodNodes = [];
   AUDIENCES.concat(['']).forEach(a => {
-    const kinds = APPAREL.filter(k => products.some(p => p.apparel === k && p.audience === a));
+    const kinds = APPAREL.filter(k => products.some(p => p.apparel === k && p.auds.includes(a)));
     if(!kinds.length) return;
     const open = r.auds.includes(a) || kinds.some(k => r.apps.includes(k));
     const gh = el('button', {type:'button', className:'gh', textContent:a || 'Other'});
@@ -1004,16 +1035,16 @@ function renderList(r){
     const body = el('div', {className:'subbody'});
     body.hidden = !open;
     gh.onclick = () => { body.hidden = !body.hidden; gh.setAttribute('aria-expanded', String(!body.hidden)); };
-    kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.audience === a), 'app', k, r.apps)));
+    kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.auds.includes(a)), 'app', k, r.apps)));
     prodNodes.push(el('div', {className:'sub'}, [gh, body]));
   });
   section('Products', prodNodes);
-  section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.audience === v, true));
+  section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
   section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
   section('Themes', opts(CATEGORIES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
   $('side').replaceChildren(sb);
 
-  const list = pool.filter(p => (!r.auds.length || r.auds.includes(p.audience)) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
+  const list = pool.filter(p => (!r.auds.length || p.auds.some(a => r.auds.includes(a))) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
   const sort = $('sort').value;
   const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
   list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
@@ -1131,7 +1162,10 @@ addEventListener('hashchange', () => { const m = route().mode; curPage = 1; rend
 $('sort').onchange = () => { curPage = 1; render(); };
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
-$('hamb').onclick = () => $('nav').classList.toggle('open');
+// phone: the menu button in the top bar slides the menu in from the left; wide screens keep the drop-down bar
+$('hamb').onclick = () => { if(innerWidth <= 900) openPanel(); else $('nav').classList.toggle('open'); };
+$('soonOk').onclick = closeSoon;
+$('soon').onclick = e => { if(e.target === $('soon')) closeSoon(); };
 $('spTab').onclick = () => openPanel();
 $('spClose').onclick = closePanel;
 $('spShade').onclick = closePanel;
