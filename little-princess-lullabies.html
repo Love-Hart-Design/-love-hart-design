@@ -84,10 +84,9 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .card{background:none;border:0;padding:0;text-align:left;color:var(--txt);display:block;cursor:pointer}
 .card .im{position:relative;border:1px solid var(--line);background:#fff;height:0;padding-bottom:100%;overflow:hidden}
 .card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block}
-/* Quick view / View options buttons on the picture, shown on hover (like The Mountain) */
+/* Quick view button on the picture, shown on hover (like The Mountain) */
 .card .acts{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:8px;opacity:0;transform:translateY(8px);transition:.18s}
 .card .acts button{flex:1;border:1px solid #222;background:#fff;color:#222;font-weight:700;text-transform:uppercase;font-size:.78rem;line-height:1.2;padding:10px 6px}
-.card .acts button:last-child{background:#222;color:#fff}
 .card:focus-within .acts{opacity:1;transform:none}
 @media(hover:hover){.card:hover .acts{opacity:1;transform:none}}
 .sale{position:absolute;left:0;top:0;z-index:1;background:#e8392f;color:#fff;font-weight:700;font-size:.9rem;padding:4px 12px}
@@ -916,8 +915,8 @@ function priceText(p){
   return vs.length > 1 && lo !== hi ? 'From ' + money(lo) : vs[0].price;
 }
 function makeCard(p, colors, showType){
-  // Quick view and View options both open the same pop-out card as clicking the card itself.
-  const acts = el('div', {className:'acts'}, [el('button', {type:'button', textContent:'Quick view'}), el('button', {type:'button', textContent:'View options'})]);
+  // Quick view opens the same pop-out card as clicking the card itself.
+  const acts = el('div', {className:'acts'}, [el('button', {type:'button', textContent:'Quick view'})]);
   const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy', decoding:'async'}), acts]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
   const kids = [im, el('h3', {textContent:p.title})];
