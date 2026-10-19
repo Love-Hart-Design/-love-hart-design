@@ -169,10 +169,12 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 @media(max-width:900px){
  html body .hd{position:static}
  html body .hamb{display:block}
- html body nav.main{display:flex;position:fixed;left:0;top:0;bottom:0;width:min(320px,86vw);z-index:36;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;gap:0;padding:56px 6vw 20px;overflow:auto;transform:translateX(-105%);transition:transform .3s ease;box-shadow:8px 0 24px rgba(0,0,0,.25)}
- html body nav.main.open{transform:none}
- .ni>a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.18)}
- .ni>a:hover,.ni>a[aria-current=page],.ni.open>a{border-bottom-color:rgba(255,255,255,.18);color:var(--accent)}
+ html body nav.main{display:flex;position:fixed;left:0;right:0;top:0;height:52px;z-index:20;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;gap:0 24px;padding:0 4vw;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+ html body nav.main::-webkit-scrollbar{display:none}
+ .ni{flex:none}
+ body{padding-top:52px}
+ .ni>a{padding:12px 0;font-size:1rem;border-bottom:3px solid transparent}
+ .ni>a:hover,.ni>a[aria-current=page],.ni.open>a{border-bottom-color:var(--accent)}
  .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12);min-width:0;padding:4px 0}
  .dm a{color:#fff;padding:10px 16px}
  .dm a:hover{background:rgba(255,255,255,.12);color:var(--accent)}
@@ -352,9 +354,6 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .gi li{padding:2px 0}
 /* phone: the floating Menu tab is replaced by the menu button in the top bar */
 @media(max-width:900px){.sptab{display:none}}
-.navx{display:none}
-@media(max-width:900px){.navx{display:block;position:absolute;top:8px;right:12px;background:none;border:0;color:#fff;font-size:2rem;line-height:1}}
-@media(prefers-reduced-motion:reduce){nav.main{transition:none!important}}
 /* small "coming soon" pop-up */
 #soon{max-width:340px;width:86vw}
 .soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
@@ -900,9 +899,7 @@ function buildNav(){
     ['Books', '#', 'soon'],
     ['Coloring App', '#', 'soon']
   ];
-  const navX = el('button', {className:'navx', type:'button', textContent:'\u00D7'});
-  navX.setAttribute('aria-label', 'Close menu'); navX.onclick = closeNav;
-  $('nav').replaceChildren(navX, ...items.map(([label, h, panel]) => {
+  $('nav').replaceChildren(...items.map(([label, h, panel]) => {
     const a = el('a', {className: 'ni-link' + (panel && panel !== 'soon' ? ' sd' : ''), href:h, textContent:label});
     if(panel === 'soon') a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); showSoon(label); };
     else if(panel) a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); openPanel(panel); };
@@ -1185,7 +1182,7 @@ $('sort').onchange = () => { curPage = 1; render(); };
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 // phone: the menu button in the top bar slides the menu in from the left; wide screens keep the drop-down bar
-$('hamb').onclick = () => { if(innerWidth <= 900) openNav(); else $('nav').classList.toggle('open'); };
+$('hamb').onclick = () => { if(innerWidth <= 900) openPanel(); else $('nav').classList.toggle('open'); };
 $('nav').addEventListener('click', e => { if(innerWidth <= 900 && e.target.closest('a')) closeNav(); });
 $('soonOk').onclick = closeSoon;
 $('soon').onclick = e => { if(e.target === $('soon')) closeSoon(); };
@@ -1197,9 +1194,8 @@ addEventListener('touchstart', e => { const t = e.touches[0]; tx = t.clientX; ty
 addEventListener('touchend', e => {
   const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
   if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-  const navOpen = innerWidth <= 900 && $('nav').classList.contains('open'), open = $('sidePanel').classList.contains('open');
-  if(dx > 0 && !open && !navOpen && tx < 30 && innerWidth <= 900) openNav();
-  else if(dx < 0 && navOpen) closeNav();
+  const open = $('sidePanel').classList.contains('open');
+  if(dx > 0 && !open && tx < 30 && innerWidth <= 900) openPanel();
   else if(dx < 0 && open) closePanel();
 }, {passive:true});
 $('sidePanel').onclick = e => { if(e.target.closest('a')) closePanel(); };
