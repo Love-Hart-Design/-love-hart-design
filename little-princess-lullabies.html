@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,7 +96,7 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .crumb{font-size:.85rem;color:#777;margin:36px 0 14px}
 .crumb a{text-decoration:none}.crumb b{color:#555}
 h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
-.lay{display:grid;grid-template-columns:300px 1fr;gap:15px;align-items:start;margin-bottom:60px}
+.lay{display:grid;grid-template-columns:1fr;gap:15px;align-items:start;margin-bottom:60px}
 .sb{border:1px solid #d9d9d9;padding:0 20px}
 .fs{border-bottom:1px solid #e3e3e3;padding-bottom:14px}
 .fs:last-child{border-bottom:0}
@@ -354,6 +353,14 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .gi li{padding:2px 0}
 /* phone: the floating Menu tab is replaced by the menu button in the top bar */
 @media(max-width:900px){.sptab{display:none}}
+/* drop-down menus: each choice group opens on its own */
+.dm details{border-top:1px solid #eee}
+.dm summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:9px 22px;cursor:pointer;font-weight:700;color:var(--txt)}
+.dm summary::-webkit-details-marker{display:none}
+.dm summary::after{content:"+";font-size:1.2rem;line-height:1}
+.dm details[open]>summary::after{content:"\2212"}
+.dm details a{padding-left:38px}
+@media(max-width:900px){.dm summary{color:#fff}.dm details{border-top-color:rgba(255,255,255,.25)}}
 /* small "coming soon" pop-up */
 #soon{max-width:340px;width:86vw}
 .soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
@@ -381,7 +388,7 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 <div id="hero"><div class="slider thin" id="topSlider" aria-label="Announcements"></div><div class="slider" id="mainSlider" aria-label="Featured"></div></div>
 
 <main class="wrap">
-  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div><h2 class="sec">Featured Products</h2><div class="grid" id="featGrid"></div><h2 class="sec">Best Selling Products</h2><div class="grid" id="bestGrid"></div></section>
+  <section id="homeView"><h2 class="sec">New Products</h2><div class="grid" id="newGrid"></div><h2 class="sec">Featured Products</h2><div class="grid" id="featGrid"></div></section>
 
   <section id="infoView" hidden>
     <p class="crumb" id="infoCrumb"></p>
@@ -393,9 +400,8 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
     <p class="crumb" id="crumb"></p>
     <h1 class="pt" id="pageTitle"></h1>
     <div class="lay">
-      <aside id="side" aria-label="Filters"></aside>
       <div>
-        <div class="tools"><button id="filterBtn" type="button">Filters</button><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new">Newest</option><option value="best" selected>Best Selling</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
+        <div class="tools"><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new" selected>Newest</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
         <div class="grid three" id="grid" aria-live="polite"></div>
         <nav id="pager" aria-label="Pages"></nav>
       </div>
@@ -900,7 +906,7 @@ addEventListener('scroll', () => { if(innerWidth <= 900) document.querySelectorA
 function buildNav(){
   const items = [
     ['Specials', href('specials'), null],
-    ['Little Princess Lullabies', href('all'), null],
+    ['Little Princess Lullabies', href('all'), 'themes'],
     ['New Releases', href('new'), null],
     ['Apparel', href('apparel'), 'apparel'],
     ['Collections', href('all'), 'collections'],
@@ -909,15 +915,17 @@ function buildNav(){
     ['Books', '#', 'soon'],
     ['Coloring App', '#', 'soon']
   ];
-  const grps = GROUPS.filter(g => products.some(p => p.group === g));
-  const audList = ['Men', 'Women'].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.auds.includes(a))));
-  const col = (title, links) => el('div', {className:'mc'}, [el('h4', {textContent:title})].concat(links.map(([l, u]) => el('a', {href:u, textContent:l}))));
+  const kindsOf = a => APPAREL.filter(k => products.some(pp => pp.apparel === k && pp.auds.includes(a)));
+  const lnk = (l, u) => el('a', {href:u, textContent:l});
+  const sub = (title, links) => { const d = el('details', {className:'dsub'}, [el('summary', {textContent:title})]); links.forEach(([l, u]) => d.append(lnk(l, u))); return d; };
+  const audBlocks = AUDIENCES.concat(['']).map(a => { const kinds = kindsOf(a); if(!kinds.length) return null; return sub(a || 'Other', (a ? [['All ' + a, href('apparel', {aud:a})]] : []).concat(kinds.map(k => [k, href('apparel', {app:k})]))); }).filter(Boolean);
+  const grpList = GROUPS.filter(g => products.some(pp => pp.group === g));
+  const themes = CATEGORIES.filter(c => products.some(pp => pp.cats.includes(c)));
+  const holidays = [['All Holidays', href('holidays')]].concat(HOLIDAYS.map(h => [h, href('all', {col:h})]));
   const menus = {
-    apparel: el('div', {className:'dm mega'}, [el('div', {className:'mg'}, [
-      col('Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
-      col('Categories', audList.map(a => [a, href('apparel', {aud:a})]))
-    ])]),
-    collections: el('div', {className:'dm'}, [['Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})], ['Holidays', href('holidays')]].map(([l, u]) => el('a', {href:u, textContent:l})))
+    apparel: el('div', {className:'dm'}, [lnk('All Apparel', href('apparel'))].concat(audBlocks, grpList.length ? [sub('By Type of Item', grpList.map(g => [g, href('apparel', {grp:g})]))] : [])),
+    collections: el('div', {className:'dm'}, [lnk('Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})), sub('Holidays', holidays)]),
+    themes: el('div', {className:'dm'}, [lnk('All Products', href('all'))].concat(themes.length ? [sub('Themes', themes.map(c => [c, href('all', {cat:c})]))] : []))
   };
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
     const menu = menus[panel];
@@ -996,7 +1004,6 @@ function renderHome(){
   const newest = products.slice().reverse();
   fill('newGrid', newest, 'Products are on the way. Check back soon.');
   fill('featGrid', newest.filter(p => p.featured), 'Featured products are coming soon.');
-  fill('bestGrid', newest.filter(p => p.best), 'Best sellers are coming soon.');
 }
 function renderPager(pages){
   const pg = $('pager'); pg.replaceChildren();
@@ -1027,48 +1034,6 @@ function renderList(r){
   const pool = scope.filter(p => (!r.apps.length || r.apps.includes(p.apparel)) && (!r.grps.length || r.grps.includes(p.group)));
   const uniq = (arr, fn) => new Set(arr.filter(fn).map(p => p.title.trim().toLowerCase())).size;
   const count = fn => uniq(pool, fn), countAll = fn => uniq(scope, fn);
-  const sb = el('div', {className:'sb'});
-  const go = (key, val, on) => {
-    const cur = {app:r.apps, grp:r.grps, cat:r.cats, color:r.colors, aud:r.auds, col:r.cols};
-    if(on && (key === 'grp' || key === 'app')){ cur.grp = []; cur.app = []; } // Products: only one box at a time
-    if(on && key === 'app') cur.aud = []; // a product type already belongs to one audience, so drop the audience filter
-    cur[key] = on ? cur[key].concat(val) : cur[key].filter(x => x !== val);
-    fromSidebar = true; location.hash = href(r.mode, cur);
-  };
-  const row = (label, n, key, val, sel) => {
-    const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
-    cb.setAttribute('aria-label', label);
-    cb.onchange = () => go(key, val, cb.checked);
-    return el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]);
-  };
-  const section = (title, nodes) => {
-    if(!nodes.length) return;
-    const d = el('details', {className:'fs', open:openSecs.has(title)}, [el('summary', {textContent:title})]);
-    d.addEventListener('toggle', () => { if(d.open) openSecs.add(title); else openSecs.delete(title); });
-    nodes.forEach(x => d.append(x));
-    sb.append(d);
-  };
-  const opts = (arr, key, sel, test, hideZero) => arr.map(v => [v, count(p => test(p, v))]).filter(([v, n]) => n > 0 || sel.includes(v) || (!hideZero && !apparelPage)).map(([v, n]) => row(v, n, key, v, sel));
-
-  // Products: one drop-down per Spreadconnect category (Men, Women, Unisex, Kids, Babies), each listing its product types
-  const prodNodes = [];
-  AUDIENCES.concat(['']).forEach(a => {
-    const kinds = APPAREL.filter(k => products.some(p => p.apparel === k && p.auds.includes(a)));
-    if(!kinds.length) return;
-    const open = r.auds.includes(a) || kinds.some(k => r.apps.includes(k));
-    const gh = el('button', {type:'button', className:'gh', textContent:a || 'Other'});
-    gh.setAttribute('aria-expanded', String(open));
-    const body = el('div', {className:'subbody'});
-    body.hidden = !open;
-    gh.onclick = () => { body.hidden = !body.hidden; gh.setAttribute('aria-expanded', String(!body.hidden)); };
-    kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.auds.includes(a)), 'app', k, r.apps)));
-    prodNodes.push(el('div', {className:'sub'}, [gh, body]));
-  });
-  section('Products', prodNodes);
-  section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
-  section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
-  section('Themes', opts(CATEGORIES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
-  $('side').replaceChildren(sb);
 
   const list = pool.filter(p => (!r.auds.length || p.auds.some(a => r.auds.includes(a))) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
   const sort = $('sort').value;
@@ -1199,9 +1164,8 @@ function render(){
 }
 
 let fromSidebar = false, lastMode = route().mode;
-addEventListener('hashchange', () => { const m = route().mode; curPage = 1; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
+addEventListener('hashchange', () => { const m = route().mode; curPage = 1; render(); scrollTo(0, 0); lastMode = m; });
 $('sort').onchange = () => { curPage = 1; render(); };
-$('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 // phone: the menu button in the top bar slides the menu in from the left; wide screens keep the drop-down bar
 $('hamb').onclick = () => { if(innerWidth <= 900) openPanel(); else $('nav').classList.toggle('open'); };
