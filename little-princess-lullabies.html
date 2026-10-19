@@ -96,7 +96,7 @@ h2.sec{text-align:center;text-transform:uppercase;font-weight:400;font-size:1.9r
 .crumb{font-size:.85rem;color:#777;margin:36px 0 14px}
 .crumb a{text-decoration:none}.crumb b{color:#555}
 h1.pt{font-weight:400;text-transform:uppercase;font-size:2.2rem;letter-spacing:.01em;margin-bottom:34px}
-.lay{display:grid;grid-template-columns:1fr;gap:15px;align-items:start;margin-bottom:60px}
+.lay{display:grid;grid-template-columns:300px 1fr;gap:15px;align-items:start;margin-bottom:60px}
 .sb{border:1px solid #d9d9d9;padding:0 20px}
 .fs{border-bottom:1px solid #e3e3e3;padding-bottom:14px}
 .fs:last-child{border-bottom:0}
@@ -400,8 +400,9 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
     <p class="crumb" id="crumb"></p>
     <h1 class="pt" id="pageTitle"></h1>
     <div class="lay">
+      <aside id="side" aria-label="Filters"></aside>
       <div>
-        <div class="tools"><label class="sortbar">Sort By: <select id="sort"><option value="feat">Featured</option><option value="new" selected>Newest</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="lo">Price: Low to High</option><option value="hi">Price: High to Low</option></select></label></div>
+        <div class="tools"><button id="filterBtn" type="button">Filters</button></div>
         <div class="grid three" id="grid" aria-live="polite"></div>
         <nav id="pager" aria-label="Pages"></nav>
       </div>
@@ -1035,10 +1036,51 @@ function renderList(r){
   const uniq = (arr, fn) => new Set(arr.filter(fn).map(p => p.title.trim().toLowerCase())).size;
   const count = fn => uniq(pool, fn), countAll = fn => uniq(scope, fn);
 
+  const sb = el('div', {className:'sb'});
+  const go = (key, val, on) => {
+    const cur = {app:r.apps, grp:r.grps, cat:r.cats, color:r.colors, aud:r.auds, col:r.cols};
+    if(on && (key === 'grp' || key === 'app')){ cur.grp = []; cur.app = []; } // Products: only one box at a time
+    if(on && key === 'app') cur.aud = []; // a product type already belongs to one audience, so drop the audience filter
+    cur[key] = on ? cur[key].concat(val) : cur[key].filter(x => x !== val);
+    fromSidebar = true; location.hash = href(r.mode, cur);
+  };
+  const row = (label, n, key, val, sel) => {
+    const cb = el('input', {type:'checkbox', checked:sel.includes(val)});
+    cb.setAttribute('aria-label', label);
+    cb.onchange = () => go(key, val, cb.checked);
+    return el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]);
+  };
+  const section = (title, nodes) => {
+    if(!nodes.length) return;
+    const d = el('details', {className:'fs', open:openSecs.has(title)}, [el('summary', {textContent:title})]);
+    d.addEventListener('toggle', () => { if(d.open) openSecs.add(title); else openSecs.delete(title); });
+    nodes.forEach(x => d.append(x));
+    sb.append(d);
+  };
+  const opts = (arr, key, sel, test, hideZero) => arr.map(v => [v, count(p => test(p, v))]).filter(([v, n]) => n > 0 || sel.includes(v) || (!hideZero && !apparelPage)).map(([v, n]) => row(v, n, key, v, sel));
+
+  // Products: one drop-down per Spreadconnect category (Men, Women, Unisex, Kids, Babies), each listing its product types
+  const prodNodes = [];
+  AUDIENCES.concat(['']).forEach(a => {
+    const kinds = APPAREL.filter(k => products.some(p => p.apparel === k && p.auds.includes(a)));
+    if(!kinds.length) return;
+    const open = r.auds.includes(a) || kinds.some(k => r.apps.includes(k));
+    const gh = el('button', {type:'button', className:'gh', textContent:a || 'Other'});
+    gh.setAttribute('aria-expanded', String(open));
+    const body = el('div', {className:'subbody'});
+    body.hidden = !open;
+    gh.onclick = () => { body.hidden = !body.hidden; gh.setAttribute('aria-expanded', String(!body.hidden)); };
+    kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.auds.includes(a)), 'app', k, r.apps)));
+    prodNodes.push(el('div', {className:'sub'}, [gh, body]));
+  });
+  section('Products', prodNodes);
+  section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
+  section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
+  section('Themes', opts(CATEGORIES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
+  $('side').replaceChildren(sb);
+
   const list = pool.filter(p => (!r.auds.length || p.auds.some(a => r.auds.includes(a))) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
-  const sort = $('sort').value;
-  const flagged = k => (a, b) => (b[k] ? 1 : 0) - (a[k] ? 1 : 0) || b.idx - a.idx;
-  list.sort(sort === 'lo' ? (a, b) => a.priceNum - b.priceNum : sort === 'hi' ? (a, b) => b.priceNum - a.priceNum : sort === 'az' ? (a, b) => a.title.localeCompare(b.title) : sort === 'za' ? (a, b) => b.title.localeCompare(a.title) : sort === 'feat' ? flagged('featured') : sort === 'new' ? (a, b) => b.idx - a.idx : flagged('best'));
+  list.sort((a, b) => b.idx - a.idx); // newest first
   const g = $('grid'); g.replaceChildren();
   $('pager').replaceChildren();
   if(!list.length){
@@ -1164,8 +1206,8 @@ function render(){
 }
 
 let fromSidebar = false, lastMode = route().mode;
-addEventListener('hashchange', () => { const m = route().mode; curPage = 1; render(); scrollTo(0, 0); lastMode = m; });
-$('sort').onchange = () => { curPage = 1; render(); };
+addEventListener('hashchange', () => { const m = route().mode; curPage = 1; render(); if(!fromSidebar) $('side').classList.remove('open'); if(!fromSidebar || m !== lastMode) scrollTo(0, 0); fromSidebar = false; lastMode = m; });
+$('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 // phone: the menu button in the top bar slides the menu in from the left; wide screens keep the drop-down bar
 $('hamb').onclick = () => { if(innerWidth <= 900) openPanel(); else $('nav').classList.toggle('open'); };
