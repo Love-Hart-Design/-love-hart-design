@@ -294,6 +294,10 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 .spx{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1}
 .spbody{flex:1;overflow:auto;padding:6px 20px 30px;position:relative}
 .spsec h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#888;margin:22px 0 6px;font-weight:700}
+.spsec summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;color:#333;font-weight:700;padding:16px 0;border-bottom:1px solid #eee;cursor:pointer}
+.spsec summary::-webkit-details-marker{display:none}
+.spsec summary::after{content:"+";font-size:1.4rem;line-height:1}
+.spsec[open] summary::after{content:"\2212"}
 .spsec a{display:block;padding:10px 0;text-decoration:none;border-bottom:1px solid #eee;transition:transform .15s,color .15s}
 .spsec a:hover{transform:translateX(6px);color:var(--brand)}
 .sptab{position:fixed;left:0;top:45%;z-index:18;writing-mode:vertical-rl;background:var(--brand);color:#fff;border:0;padding:16px 8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:0 8px 8px 0}
@@ -861,7 +865,7 @@ const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases',
 function buildSidePanel(){
   const grps = GROUPS.filter(g => products.some(p => p.group === g));
   const auds = [['Men', href('apparel', {aud:'Men'})], ['Women', href('apparel', {aud:'Women'})]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.auds.includes(a))).map(a => [a, href('apparel', {aud:a})]));
-  const sec = (id, title, links) => links.length ? el('div', {className:'spsec', id:'sp-' + id}, [el('h4', {textContent:title})].concat(links.map(([l, u, s]) => { const a = el('a', {href:u, textContent:l}); if(s) a.onclick = e => { e.preventDefault(); showSoon(l); }; return a; }))) : null;
+  const sec = (id, title, links) => links.length ? el('details', {className:'spsec', id:'sp-' + id}, [el('summary', {textContent:title})].concat(links.map(([l, u, s]) => { const a = el('a', {href:u, textContent:l}); if(s) a.onclick = e => { e.preventDefault(); showSoon(l); }; return a; }))) : null;
   $('spBody').replaceChildren(...[
     sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', '#', 1], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
@@ -871,7 +875,9 @@ function buildSidePanel(){
 }
 function openPanel(id){
   $('sidePanel').classList.add('open'); $('spShade').classList.add('open'); $('spTab').setAttribute('aria-expanded', 'true');
+  document.querySelectorAll('.spsec').forEach(d => d.open = false); // every drop-down starts closed
   const t = id && $('sp-' + id);
+  if(t) t.open = true;
   $('spBody').scrollTop = t ? Math.max(0, t.offsetTop - 8) : 0;
 }
 function closePanel(){
@@ -1169,6 +1175,15 @@ $('soon').onclick = e => { if(e.target === $('soon')) closeSoon(); };
 $('spTab').onclick = () => openPanel();
 $('spClose').onclick = closePanel;
 $('spShade').onclick = closePanel;
+let tx = 0, ty = 0;
+addEventListener('touchstart', e => { const t = e.touches[0]; tx = t.clientX; ty = t.clientY; }, {passive:true});
+addEventListener('touchend', e => {
+  const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+  if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+  const open = $('sidePanel').classList.contains('open');
+  if(dx > 0 && !open && tx < 30 && innerWidth <= 900) openPanel();
+  else if(dx < 0 && open) closePanel();
+}, {passive:true});
 $('sidePanel').onclick = e => { if(e.target.closest('a')) closePanel(); };
 addEventListener('keydown', e => { if(e.key === 'Escape') closePanel(); });
 // The shrinking header on scroll is for wide screens only. On phones it moved the open menu out of the page and made scrolling jump.
@@ -1463,4 +1478,5 @@ load();
 </script>
 </body>
 </html>
+
 
