@@ -169,8 +169,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 @media(max-width:900px){
  html body .hd{position:static}
  html body .hamb{display:block}
- html body nav.main{display:none}
- html body nav.main.open{display:flex;position:static;flex-direction:column;flex-wrap:nowrap;gap:0;padding:4px 6vw 10px;box-shadow:none}
+ html body nav.main{display:flex;position:fixed;left:0;top:0;bottom:0;width:min(320px,86vw);z-index:36;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;gap:0;padding:56px 6vw 20px;overflow:auto;transform:translateX(-105%);transition:transform .3s ease;box-shadow:8px 0 24px rgba(0,0,0,.25)}
+ html body nav.main.open{transform:none}
  .ni>a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.18)}
  .ni>a:hover,.ni>a[aria-current=page],.ni.open>a{border-bottom-color:rgba(255,255,255,.18);color:var(--accent)}
  .dm{position:static;box-shadow:none;border:0;background:rgba(255,255,255,.12);min-width:0;padding:4px 0}
@@ -294,10 +294,6 @@ a.tile:hover{border-color:var(--brand);color:var(--brand)}
 .spx{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1}
 .spbody{flex:1;overflow:auto;padding:6px 20px 30px;position:relative}
 .spsec h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#888;margin:22px 0 6px;font-weight:700}
-.spsec summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;color:#333;font-weight:700;padding:16px 0;border-bottom:1px solid #eee;cursor:pointer}
-.spsec summary::-webkit-details-marker{display:none}
-.spsec summary::after{content:"+";font-size:1.4rem;line-height:1}
-.spsec[open] summary::after{content:"\2212"}
 .spsec a{display:block;padding:10px 0;text-decoration:none;border-bottom:1px solid #eee;transition:transform .15s,color .15s}
 .spsec a:hover{transform:translateX(6px);color:var(--brand)}
 .sptab{position:fixed;left:0;top:45%;z-index:18;writing-mode:vertical-rl;background:var(--brand);color:#fff;border:0;padding:16px 8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:0 8px 8px 0}
@@ -356,6 +352,9 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .gi li{padding:2px 0}
 /* phone: the floating Menu tab is replaced by the menu button in the top bar */
 @media(max-width:900px){.sptab{display:none}}
+.navx{display:none}
+@media(max-width:900px){.navx{display:block;position:absolute;top:8px;right:12px;background:none;border:0;color:#fff;font-size:2rem;line-height:1}}
+@media(prefers-reduced-motion:reduce){nav.main{transition:none!important}}
 /* small "coming soon" pop-up */
 #soon{max-width:340px;width:86vw}
 .soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
@@ -854,7 +853,7 @@ function route(){
   const h = location.hash.replace(/^#\/?/, '');
   const [path, qs] = h.split('?');
   const q = new URLSearchParams(qs || '');
-  let mode = ['all','specials','new','apparel','men','women','holidays','social','privacy','about','sitemap','wishlist'].includes(path) ? path : 'home';
+  let mode = ['all','specials','new','apparel','men','women','holidays','social','music','privacy','about','sitemap','wishlist'].includes(path) ? path : 'home';
   const list = (k, ok) => (q.get(k) || '').split(',').filter(v => ok ? ok.includes(v) : v);
   let auds = list('aud', AUDIENCES);
   if(path === 'men' || path === 'women'){ if(!auds.length) auds = [path === 'men' ? 'Men' : 'Women']; mode = 'apparel'; }
@@ -865,9 +864,9 @@ const PAGE_NAMES = {all:'All Products', specials:'Specials', new:'New Releases',
 function buildSidePanel(){
   const grps = GROUPS.filter(g => products.some(p => p.group === g));
   const auds = [['Men', href('apparel', {aud:'Men'})], ['Women', href('apparel', {aud:'Women'})]].concat(['Unisex', 'Kids', 'Babies'].filter(a => products.some(p => p.auds.includes(a))).map(a => [a, href('apparel', {aud:a})]));
-  const sec = (id, title, links) => links.length ? el('details', {className:'spsec', id:'sp-' + id}, [el('summary', {textContent:title})].concat(links.map(([l, u, s]) => { const a = el('a', {href:u, textContent:l}); if(s) a.onclick = e => { e.preventDefault(); showSoon(l); }; return a; }))) : null;
+  const sec = (id, title, links) => links.length ? el('div', {className:'spsec', id:'sp-' + id}, [el('h4', {textContent:title})].concat(links.map(([l, u, s]) => { const a = el('a', {href:u, textContent:l}); if(s) a.onclick = e => { e.preventDefault(); showSoon(l); }; return a; }))) : null;
   $('spBody').replaceChildren(...[
-    sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', '#', 1], ['Books', '#', 1], ['Coloring App', '#', 1]]),
+    sec('shop', 'Shop', [['Specials', href('specials')], ['Little Princess Lullabies', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', href('music')], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
     sec('aud', 'Apparel Categories', auds),
     sec('collections', 'Collections', [['Enchanted Little Royals', href('all', {col:'Enchanted Little Royals'})], ['Holidays', href('holidays')]])
@@ -875,14 +874,14 @@ function buildSidePanel(){
 }
 function openPanel(id){
   $('sidePanel').classList.add('open'); $('spShade').classList.add('open'); $('spTab').setAttribute('aria-expanded', 'true');
-  document.querySelectorAll('.spsec').forEach(d => d.open = false); // every drop-down starts closed
   const t = id && $('sp-' + id);
-  if(t) t.open = true;
   $('spBody').scrollTop = t ? Math.max(0, t.offsetTop - 8) : 0;
 }
 function closePanel(){
   $('sidePanel').classList.remove('open'); $('spShade').classList.remove('open'); $('spTab').setAttribute('aria-expanded', 'false');
 }
+function openNav(){ $('nav').classList.add('open'); $('spShade').classList.add('open'); }
+function closeNav(){ $('nav').classList.remove('open'); if(!$('sidePanel').classList.contains('open')) $('spShade').classList.remove('open'); }
 function showSoon(label){
   $('soonTitle').textContent = label;
   const d = $('soon');
@@ -897,11 +896,13 @@ function buildNav(){
     ['Apparel', href('apparel'), 'apparel'],
     ['Collections', href('all'), 'collections'],
     ['Social Media', href('social'), null],
-    ['Music', '#', 'soon'],
+    ['Music', href('music'), null],
     ['Books', '#', 'soon'],
     ['Coloring App', '#', 'soon']
   ];
-  $('nav').replaceChildren(...items.map(([label, h, panel]) => {
+  const navX = el('button', {className:'navx', type:'button', textContent:'\u00D7'});
+  navX.setAttribute('aria-label', 'Close menu'); navX.onclick = closeNav;
+  $('nav').replaceChildren(navX, ...items.map(([label, h, panel]) => {
     const a = el('a', {className: 'ni-link' + (panel && panel !== 'soon' ? ' sd' : ''), href:h, textContent:label});
     if(panel === 'soon') a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); showSoon(label); };
     else if(panel) a.onclick = e => { e.preventDefault(); $('nav').classList.remove('open'); openPanel(panel); };
@@ -1078,7 +1079,13 @@ const SOCIAL_ICONS = {
   TikTok: `<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#000"/><g fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(1.5 1.5)" stroke="#FE2C55" d="M27 10v19a6 6 0 1 1-6-6M27 10c.5 4 3 6.500 7 7"/><path transform="translate(-1.5 -1.5)" stroke="#25F4EE" d="M27 10v19a6 6 0 1 1-6-6M27 10c.5 4 3 6.500 7 7"/><path stroke="#fff" d="M27 10v19a6 6 0 1 1-6-6M27 10c.5 4 3 6.500 7 7"/></g></svg>`,
   Pinterest: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#BD081C"/><text x="24" y="35" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="30" fill="#fff">P</text></svg>`,
   Threads: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#000"/><text x="24" y="33" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="28" fill="#fff">@</text></svg>`,
-  Reddit: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#FF4500"/><ellipse cx="24" cy="28" rx="11" ry="7.5" fill="#fff"/><circle cx="14.500" cy="23.500" r="3" fill="#fff"/><circle cx="33.500" cy="23.500" r="3" fill="#fff"/><circle cx="20" cy="27" r="2" fill="#FF4500"/><circle cx="28" cy="27" r="2" fill="#FF4500"/><path d="M19.500 31.500c2.500 2 6.500 2 9 0" stroke="#FF4500" stroke-width="1.600" fill="none" stroke-linecap="round"/><circle cx="33" cy="14" r="2.500" fill="#fff"/><path d="M24 20.500l1.800-7 5.200 1.200" stroke="#fff" stroke-width="1.600" fill="none"/></svg>`
+  Reddit: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#FF4500"/><ellipse cx="24" cy="28" rx="11" ry="7.5" fill="#fff"/><circle cx="14.500" cy="23.500" r="3" fill="#fff"/><circle cx="33.500" cy="23.500" r="3" fill="#fff"/><circle cx="20" cy="27" r="2" fill="#FF4500"/><circle cx="28" cy="27" r="2" fill="#FF4500"/><path d="M19.500 31.500c2.500 2 6.500 2 9 0" stroke="#FF4500" stroke-width="1.600" fill="none" stroke-linecap="round"/><circle cx="33" cy="14" r="2.500" fill="#fff"/><path d="M24 20.500l1.800-7 5.200 1.200" stroke="#fff" stroke-width="1.600" fill="none"/></svg>`,
+  'Amazon Music': `<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#0B1A2B"/><text x="24" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">music</text><path d="M11 32c8 5 18 5 26 0" stroke="#25D1DA" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M33 29.500l5 2.800-3.500 4" stroke="#25D1DA" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  'Spotify': `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#1ED760"/><path d="M11 18c8-2.500 18-1.800 25 2.200" stroke="#000" stroke-width="3.600" fill="none" stroke-linecap="round"/><path d="M13 25.500c6.500-1.800 14-1.200 19.500 2" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M15 32c5-1.300 10-.8 14 1.500" stroke="#000" stroke-width="2.500" fill="none" stroke-linecap="round"/></svg>`,
+  'Apple Music': `<svg viewBox="0 0 48 48"><defs><linearGradient id="amg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB5C74"/><stop offset="1" stop-color="#FA233B"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#amg)"/><path fill="#fff" d="M33 11.500v17.200a4.200 4.200 0 1 1-2.400-3.800V18.200l-11 2.400v12.100a4.200 4.200 0 1 1-2.400-3.800V15.200z"/></svg>`,
+  'YouTube Music': `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#FF0000"/><circle cx="24" cy="24" r="14" fill="none" stroke="#fff" stroke-width="2.200"/><path fill="#fff" d="M20 16.500v15l12-7.500z"/></svg>`,
+  'Deezer': `<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#121216"/><rect x="6.5" y="35" width="5.5" height="5" fill="#A238FF"/><rect x="14.0" y="29" width="5.5" height="5" fill="#FF0092"/><rect x="14.0" y="35" width="5.5" height="5" fill="#FF0092"/><rect x="21.5" y="23" width="5.5" height="5" fill="#FF6A00"/><rect x="21.5" y="29" width="5.5" height="5" fill="#FF6A00"/><rect x="21.5" y="35" width="5.5" height="5" fill="#FF6A00"/><rect x="29.0" y="17" width="5.5" height="5" fill="#FFC400"/><rect x="29.0" y="23" width="5.5" height="5" fill="#FFC400"/><rect x="29.0" y="29" width="5.5" height="5" fill="#FFC400"/><rect x="29.0" y="35" width="5.5" height="5" fill="#FFC400"/><rect x="36.5" y="11" width="5.5" height="5" fill="#40AB5D"/><rect x="36.5" y="17" width="5.5" height="5" fill="#40AB5D"/><rect x="36.5" y="23" width="5.5" height="5" fill="#40AB5D"/><rect x="36.5" y="29" width="5.5" height="5" fill="#40AB5D"/><rect x="36.5" y="35" width="5.5" height="5" fill="#40AB5D"/></svg>`,
+  'TIDAL': `<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#000"/><path d="M14 12l5 5l-5 5l-5 -5z" fill="#fff"/><path d="M24 12l5 5l-5 5l-5 -5z" fill="#fff"/><path d="M34 12l5 5l-5 5l-5 -5z" fill="#fff"/><path d="M24 22l5 5l-5 5l-5 -5z" fill="#fff"/><path d="M24 32l5 5l-5 5l-5 -5z" fill="#fff"/></svg>`
 };
 function tiles(items){
   return el('div', {className:'tiles'}, items.map(([label, url]) => {
@@ -1096,6 +1103,15 @@ function renderSimplePage(title, intro, items){
   const box = $('infoBody'); box.replaceChildren(el('p', {textContent:intro}), tiles(items));
 }
 function renderHolidays(){ renderSimplePage('Holidays', 'Pick a holiday to see its designs.', HOLIDAYS.map(h => [h, href('all', {col:h})])); }
+const MUSIC = [
+  ['Amazon Music', 'https://music.amazon.com/search/Tiny%20Dreams%20Lullaby%20Christmas%20Dreams'],
+  ['Spotify', 'https://open.spotify.com/search/Christmas%20Dreams%20Tiny%20Dreams%20Lullaby'],
+  ['Apple Music', 'https://music.apple.com/us/search?term=Christmas%20Dreams%20Tiny%20Dreams%20Lullaby'],
+  ['YouTube Music', 'https://music.youtube.com/search?q=Christmas%20Dreams%20Tiny%20Dreams%20Lullaby'],
+  ['Deezer', 'https://www.deezer.com/search/Christmas%20Dreams%20Tiny%20Dreams%20Lullaby'],
+  ['TIDAL', 'https://listen.tidal.com/search?q=Christmas%20Dreams%20Tiny%20Dreams%20Lullaby']
+];
+function renderMusic(){ renderSimplePage('Music', 'Listen on your favorite music service.', MUSIC); }
 function renderSocial(){ renderSimplePage('Social Media', 'Find Little Princess Lullabies on these sites.', SOCIAL); }
 function renderWishlist(){
   const title = 'Wish Lists';
@@ -1151,16 +1167,16 @@ function renderInfo(r){
 }
 function render(){
   const r = route();
-  const isInfo = ['privacy','about','sitemap','holidays','social','wishlist'].includes(r.mode);
+  const isInfo = ['privacy','about','sitemap','holidays','social','music','wishlist'].includes(r.mode);
   const isAuth = false;
   document.body.classList.toggle('list', r.mode !== 'home');
   document.body.classList.toggle('info', isInfo || isAuth);
   $('homeView').hidden = r.mode !== 'home';
   $('listView').hidden = r.mode === 'home' || isInfo || isAuth;
   $('infoView').hidden = !(isInfo || isAuth);
-  $('nav').classList.remove('open');
+  closeNav();
   document.querySelectorAll('.ni.open').forEach(n => n.classList.remove('open'));
-  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(r.mode === 'wishlist') renderWishlist(); else if(isInfo) renderInfo(r); else renderList(r);
+  if(r.mode === 'home'){ document.title = 'Little Princess Lullabies | Love Hart Design'; renderHome(); } else if(r.mode === 'holidays') renderHolidays(); else if(r.mode === 'social') renderSocial(); else if(r.mode === 'music') renderMusic(); else if(r.mode === 'wishlist') renderWishlist(); else if(isInfo) renderInfo(r); else renderList(r);
 }
 
 let fromSidebar = false, lastMode = route().mode;
@@ -1169,19 +1185,21 @@ $('sort').onchange = () => { curPage = 1; render(); };
 $('filterBtn').onclick = () => $('side').classList.toggle('open');
 $('q').oninput = e => { fQ = e.target.value.trim(); curPage = 1; if(fQ && route().mode === 'home') location.hash = '#/all'; else render(); };
 // phone: the menu button in the top bar slides the menu in from the left; wide screens keep the drop-down bar
-$('hamb').onclick = () => { if(innerWidth <= 900) openPanel(); else $('nav').classList.toggle('open'); };
+$('hamb').onclick = () => { if(innerWidth <= 900) openNav(); else $('nav').classList.toggle('open'); };
+$('nav').addEventListener('click', e => { if(innerWidth <= 900 && e.target.closest('a')) closeNav(); });
 $('soonOk').onclick = closeSoon;
 $('soon').onclick = e => { if(e.target === $('soon')) closeSoon(); };
 $('spTab').onclick = () => openPanel();
 $('spClose').onclick = closePanel;
-$('spShade').onclick = closePanel;
+$('spShade').onclick = () => { closePanel(); closeNav(); };
 let tx = 0, ty = 0;
 addEventListener('touchstart', e => { const t = e.touches[0]; tx = t.clientX; ty = t.clientY; }, {passive:true});
 addEventListener('touchend', e => {
   const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
   if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-  const open = $('sidePanel').classList.contains('open');
-  if(dx > 0 && !open && tx < 30 && innerWidth <= 900) openPanel();
+  const navOpen = innerWidth <= 900 && $('nav').classList.contains('open'), open = $('sidePanel').classList.contains('open');
+  if(dx > 0 && !open && !navOpen && tx < 30 && innerWidth <= 900) openNav();
+  else if(dx < 0 && navOpen) closeNav();
   else if(dx < 0 && open) closePanel();
 }, {passive:true});
 $('sidePanel').onclick = e => { if(e.target.closest('a')) closePanel(); };
@@ -1478,5 +1496,4 @@ load();
 </script>
 </body>
 </html>
-
 
