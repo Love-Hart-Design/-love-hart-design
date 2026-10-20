@@ -499,7 +499,7 @@ let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
 const COLLECTIONS = ['Angel Favorites','Halloween','Thanksgiving','Christmas'];
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
-const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
+const SOCIAL = [['Facebook','https://www.facebook.com/LoveHartDesign/'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
 const AUDIENCES = ['Men','Women','Unisex','Kids','Babies'];
 // Product types that are listed under BOTH Men and Women (instead of Other). To add another: add /words in the product type name/.
@@ -1553,5 +1553,4 @@ load();
 </script>
 </body>
 </html>
-
 
