@@ -366,6 +366,12 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
 .soonbox h3{font-family:var(--cond);font-weight:700;font-size:1.4rem;text-transform:uppercase}
 .soonbox p{font-size:1.05rem;color:#777}
+/* sold-out colors and sizes (greyed out, can't be picked) */
+.sw.out,.opt.out{opacity:.4;cursor:not-allowed;position:relative}
+.opt.out{text-decoration:line-through}
+.sw.out::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#b00020;transform:rotate(45deg)}
+.sw.txt.out::after{display:none}
+.sw.txt.out{text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -774,11 +780,11 @@ function normalize(p, i){
 
 let products = [], fQ = '', cart = [], loaded = false, failed = false, curPage = 1;
 const openSecs = new Set(); // filter drop-downs the visitor has opened (they start closed)
-try{ cart = JSON.parse(localStorage.getItem('little-princess-cart')) || []; }catch(e){}
+try{ cart = JSON.parse(localStorage.getItem('fantasy-cart')) || []; }catch(e){}
 
 /* ---- wish lists: saved in the visitor's own browser (no account needed) ---- */
 const WISH_DEFAULT = 'My Wish List';
-const WISH_KEY = 'lpl-wishlists';
+const WISH_KEY = 'fantasy-wishlists';
 let wishes = [];
 function loadWishes(){
   try{
@@ -1332,12 +1338,12 @@ async function checkoutNow(items, out){
   if(!CHECKOUT_URL){ out.textContent = 'Checkout opens once Stripe is connected.'; return; }
   out.textContent = 'Taking you to checkout...';
   try{
-    try{ sessionStorage.setItem('lpl-buynow', '1'); }catch(e){}
+    try{ sessionStorage.setItem('fantasy-buynow', '1'); }catch(e){}
     const r = await fetch(CHECKOUT_URL, {method:'POST', headers:{'Content-Type':'application/json', ...(ANON_KEY && {Authorization:'Bearer ' + ANON_KEY})}, body:JSON.stringify({cart:items, returnUrl:location.href.split('#')[0].split('?')[0]})});
     const j = await r.json();
     if(j.url) location.href = j.url; else throw new Error(j.error || 'No checkout URL');
   }catch(e){
-    try{ sessionStorage.removeItem('lpl-buynow'); }catch(x){}
+    try{ sessionStorage.removeItem('fantasy-buynow'); }catch(x){}
     out.textContent = (e && e.message && e.message !== 'No checkout URL' && e.message !== 'Failed to fetch') ? e.message : 'Checkout could not start. Please try again.';
   }
 }
@@ -1467,7 +1473,7 @@ function openProduct(p, colors){
 }
 
 function saveCart(){
-  try{ localStorage.setItem('little-princess-cart', JSON.stringify(cart)); }catch(e){}
+  try{ localStorage.setItem('fantasy-cart', JSON.stringify(cart)); }catch(e){}
   $('cartCount').textContent = cart.reduce((s,l) => s + l.qty, 0);
   const box = $('items'); box.replaceChildren();
   if(!cart.length) box.append(el('p', {className:'note', textContent:'Your cart is empty.'}));
@@ -1499,7 +1505,7 @@ $('checkout').onclick = async () => {
 };
 
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
-const CACHE_KEY = 'lpl-products-cache-v1';
+const CACHE_KEY = 'fantasy-products-cache-v1';
 function applyFeed(arr){
   arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
@@ -1544,15 +1550,98 @@ buildNav(); renderBanners(); startNavSlide(); saveCart(); render();
 (function(){
   const q = new URLSearchParams(location.search);
   let now = false;
-  try{ now = sessionStorage.getItem('lpl-buynow') === '1'; sessionStorage.removeItem('lpl-buynow'); }catch(e){}
+  try{ now = sessionStorage.getItem('fantasy-buynow') === '1'; sessionStorage.removeItem('fantasy-buynow'); }catch(e){}
   if(q.get('paid') === '1'){ if(!now){ cart = []; saveCart(); } toast('Thank you! Your order was received.'); }
   else if(q.get('canceled') === '1'){ toast('Checkout canceled. Your cart is still here.'); }
   if(q.has('paid') || q.has('canceled')) history.replaceState(null, '', location.pathname + location.hash);
 })();
 load();
 </script>
+
+<!-- Sold-out colors and sizes: greys them out in the product pop-up and blocks adding a sold-out choice to the cart -->
+<script>
+(function(){
+  var cur = null, out = new Set(), pending = false;
+  var KEY = (typeof CACHE_KEY !== 'undefined') ? CACHE_KEY : 'fantasy-products-cache-v1';
+  var key = function(c, s){ return c + '||' + s; };
+
+  // the sold-out list for the product that was just opened (it comes from the product feed)
+  function loadOut(p){
+    out = new Set();
+    try{
+      var v = (p && p.variants && p.variants.length === 1) ? p.variants[0] : null;
+      if(!v) return;
+      var raw = JSON.parse(localStorage.getItem(KEY) || '[]');
+      var hit = raw.find(function(x){ return String(x.id) === String(v.id); });
+      if(hit && Array.isArray(hit.soldOut)) hit.soldOut.forEach(function(s){ out.add(s); });
+    }catch(e){}
+  }
+  function pickedColor(info){
+    var on = info.querySelector('.swatches .sw.on');
+    return on ? on.getAttribute('aria-label') : '';
+  }
+  function pickedSize(info){
+    var b = info.querySelector('.opts[aria-label="Size"] .opt[aria-pressed="true"]');
+    return b ? b.textContent : '';
+  }
+  function mark(b, off, label){
+    if(b.dataset.t === undefined) b.dataset.t = b.getAttribute('title') || '';
+    b.classList.toggle('out', off);
+    b.disabled = off;
+    b.title = off ? label + ' - sold out' : b.dataset.t;
+  }
+  function apply(){
+    pending = false;
+    var info = document.querySelector('#pd .info');
+    if(!info || !cur || !out.size) return;
+    var v = cur.variants[0];
+    var sizes = v.sizes.length ? v.sizes : [''];
+    var colors = v.colors.length ? v.colors : [''];
+    var selColor = pickedColor(info);
+    var sw = Array.prototype.slice.call(info.querySelectorAll('.swatches .sw'));
+    sw.forEach(function(b){
+      var c = b.getAttribute('aria-label');
+      mark(b, sizes.every(function(s){ return out.has(key(c, s)); }), c);
+    });
+    var row = info.querySelector('.opts[aria-label="Size"]');
+    var sbtns = row ? Array.prototype.slice.call(row.querySelectorAll('.opt')) : [];
+    sbtns.forEach(function(b){
+      var s = b.textContent;
+      var off = selColor ? out.has(key(selColor, s)) : colors.every(function(c){ return out.has(key(c, s)); });
+      mark(b, off, s);
+    });
+    // safety net: block Add to cart / Buy now if the chosen size and color is sold out
+    var msg = info.querySelector('.msg');
+    ['.add', '.stripebtn'].forEach(function(q){
+      var btn = info.querySelector(q);
+      if(!btn || btn.dataset.sg) return;
+      btn.dataset.sg = '1';
+      btn.addEventListener('click', function(ev){
+        var c = pickedColor(info), s = pickedSize(info);
+        if(c && s && out.has(key(c, s))){
+          ev.stopImmediatePropagation(); ev.preventDefault();
+          if(msg) msg.textContent = 'Sorry, that size is sold out in that color. Please choose a different size or color.';
+        }
+      }, true);
+    });
+  }
+  function soon(){ if(!pending){ pending = true; requestAnimationFrame(apply); } }
+
+  // runs again whenever the pop-up is redrawn or a color or size is picked
+  var host = document.getElementById('pd');
+  if(host) new MutationObserver(soon).observe(host, {childList:true, subtree:true, attributes:true, attributeFilter:['class', 'aria-pressed']});
+
+  var orig = window.openProduct;
+  if(typeof orig === 'function'){
+    window.openProduct = function(p){
+      cur = p; loadOut(p);
+      var r = orig.apply(this, arguments);
+      soon();
+      return r;
+    };
+  }
+})();
+</script>
 </body>
 </html>
-
-
 
