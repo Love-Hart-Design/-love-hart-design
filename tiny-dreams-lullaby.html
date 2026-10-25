@@ -366,6 +366,12 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .soonbox{padding:30px 26px;text-align:center;display:flex;flex-direction:column;gap:12px}
 .soonbox h3{font-family:var(--cond);font-weight:700;font-size:1.4rem;text-transform:uppercase}
 .soonbox p{font-size:1.05rem;color:#777}
+/* sold-out colors and sizes (greyed out, can't be picked) */
+.sw.out,.opt.out{opacity:.4;cursor:not-allowed;position:relative}
+.opt.out{text-decoration:line-through}
+.sw.out::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#b00020;transform:rotate(45deg)}
+.sw.txt.out::after{display:none}
+.sw.txt.out{text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -1302,9 +1308,9 @@ function startNavSlide(){
 const CARD_ICONS = [
   '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><text x="19" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-style="italic" font-size="11" fill="#1a1f71">VISA</text></svg>',
   '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><circle cx="15" cy="12" r="7" fill="#eb001b"/><circle cx="23" cy="12" r="7" fill="#f79e1b" fill-opacity=".85"/></svg>',
-  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#2e77bc" stroke="#2e77bc"/><text x="19" y="15.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" fill="#fff">AMEX</text></svg>',
-  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><text x="13" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.2" fill="#231f20">DISCOVER</text><circle cx="31" cy="12" r="4" fill="#f68121"/></svg>',
-  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><circle cx="19" cy="12" r="8" fill="#0079be"/><circle cx="19" cy="12" r="5.5" fill="#fff"/><rect x="18" y="5" width="2" height="14" fill="#0079be"/></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#2e77bc" stroke="#2e77bc"/><text x="19" y="15.500" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.500" fill="#fff">AMEX</text></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><text x="13" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="5.200" fill="#231f20">DISCOVER</text><circle cx="31" cy="12" r="4" fill="#f68121"/></svg>',
+  '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><circle cx="19" cy="12" r="8" fill="#0079be"/><circle cx="19" cy="12" r="5.500" fill="#fff"/><rect x="18" y="5" width="2" height="14" fill="#0079be"/></svg>',
   '<svg viewBox="0 0 38 24"><rect x=".5" y=".5" width="37" height="23" rx="3" fill="#fff" stroke="#d0d0d0"/><rect x="6" y="5" width="8" height="14" rx="2" fill="#0e4c96"/><rect x="15" y="5" width="8" height="14" rx="2" fill="#c8102e"/><rect x="24" y="5" width="8" height="14" rx="2" fill="#00964e"/><g font-family="Arial,sans-serif" font-weight="700" font-size="7" fill="#fff" text-anchor="middle"><text x="10" y="15">J</text><text x="19" y="15">C</text><text x="28" y="15">B</text></g></svg>'
 ].join('');
 // Buy now: sends just this one item straight to Stripe, without touching what is already in the cart
@@ -1416,7 +1422,7 @@ function openProduct(p, colors){
     cards.setAttribute('aria-label', 'Accepted cards: Visa, Mastercard, American Express, Discover, Diners Club, JCB');
     cards.innerHTML = CARD_ICONS;
 
-    // Add to wish list: drop-down with "Add to my wish list" and "Create wish list". Saved on this device.
+    // Add to wish list: drop-down with "Add to my wish list" and "Create wish list". Saving needs a signed-in account.
     const wbtn = el('button', {className:'wlbtn', type:'button', textContent:'Add to wish list'});
     wbtn.setAttribute('aria-expanded', 'false');
     const wmsg = el('p', {className:'msg'});
@@ -1530,6 +1536,91 @@ buildNav(); renderBanners(); startNavSlide(); saveCart(); render();
   if(q.has('paid') || q.has('canceled')) history.replaceState(null, '', location.pathname + location.hash);
 })();
 load();
+</script>
+
+<!-- Sold-out colors and sizes: greys them out in the product pop-up and blocks adding a sold-out choice to the cart -->
+<script>
+(function(){
+  var cur = null, out = new Set(), pending = false;
+  var KEY = (typeof CACHE_KEY !== 'undefined') ? CACHE_KEY : 'tdl-products-cache-v1';
+  var key = function(c, s){ return c + '||' + s; };
+
+  // the sold-out list for the product that was just opened (it comes from the product feed)
+  function loadOut(p){
+    out = new Set();
+    try{
+      var v = (p && p.variants && p.variants.length === 1) ? p.variants[0] : null;
+      if(!v) return;
+      var raw = JSON.parse(localStorage.getItem(KEY) || '[]');
+      var hit = raw.find(function(x){ return String(x.id) === String(v.id); });
+      if(hit && Array.isArray(hit.soldOut)) hit.soldOut.forEach(function(s){ out.add(s); });
+    }catch(e){}
+  }
+  function pickedColor(info){
+    var on = info.querySelector('.swatches .sw.on');
+    return on ? on.getAttribute('aria-label') : '';
+  }
+  function pickedSize(info){
+    var b = info.querySelector('.opts[aria-label="Size"] .opt[aria-pressed="true"]');
+    return b ? b.textContent : '';
+  }
+  function mark(b, off, label){
+    if(b.dataset.t === undefined) b.dataset.t = b.getAttribute('title') || '';
+    b.classList.toggle('out', off);
+    b.disabled = off;
+    b.title = off ? label + ' - sold out' : b.dataset.t;
+  }
+  function apply(){
+    pending = false;
+    var info = document.querySelector('#pd .info');
+    if(!info || !cur || !out.size) return;
+    var v = cur.variants[0];
+    var sizes = v.sizes.length ? v.sizes : [''];
+    var colors = v.colors.length ? v.colors : [''];
+    var selColor = pickedColor(info);
+    var sw = Array.prototype.slice.call(info.querySelectorAll('.swatches .sw'));
+    sw.forEach(function(b){
+      var c = b.getAttribute('aria-label');
+      mark(b, sizes.every(function(s){ return out.has(key(c, s)); }), c);
+    });
+    var row = info.querySelector('.opts[aria-label="Size"]');
+    var sbtns = row ? Array.prototype.slice.call(row.querySelectorAll('.opt')) : [];
+    sbtns.forEach(function(b){
+      var s = b.textContent;
+      var off = selColor ? out.has(key(selColor, s)) : colors.every(function(c){ return out.has(key(c, s)); });
+      mark(b, off, s);
+    });
+    // safety net: block Add to cart / Buy now if the chosen size and color is sold out
+    var msg = info.querySelector('.msg');
+    ['.add', '.stripebtn'].forEach(function(q){
+      var btn = info.querySelector(q);
+      if(!btn || btn.dataset.sg) return;
+      btn.dataset.sg = '1';
+      btn.addEventListener('click', function(ev){
+        var c = pickedColor(info), s = pickedSize(info);
+        if(c && s && out.has(key(c, s))){
+          ev.stopImmediatePropagation(); ev.preventDefault();
+          if(msg) msg.textContent = 'Sorry, that size is sold out in that color. Please choose a different size or color.';
+        }
+      }, true);
+    });
+  }
+  function soon(){ if(!pending){ pending = true; requestAnimationFrame(apply); } }
+
+  // runs again whenever the pop-up is redrawn or a color or size is picked
+  var host = document.getElementById('pd');
+  if(host) new MutationObserver(soon).observe(host, {childList:true, subtree:true, attributes:true, attributeFilter:['class', 'aria-pressed']});
+
+  var orig = window.openProduct;
+  if(typeof orig === 'function'){
+    window.openProduct = function(p){
+      cur = p; loadOut(p);
+      var r = orig.apply(this, arguments);
+      soon();
+      return r;
+    };
+  }
+})();
 </script>
 </body>
 </html>
