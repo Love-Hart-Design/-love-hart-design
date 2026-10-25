@@ -467,6 +467,7 @@ const TOP_SLIDE_SECONDS = 4;   // how often the thin top banner changes
 const MAIN_SLIDE_SECONDS = 7;  // how often the main banner changes (different, so they move at different times)
 const NAV_SLIDE_SECONDS = 5.5; // phone only: how often the top link bar slides to its next links (different from both banners)
 const ALL_PAGE_SIZE = 12;      // products per page on every list page
+const HIDE_ALL_PRODUCTS = true;  // true = this store shows NO products. Change to false once your new designs are uploaded.
 
 const BRANDS = [
   ['Angels', 'angels-store.html'],
@@ -1507,6 +1508,7 @@ $('checkout').onclick = async () => {
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
 const CACHE_KEY = 'animals-products-cache-v1';
 function applyFeed(arr){
+  if(HIDE_ALL_PRODUCTS) arr = [];
   arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
   APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
