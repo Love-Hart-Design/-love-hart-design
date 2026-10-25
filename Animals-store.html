@@ -503,7 +503,8 @@ let APPAREL = []; // filled from Spreadconnect product types when products load
 const CATEGORIES = ['Cats','Dogs','Wolves','Bears','Horses','Birds','Foxes','Owls','Elephants','Lions','Butterflies','Wildlife'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Animal Favorites','Halloween','Thanksgiving','Christmas'];
+const COLLECTION_THEMES = ['Aquatic','Big Cats','Birds','Bugs','Cats','Dogs','Farm','Horses','Nature & Peace','North American Animals','Pets','Reptiles and Amphibians','Selfies','Sea Life','Wild Animals','Wolf Shirt Collection'];
+const COLLECTIONS = COLLECTION_THEMES.concat(['Halloween','Thanksgiving','Christmas']);
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
@@ -886,7 +887,7 @@ function buildSidePanel(){
     sec('shop', 'Shop', [['Specials', href('specials')], ['Animals', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', href('music')], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
     sec('aud', 'Apparel Categories', auds),
-    sec('collections', 'Collections', [['Animal Favorites', href('all', {col:'Animal Favorites'})], ['Holidays', href('holidays')]])
+    sec('collections', 'Collections', [...COLLECTION_THEMES.map(c => [c, href('all', {col:c})]), ['Holidays', href('holidays')]])
   ].filter(Boolean));
 }
 function openPanel(id){
@@ -936,7 +937,7 @@ function buildNav(){
   const holidays = [['All Holidays', href('holidays')]].concat(HOLIDAYS.map(h => [h, href('all', {col:h})]));
   const menus = {
     apparel: el('div', {className:'dm'}, [lnk('All Apparel', href('apparel'))].concat(audBlocks, grpList.length ? [sub('By Type of Item', grpList.map(g => [g, href('apparel', {grp:g})]))] : [])),
-    collections: el('div', {className:'dm'}, [lnk('Animal Favorites', href('all', {col:'Animal Favorites'})), sub('Holidays', holidays)]),
+    collections: el('div', {className:'dm'}, [sub('Themes', COLLECTION_THEMES.map(c => [c, href('all', {col:c})])), sub('Holidays', holidays)]),
     themes: el('div', {className:'dm'}, [lnk('All Products', href('all'))].concat(themes.length ? [sub('Themes', themes.map(c => [c, href('all', {cat:c})]))] : []))
   };
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
