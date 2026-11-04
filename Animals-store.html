@@ -372,6 +372,14 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .sw.out::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#b00020;transform:rotate(45deg)}
 .sw.txt.out::after{display:none}
 .sw.txt.out{text-decoration:line-through}
+/* Collections drop-down: all collections in 2 columns (like The Mountain) */
+.dm.cols{min-width:min(520px,92vw);background:var(--nav);border:0;padding:22px 26px;grid-template-columns:1fr 1fr;gap:0 40px}
+.ni.open .dm.cols{display:grid}
+@media(hover:hover){.ni:hover .dm.cols,.ni:focus-within .dm.cols{display:grid}}
+.dm.cols a{color:#fff;text-transform:uppercase;font-weight:700;letter-spacing:.02em;padding:14px 0}
+.dm.cols a:hover{background:none;color:var(--accent)}
+@media(max-width:900px){.dm.cols{min-width:0;padding:10px 16px;gap:0 16px}.dm.cols a{padding:10px 0}}
+body.scrolled nav.main.open .dm.cols{display:grid}
 </style>
 </head>
 <body>
@@ -934,10 +942,9 @@ function buildNav(){
   const audBlocks = AUDIENCES.concat(['']).map(a => { const kinds = kindsOf(a); if(!kinds.length) return null; return sub(a || 'Other', (a ? [['All ' + a, href('apparel', {aud:a})]] : []).concat(kinds.map(k => [k, href('apparel', {app:k})]))); }).filter(Boolean);
   const grpList = GROUPS.filter(g => products.some(pp => pp.group === g));
   const themes = CATEGORIES.filter(c => products.some(pp => pp.cats.includes(c)));
-  const holidays = [['All Holidays', href('holidays')]].concat(HOLIDAYS.map(h => [h, href('all', {col:h})]));
   const menus = {
     apparel: el('div', {className:'dm'}, [lnk('All Apparel', href('apparel'))].concat(audBlocks, grpList.length ? [sub('By Type of Item', grpList.map(g => [g, href('apparel', {grp:g})]))] : [])),
-    collections: el('div', {className:'dm'}, [sub('Themes', COLLECTION_THEMES.map(c => [c, href('all', {col:c})])), sub('Holidays', holidays)]),
+    collections: el('div', {className:'dm cols'}, COLLECTION_THEMES.map(c => lnk(c, href('all', {col:c}))).concat([lnk('Holidays', href('holidays'))])),
     themes: el('div', {className:'dm'}, [lnk('All Products', href('all'))].concat(themes.length ? [sub('Themes', themes.map(c => [c, href('all', {cat:c})]))] : []))
   };
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
