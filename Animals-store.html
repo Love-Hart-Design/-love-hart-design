@@ -508,7 +508,7 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Cats','Dogs','Wolves','Bears','Horses','Birds','Foxes','Owls','Elephants','Lions','Butterflies','Wildlife'];
+const CATEGORIES = ['Cats','Dogs','Wolves','Bears','Horses','Birds','Foxes','Owls','Elephants','Lions','Tigers','Panthers','Leopards','Butterflies','Wildlife'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
 const COLLECTION_THEMES = ['Aquatic','Big Cats','Birds','Bugs','Cats','Dogs','Farm','Horses','Nature & Peace','North American Animals','Pets','Reptiles and Amphibians','Selfies','Sea Life','Wild Animals','Wolf Shirt Collection'];
@@ -1651,6 +1651,18 @@ load();
     };
   }
 })();
+</script>
+
+<!-- Themes drop-down fix: clicking the white "Themes" box in the menu opens or closes its list of themes -->
+<script>
+document.addEventListener('click', function(e){
+  var s = e.target.closest && e.target.closest('.dm summary');
+  if(!s) return;
+  e.preventDefault();
+  e.stopPropagation();
+  var d = s.parentNode;
+  d.open = !d.open;
+}, true);
 </script>
 </body>
 </html>
