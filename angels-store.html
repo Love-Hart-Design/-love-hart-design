@@ -499,10 +499,10 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Guardian Angels','Angel Wings','Halos','Cherubs','Memorial','Faith','Hope','Peace','Heaven','Remembrance'];
+const CATEGORIES = ['Guardian Angels','Angel Wings','Halos','Cherubs','Memorial','Faith','Hope','Peace','Heaven','Remembrance','Guardian Angel of the Enchanted Forest','Warrior Angel of the Crimson Skies','Angel of the Frozen Cathedral','Angel of the Ancient Rose Garden','Angel of the Golden Harvest','Fallen Angel of the Forgotten Ruins','Angel of the Sapphire Night','Angel Mother and Sleeping Child','Angel of the Waterfall Sanctuary','Angel Queen of the Heavenly Court'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Angel Favorites','Halloween','Thanksgiving','Christmas'];
+const COLLECTIONS = ['Angel Favorites','The Celestial Guardians Collection','Halloween','Thanksgiving','Christmas'];
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/LoveHartDesign/'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
@@ -885,7 +885,7 @@ function buildSidePanel(){
     sec('shop', 'Shop', [['Specials', href('specials')], ['Angels', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', href('music')], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
     sec('aud', 'Apparel Categories', auds),
-    sec('collections', 'Collections', [['Angel Favorites', href('all', {col:'Angel Favorites'})], ['Holidays', href('holidays')]])
+    sec('collections', 'Collections', [['Angel Favorites', href('all', {col:'Angel Favorites'})], ['The Celestial Guardians Collection', href('all', {col:'The Celestial Guardians Collection'})], ['Holidays', href('holidays')]])
   ].filter(Boolean));
 }
 function openPanel(id){
@@ -935,7 +935,7 @@ function buildNav(){
   const holidays = [['All Holidays', href('holidays')]].concat(HOLIDAYS.map(h => [h, href('all', {col:h})]));
   const menus = {
     apparel: el('div', {className:'dm'}, [lnk('All Apparel', href('apparel'))].concat(audBlocks, grpList.length ? [sub('By Type of Item', grpList.map(g => [g, href('apparel', {grp:g})]))] : [])),
-    collections: el('div', {className:'dm'}, [lnk('Angel Favorites', href('all', {col:'Angel Favorites'})), sub('Holidays', holidays)]),
+    collections: el('div', {className:'dm'}, [lnk('Angel Favorites', href('all', {col:'Angel Favorites'})), lnk('The Celestial Guardians Collection', href('all', {col:'The Celestial Guardians Collection'})), sub('Holidays', holidays)]),
     themes: el('div', {className:'dm'}, [lnk('All Products', href('all'))].concat(themes.length ? [sub('Themes', themes.map(c => [c, href('all', {cat:c})]))] : []))
   };
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
@@ -1644,6 +1644,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
