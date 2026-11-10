@@ -523,6 +523,69 @@ function groupOf(type){
 // To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
 const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
 const GARMENT_INFO = [
+  [/kid.?s?.*tie.?dye/i, [
+    'Double-needle stitching throughout',
+    'Shoulder-to-shoulder tape',
+    'No two are alike',
+    'Due to the unique Tie-Dye process, color variations may occur',
+    'Fabric weight: 5.4 oz (midweight)',
+    '100% Cotton',
+    'Brand: Tie Dye USA',
+    'Imported product, printed and processed in the USA'
+  ]],
+  [/tie.?dye.*long.?sleeve/i, [
+    'Pre-shrunk',
+    'Classic fit',
+    'Ribbed collar and cuffs',
+    'Double-needle bottom hem',
+    'Fabric weight: 5.3 oz',
+    '100% heavyweight cotton',
+    'Brand: Colortone',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/tie.?dye.*hoodie/i, [
+    'Hand-dyed color combinations',
+    'No two exactly alike',
+    'Drawstring hood',
+    'To be washed separately',
+    'Fabric weight: 8.5 oz (heavyweight)',
+    '80% cotton, 20% polyester',
+    'Brand: Tie-Dye',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/unisex.*tie.?dye/i, [
+    'Brand: Dyenomite | Product ID: 200CY',
+    '100% cotton | Fabric weight: 5.5 oz (heavyweight)',
+    'Double-stitched sleeves, waist, shoulders and collar',
+    'Reinforced shoulder construction maintains shape after repeated washings',
+    'PLEASE NOTE: order a size smaller for a more snug fit',
+    'Imported; processed and printed in the U.S.A.'
+  ]],
+  [/garment.?dyed/i, [
+    'Double-needle stitching throughout',
+    'Pigment-dyed for a retro vintage look',
+    'Reinforced seams',
+    'Fabric weight: 7.5 oz (heavyweight)',
+    '100% cotton',
+    'Brand: Shaka Wear',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/colorblast|color.?blast/i, [
+    'Garment-dyed for that lived in feel and almost no shrinkage at home',
+    'Relaxed fit',
+    '1x1 rib collar, cuffs and waistband',
+    'Back neck twill tape',
+    'Fabric weight: 9.5 oz (heavyweight)',
+    '80/20 ringspun cotton/polyester cotton/polyester',
+    'Brand: Comfort Colors',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/ornament/i, [
+    'Aluminum with white gloss coating | Weight: .03lb',
+    'Measures 2.75” in diameter x .3” in thickness',
+    'Comes complete with punched hole and red satin ribbon for hanging',
+    'Imported; printed and processed in the USA'
+  ], 'nodtg'],
   [/ultra.?cotton.*adult/i, [
     'Fabric weight: 6 oz (heavyweight)',
     'Material: 100% preshrunk cotton (Heather gray is 90% cotton/10% polyester. Deep heather is 50% cotton/50% polyester)',
@@ -708,7 +771,7 @@ function garmentInfo(c){
   const hit = GARMENT_INFO.find(([re]) => re.test(type));
   const fromFeed = Array.isArray(c.garmentInfo) ? c.garmentInfo : [];
   if(!hit && !fromFeed.length && c.group !== 'Clothing') return null;
-  const lines = (hit ? hit[1] : fromFeed).concat(DTG_LINE);
+  const lines = (hit ? hit[1] : fromFeed).concat(hit && hit[2] === 'nodtg' ? [] : [DTG_LINE]);
   return el('div', {className:'gi'}, [el('h4', {textContent:type}), el('ul', {}, lines.map(t => el('li', {textContent:t})))]);
 }
 
@@ -1623,4 +1686,5 @@ load();
 </script>
 </body>
 </html>
+
 
