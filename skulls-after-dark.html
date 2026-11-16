@@ -746,7 +746,7 @@ function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
   const tags = m ? m[1].split('|').map(s => s.trim()) : [];
-  const title = (p.title || p.name || '').replace(/^skulls\s+after\s+dark\s*[\u2013\u2014:|-]?\s*/i, '');
+  const title = (p.title || p.name || '').replace(/^skulls\s*after\s*dark\s*[\u2013\u2014:|-]?\s*/i, '');
   const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
   const priceNum = parseFloat(p.price != null ? p.price : p.retailPrice) || 0;
   const was = parseFloat(p.compareAtPrice || p.compare_at_price || p.originalPrice || 0);
@@ -1623,5 +1623,4 @@ load();
 </script>
 </body>
 </html>
-
 
