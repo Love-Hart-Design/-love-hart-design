@@ -499,7 +499,7 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Dragons','Wizards','Fairies','Unicorns','Mermaids','Elves','Castles','Magic','Mythical Creatures','Potions','Crystals','Enchanted Forest'];
+const CATEGORIES = ['Dragons','Wizards','Fairies','Unicorns','Mermaids','Elves','Castles','Magic','Mythical Creatures','Potions','Crystals','Enchanted Forest','Phoenixes','Sorcerers'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
 const COLLECTIONS = ['Fantasy Favorites','Halloween','Thanksgiving','Christmas'];
@@ -527,6 +527,63 @@ function groupOf(type){
 // To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
 const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
 const GARMENT_INFO = [
+  [/kid.*tie.?dye/i, [
+    'Double-needle stitching throughout',
+    'Shoulder-to-shoulder tape',
+    'No two are alike',
+    'Due to the unique Tie-Dye process, color variations may occur',
+    'Fabric weight: 5.4 oz (midweight)',
+    '100% Cotton',
+    'Brand: Tie Dye USA',
+    'Imported product, printed and processed in the USA'
+  ]],
+  [/tie.?dye.*long.?sleeve/i, [
+    'Pre-shrunk',
+    'Classic fit',
+    'Ribbed collar and cuffs',
+    'Double-needle bottom hem',
+    'Fabric weight: 5.3 oz',
+    '100% heavyweight cotton',
+    'Brand: Colortone',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/tie.?dye.*hoodie/i, [
+    'Hand-dyed color combinations',
+    'No two exactly alike',
+    'Drawstring hood',
+    'To be washed separately',
+    'Fabric weight: 8.5 oz (heavyweight)',
+    '80% cotton, 20% polyester',
+    'Brand: Tie-Dye',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/tie.?dye.*(t-?shirt|tee)/i, [
+    'Brand: Dyenomite | Product ID: 200CY',
+    '100% cotton | Fabric weight: 5.5 oz (heavyweight)',
+    'Double-stitched sleeves, waist, shoulders and collar',
+    'Reinforced shoulder construction maintains shape after repeated washings',
+    'PLEASE NOTE: order a size smaller for a more snug fit',
+    'Imported; processed and printed in the U.S.A.'
+  ]],
+  [/garment.?dyed/i, [
+    'Double-needle stitching throughout',
+    'Pigment-dyed for a retro vintage look',
+    'Reinforced seams',
+    'Fabric weight: 7.5 oz (heavyweight)',
+    '100% cotton',
+    'Brand: Shaka Wear',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/colou?r.?blast/i, [
+    'Garment-dyed for that lived in feel and almost no shrinkage at home',
+    'Relaxed fit',
+    '1x1 rib collar, cuffs and waistband',
+    'Back neck twill tape',
+    'Fabric weight: 9.5 oz (heavyweight)',
+    '80/20 ringspun cotton/polyester',
+    'Brand: Comfort Colors',
+    'Imported product, printed & processed in the USA'
+  ]],
   [/ultra.?cotton.*adult/i, [
     'Fabric weight: 6 oz (heavyweight)',
     'Material: 100% preshrunk cotton (Heather gray is 90% cotton/10% polyester. Deep heather is 50% cotton/50% polyester)',
@@ -1644,4 +1701,5 @@ load();
 </script>
 </body>
 </html>
+
 
