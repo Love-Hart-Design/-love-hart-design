@@ -499,10 +499,12 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Deer','Elk','Turkey','Ducks','Bass','Trout','Bowhunting','Fishing Lures','Boats','Camo','Fishing Humor','Hunting Humor'];
+const FISHING_THEMES = ['Marlin','Bass','Mahi Mahi','Catfish','Trout','Grouper','Cobia','Permit','Snapper','Roosterfish','Sailfish','Silver King','Snook','Wahoo','Tuna'];
+const HUNTING_THEMES = ['Elk','Mallards','Dogs','Turkeys','Deer'];
+const CATEGORIES = Array.from(new Set(['Deer','Elk','Turkey','Ducks','Bass','Trout','Bowhunting','Fishing Lures','Boats','Camo','Fishing Humor','Hunting Humor'].concat(FISHING_THEMES, HUNTING_THEMES)));
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Hunt and Fish Favorites','Halloween','Thanksgiving','Christmas'];
+const COLLECTIONS = ['Hunting','Fishing','Halloween','Thanksgiving','Christmas'];
 const HOLIDAYS = ['Halloween','Thanksgiving','Christmas'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/profile.php?id=61594627241972'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
@@ -527,6 +529,63 @@ function groupOf(type){
 // To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
 const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
 const GARMENT_INFO = [
+  [/kid.*tie.?dye/i, [
+    'Double-needle stitching throughout',
+    'Shoulder-to-shoulder tape',
+    'No two are alike',
+    'Due to the unique Tie-Dye process, color variations may occur',
+    'Fabric weight: 5.4 oz (midweight)',
+    '100% Cotton',
+    'Brand: Tie Dye USA',
+    'Imported product, printed and processed in the USA'
+  ]],
+  [/tie.?dye.*long.?sleeve/i, [
+    'Pre-shrunk',
+    'Classic fit',
+    'Ribbed collar and cuffs',
+    'Double-needle bottom hem',
+    'Fabric weight: 5.3 oz',
+    '100% heavyweight cotton',
+    'Brand: Colortone',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/tie.?dye.*hoodie/i, [
+    'Hand-dyed color combinations',
+    'No two exactly alike',
+    'Drawstring hood',
+    'To be washed separately',
+    'Fabric weight: 8.5 oz (heavyweight)',
+    '80% cotton, 20% polyester',
+    'Brand: Tie-Dye',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/tie.?dye.*(t-?shirt|tee)/i, [
+    'Brand: Dyenomite | Product ID: 200CY',
+    '100% cotton | Fabric weight: 5.5 oz (heavyweight)',
+    'Double-stitched sleeves, waist, shoulders and collar',
+    'Reinforced shoulder construction maintains shape after repeated washings',
+    'PLEASE NOTE: order a size smaller for a more snug fit',
+    'Imported; processed and printed in the U.S.A.'
+  ]],
+  [/garment.?dyed/i, [
+    'Double-needle stitching throughout',
+    'Pigment-dyed for a retro vintage look',
+    'Reinforced seams',
+    'Fabric weight: 7.5 oz (heavyweight)',
+    '100% cotton',
+    'Brand: Shaka Wear',
+    'Imported product, printed & processed in the USA'
+  ]],
+  [/colou?r.?blast/i, [
+    'Garment-dyed for that lived in feel and almost no shrinkage at home',
+    'Relaxed fit',
+    '1x1 rib collar, cuffs and waistband',
+    'Back neck twill tape',
+    'Fabric weight: 9.5 oz (heavyweight)',
+    '80/20 ringspun cotton/polyester',
+    'Brand: Comfort Colors',
+    'Imported product, printed & processed in the USA'
+  ]],
   [/ultra.?cotton.*adult/i, [
     'Fabric weight: 6 oz (heavyweight)',
     'Material: 100% preshrunk cotton (Heather gray is 90% cotton/10% polyester. Deep heather is 50% cotton/50% polyester)',
@@ -885,7 +944,7 @@ function buildSidePanel(){
     sec('shop', 'Shop', [['Specials', href('specials')], ['Hunting & Fishing', href('all')], ['New Releases', href('new')], ['Social Media', href('social')], ['Music', href('music')], ['Books', '#', 1], ['Coloring App', '#', 1]]),
     sec('apparel', 'Apparel', [['All Apparel', href('apparel')]].concat(grps.map(g => [g, href('apparel', {grp:g})]))),
     sec('aud', 'Apparel Categories', auds),
-    sec('collections', 'Collections', [['Hunt and Fish Favorites', href('all', {col:'Hunt and Fish Favorites'})], ['Holidays', href('holidays')]])
+    sec('collections', 'Collections', [['Hunting', href('all', {col:'Hunting'})], ['Fishing', href('all', {col:'Fishing'})], ['Holidays', href('holidays')]])
   ].filter(Boolean));
 }
 function openPanel(id){
@@ -935,7 +994,7 @@ function buildNav(){
   const holidays = [['All Holidays', href('holidays')]].concat(HOLIDAYS.map(h => [h, href('all', {col:h})]));
   const menus = {
     apparel: el('div', {className:'dm'}, [lnk('All Apparel', href('apparel'))].concat(audBlocks, grpList.length ? [sub('By Type of Item', grpList.map(g => [g, href('apparel', {grp:g})]))] : [])),
-    collections: el('div', {className:'dm'}, [lnk('Hunt and Fish Favorites', href('all', {col:'Hunt and Fish Favorites'})), sub('Holidays', holidays)]),
+    collections: el('div', {className:'dm'}, [lnk('Hunting', href('all', {col:'Hunting'})), lnk('Fishing', href('all', {col:'Fishing'})), sub('Holidays', holidays)]),
     themes: el('div', {className:'dm'}, [lnk('All Products', href('all'))].concat(themes.length ? [sub('Themes', themes.map(c => [c, href('all', {cat:c})]))] : []))
   };
   $('nav').replaceChildren(...items.map(([label, h, panel]) => {
@@ -1086,7 +1145,8 @@ function renderList(r){
   section('Products', prodNodes);
   section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
   section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
-  section('Themes', opts(CATEGORIES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
+  section('Fishing Themes', opts(FISHING_THEMES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
+  section('Hunting Themes', opts(HUNTING_THEMES, 'cat', r.cats, (p, v) => p.cats.includes(v), false));
   $('side').replaceChildren(sb);
 
   const list = pool.filter(p => (!r.auds.length || p.auds.some(a => r.auds.includes(a))) && (!r.cols.length || p.cols.some(c => r.cols.includes(c))) && (!r.cats.length || p.cats.some(c => r.cats.includes(c))) && (!r.colors.length || p.gcolors.some(c => r.colors.includes(c))));
@@ -1644,4 +1704,5 @@ load();
 </script>
 </body>
 </html>
+
 
