@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet"></noscript>
 <style>
-:root{--page:#fff;--nav:#b3202a;--brand:#8f1a22;--accent:#f4c542;--foot:#1b3a2a;--qv:rgba(143,26,34,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Mountains of Christmas','Georgia',serif}
+:root{--page:#e2f2e0;--nav:#b3202a;--brand:#8f1a22;--accent:#f4c542;--foot:#1b3a2a;--qv:rgba(143,26,34,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Mountains of Christmas','Georgia',serif}
 html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box;margin:0}
 img{max-width:100%}
@@ -496,10 +496,10 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Santa','Reindeer','Snowmen','Ornaments','Christmas Trees','Lights','Gingerbread','Nativity','Stockings','Elves'];
+const CATEGORIES = ['Christmas Trees','Gingerbreads','Cabins','Elves','Santa','Penguins','Polar Bears','Reindeer','Snowmen',"Baby's First",'First Christmas','Dinosaurs','Grinch','Grinch Baby','Puppies','Kittens','Nativity'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Christmas in July','Classic Carols','Santa Claus','Winter Wonderland','Funny Christmas'];
+const COLLECTIONS = ['First Christmas','Cute Animals','Santa Claus','Winter Wonderland','Funny Christmas','Nativity'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/ChristmasSongsAllYearLong'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['YouTube','https://www.youtube.com/@ChristmasSongsAllYearLong'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
@@ -1049,7 +1049,7 @@ function priceText(p){
 function makeCard(p, colors, showType){
   // Quick view opens the same pop-out card as clicking the card itself.
   const acts = el('div', {className:'acts'}, [el('button', {type:'button', textContent:'Quick view'})]);
-  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:'lazy', decoding:'async'}), acts]);
+  const im = el('div', {className:'im'}, [el('img', {src:colorImage(p, colors) || p.img, alt:p.title, loading:((makeCard.n = (makeCard.n || 0) + 1) <= 4 ? 'eager' : 'lazy'), fetchPriority:(makeCard.n <= 4 ? 'high' : 'auto'), decoding:'async'}), acts]);
   if(p.special) im.prepend(el('span', {className:'sale', textContent:'SALE'}));
   const kids = [im, el('h3', {textContent:p.title})];
   if(showType && p.apparel) kids.push(el('span', {className:'ty', textContent:p.apparel}));
@@ -1551,6 +1551,13 @@ const CACHE_KEY = 'christmas-products-cache-v1';
 function applyFeed(arr){
   arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
+  try{
+    const o = new URL(products[0].img).origin;
+    if(o !== location.origin && !document.querySelector('link[data-pc="' + o + '"]')){
+      const l = document.createElement('link'); l.rel = 'preconnect'; l.href = o; l.crossOrigin = ''; l.dataset.pc = o;
+      document.head.appendChild(l);
+    }
+  }catch(e){}
   APPAREL = Array.from(new Set(products.map(p => p.apparel).filter(Boolean))).sort((a, b) => a.localeCompare(b));
   COLORS = Array.from(new Set(products.reduce((a, p) => a.concat(p.gcolors), []))).sort((a, b) => a.localeCompare(b));
   COLOR_HEX = {};
@@ -1613,7 +1620,9 @@ load();
     try{
       var v = (p && p.variants && p.variants.length === 1) ? p.variants[0] : null;
       if(!v) return;
-      var raw = JSON.parse(localStorage.getItem(KEY) || '[]');
+      var rawText = localStorage.getItem(KEY) || '[]';
+      if(window.__soText !== rawText){ window.__soText = rawText; window.__soList = JSON.parse(rawText); }
+      var raw = window.__soList;
       var hit = raw.find(function(x){ return String(x.id) === String(v.id); });
       if(hit && Array.isArray(hit.soldOut)) hit.soldOut.forEach(function(s){ out.add(s); });
     }catch(e){}
@@ -1686,5 +1695,6 @@ load();
 </script>
 </body>
 </html>
+
 
 
