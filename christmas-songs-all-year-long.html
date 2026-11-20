@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Christmas Songs All Year Long | Love Hart Design</title>
 <link rel="preconnect" href="https://ekplyauihbtwiyecvwcu.supabase.co" crossorigin>
-<script>window.__feed=fetch('https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products?brand=christmas').catch(function(){return null;});</script>
+<script>window.__feed=fetch('https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products?brand=christmas&lite=1').catch(function(){return null;});</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -831,6 +831,7 @@ function normalize(p, i){
     group: groupOf(String(p.productType || '').split('|')[0].trim()),
     audience: auds[0], auds,
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances),
+    lite: p.lite === true,
     colorImages: (p.colorImages && typeof p.colorImages === 'object') ? p.colorImages : {},
     colorValues: (p.colorValues && typeof p.colorValues === 'object') ? p.colorValues : {},
     garmentInfo: Array.isArray(p.garmentInfo) ? p.garmentInfo.filter(x => typeof x === 'string' && x.trim()) : []
@@ -1547,7 +1548,8 @@ $('checkout').onclick = async () => {
 };
 
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
-const CACHE_KEY = 'christmas-products-cache-v1';
+const CACHE_KEY = 'christmas-products-cache-v2';
+try{ localStorage.removeItem('christmas-products-cache-v1'); }catch(e){}
 function applyFeed(arr){
   arr = arr.filter(p => !/\btest\b/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
@@ -1573,7 +1575,7 @@ async function load(){
   try{
     // the request was already started in the page head, so it has been loading while the page drew
     let r = await window.__feed;
-    if(!r) r = await fetch(FUNCTION_URL + '?brand=' + BRAND_KEY);
+    if(!r) r = await fetch(FUNCTION_URL + '?brand=' + BRAND_KEY + '&lite=1');
     const j = await r.json();
     const arr = Array.isArray(j.products) ? j.products : ((j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []));
     const fresh = JSON.stringify(arr);
@@ -1623,7 +1625,7 @@ load();
       var rawText = localStorage.getItem(KEY) || '[]';
       if(window.__soText !== rawText){ window.__soText = rawText; window.__soList = JSON.parse(rawText); }
       var raw = window.__soList;
-      var hit = raw.find(function(x){ return String(x.id) === String(v.id); });
+      var hit = (window.__detail && window.__detail[String(v.id)]) || raw.find(function(x){ return String(x.id) === String(v.id); });
       if(hit && Array.isArray(hit.soldOut)) hit.soldOut.forEach(function(s){ out.add(s); });
     }catch(e){}
   }
@@ -1693,8 +1695,59 @@ load();
   }
 })();
 </script>
+
+<script>
+/* product details load when a product is opened */
+(function(){
+  var orig = window.openProduct;
+  if(typeof orig !== 'function') return;
+  window.__detail = window.__detail || {};
+  var pending = {};
+  function getDetail(id){
+    id = String(id);
+    if(window.__detail[id]) return Promise.resolve(window.__detail[id]);
+    if(pending[id]) return pending[id];
+    pending[id] = fetch(FUNCTION_URL + '?brand=' + BRAND_KEY + '&id=' + encodeURIComponent(id)).then(function(r){
+      if(!r.ok) throw new Error('detail ' + r.status);
+      return r.json();
+    }).then(function(j){
+      if(!j || !j.product) throw new Error('no detail');
+      window.__detail[id] = j.product;
+      delete pending[id];
+      return j.product;
+    }).catch(function(e){ delete pending[id]; throw e; });
+    return pending[id];
+  }
+  function fill(t, d){
+    t.sizes = d.sizes || [];
+    t.colors = d.colors || [];
+    t.gcolors = Array.from(new Set((d.colors || []).map(function(c){ return String(c).trim().toLowerCase(); })));
+    t.colorImages = d.colorImages || {};
+    t.colorValues = d.colorValues || {};
+    t.garmentInfo = d.garmentInfo || [];
+    t.full = true;
+  }
+  window.openProduct = function(p, colors){
+    var self = this, args = arguments;
+    var targets = [p].concat(p && p.variants ? p.variants : []).filter(function(t, i, a){ return t && a.indexOf(t) === i; });
+    var need = targets.filter(function(t){ return t.lite && !t.full; });
+    if(!need.length) return orig.apply(self, args);
+    document.body.style.cursor = 'progress';
+    var ids = Array.from(new Set(need.map(function(t){ return String(t.id); })));
+    return Promise.all(ids.map(getDetail)).then(function(){
+      need.forEach(function(t){ var d = window.__detail[String(t.id)]; if(d) fill(t, d); });
+      document.body.style.cursor = '';
+      orig.apply(self, args);
+    }).catch(function(){
+      document.body.style.cursor = '';
+      if(typeof toast === 'function') toast('Could not load this product. Please try again.');
+    });
+  };
+})();
+</script>
 </body>
 </html>
+
 
 
 
