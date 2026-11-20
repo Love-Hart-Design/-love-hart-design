@@ -808,7 +808,7 @@ function plain(h){
 function normalize(p, i){
   const desc = p.description || p.desc || '';
   const m = desc.match(/^\s*\[([^\]]+)\]\s*/);
-  const tags = m ? m[1].split('|').map(s => s.trim()) : [];
+  const tags = m ? m[1].split('|').map(s => s.trim().replace(/santa clause/ig, 'Santa Claus')) : [];
   const title = (p.title || p.name || '').replace(/^christmas\s+songs\s+all\s+year\s+long\s*[\u2013\u2014:|-]?\s*/i, '');
   const img = p.image || p.imageUrl || p.image_url || p.thumbnail || (Array.isArray(p.images) && p.images[0] && (p.images[0].url || p.images[0])) || '';
   const priceNum = parseFloat(p.price != null ? p.price : p.retailPrice) || 0;
@@ -1695,6 +1695,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
