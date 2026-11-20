@@ -65,7 +65,7 @@ body.list .track{transition-duration:.35s}
 .slide{flex:0 0 100%;display:flex;align-items:center;justify-content:center;gap:3vw;text-align:center;color:#fff;position:relative;overflow:hidden;min-height:var(--h)}
 .slide img{width:100%;display:block}
 .slide.a{background:linear-gradient(120deg,#0f5a2e,#1f8a4c)}
-.slide.b{background:#000;color:var(--accent)}
+.slide.b{background:linear-gradient(120deg,#8f1a22,#c62832);color:var(--accent)}
 .slide h1,.slide h2{font-family:var(--logo);font-weight:600;line-height:1.1;font-size:clamp(1.3rem,4.4vw,3.2rem);position:relative;margin:0}
 .slider.thin .slide h2{font-family:var(--body);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(.9rem,2.6vw,2rem)}
 .slide p{color:#fff;letter-spacing:.25em;font-size:clamp(.7rem,1.8vw,1.4rem);margin-top:8px;position:relative}
@@ -496,7 +496,7 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Christmas Trees','Gingerbreads','Cabins','Elves','Santa','Penguins','Polar Bears','Reindeer','Snowmen',"Baby's First",'First Christmas','Dinosaurs','Grinch','Grinch Baby','Puppies','Kittens','Nativity'];
+const CATEGORIES = ['Christmas Trees','Gingerbreads','Cabins','Elves','Santa','Penguins','Polar Bears','Reindeer','Snowmen',"Baby's First",'First Christmas','Dinosaurs','Grinch','Grinch Baby','Puppies','Kittens','Nativity','Cute Babies'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
 const COLLECTIONS = ['First Christmas','Cute Animals','Santa Claus','Winter Wonderland','Funny Christmas','Nativity'];
@@ -1695,6 +1695,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
