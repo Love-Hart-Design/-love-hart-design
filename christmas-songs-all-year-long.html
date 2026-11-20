@@ -1549,7 +1549,7 @@ $('checkout').onclick = async () => {
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
 const CACHE_KEY = 'christmas-products-cache-v1';
 function applyFeed(arr){
-  arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
+  arr = arr.filter(p => !/\btest\b/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
   try{
     const o = new URL(products[0].img).origin;
@@ -1695,6 +1695,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
