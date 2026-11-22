@@ -496,10 +496,10 @@ const INFO = {
   ]}
 };
 let APPAREL = []; // filled from Spreadconnect product types when products load
-const CATEGORIES = ['Raindrops','Clouds','Umbrellas','Moon & Stars','Waves','Forests','Cabins','Lightning','Puddles','Windows'];
+const CATEGORIES = ['Waterfalls','Streams','Water Gardens'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Rain','Thunderstorms','Ocean','Night Sky'];
+const COLLECTIONS = ['Waterfalls','Streams','Water Gardens'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/PureDreamSounds/'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['YouTube','https://www.youtube.com/@LoveHartDesign'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
@@ -1738,5 +1738,6 @@ load();
 </script>
 </body>
 </html>
+
 
 
