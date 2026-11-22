@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hunting & Fishing | Love Hart Design</title>
 <link rel="preconnect" href="https://ekplyauihbtwiyecvwcu.supabase.co" crossorigin>
-<script>window.__feed=fetch('https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products?brand=hunting-fishing').catch(function(){return null;});</script>
+<script>window.__feed=fetch('https://ekplyauihbtwiyecvwcu.supabase.co/functions/v1/spreadconnect-products?brand=hunting-fishing&lite=1').catch(function(){return null;});</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -529,7 +529,7 @@ function groupOf(type){
 // To add another garment: add a line  [/words in the product type name/, ['line 1', 'line 2', ...]]  to GARMENT_INFO.
 const DTG_LINE = 'Printing: DTG (direct-to-garment) printed';
 const GARMENT_INFO = [
-  [/kid.*tie.?dye/i, [
+  [/kid.?s?.*tie.?dye/i, [
     'Double-needle stitching throughout',
     'Shoulder-to-shoulder tape',
     'No two are alike',
@@ -559,7 +559,7 @@ const GARMENT_INFO = [
     'Brand: Tie-Dye',
     'Imported product, printed & processed in the USA'
   ]],
-  [/tie.?dye.*(t-?shirt|tee)/i, [
+  [/unisex.*tie.?dye/i, [
     'Brand: Dyenomite | Product ID: 200CY',
     '100% cotton | Fabric weight: 5.5 oz (heavyweight)',
     'Double-stitched sleeves, waist, shoulders and collar',
@@ -576,16 +576,22 @@ const GARMENT_INFO = [
     'Brand: Shaka Wear',
     'Imported product, printed & processed in the USA'
   ]],
-  [/colou?r.?blast/i, [
+  [/colorblast|color.?blast/i, [
     'Garment-dyed for that lived in feel and almost no shrinkage at home',
     'Relaxed fit',
     '1x1 rib collar, cuffs and waistband',
     'Back neck twill tape',
     'Fabric weight: 9.5 oz (heavyweight)',
-    '80/20 ringspun cotton/polyester',
+    '80/20 ringspun cotton/polyester cotton/polyester',
     'Brand: Comfort Colors',
     'Imported product, printed & processed in the USA'
   ]],
+  [/ornament/i, [
+    'Aluminum with white gloss coating | Weight: .03lb',
+    'Measures 2.75” in diameter x .3” in thickness',
+    'Comes complete with punched hole and red satin ribbon for hanging',
+    'Imported; printed and processed in the USA'
+  ], 'nodtg'],
   [/ultra.?cotton.*adult/i, [
     'Fabric weight: 6 oz (heavyweight)',
     'Material: 100% preshrunk cotton (Heather gray is 90% cotton/10% polyester. Deep heather is 50% cotton/50% polyester)',
@@ -771,7 +777,7 @@ function garmentInfo(c){
   const hit = GARMENT_INFO.find(([re]) => re.test(type));
   const fromFeed = Array.isArray(c.garmentInfo) ? c.garmentInfo : [];
   if(!hit && !fromFeed.length && c.group !== 'Clothing') return null;
-  const lines = (hit ? hit[1] : fromFeed).concat(DTG_LINE);
+  const lines = (hit ? hit[1] : fromFeed).concat(hit && hit[2] === 'nodtg' ? [] : [DTG_LINE]);
   return el('div', {className:'gi'}, [el('h4', {textContent:type}), el('ul', {}, lines.map(t => el('li', {textContent:t})))]);
 }
 
@@ -831,6 +837,7 @@ function normalize(p, i){
     group: groupOf(String(p.productType || '').split('|')[0].trim()),
     audience: auds[0], auds,
     sizes: pickList(p.sizes), colors: pickList(p.colors || p.appearances),
+    lite: p.lite === true,
     colorImages: (p.colorImages && typeof p.colorImages === 'object') ? p.colorImages : {},
     colorValues: (p.colorValues && typeof p.colorValues === 'object') ? p.colorValues : {},
     garmentInfo: Array.isArray(p.garmentInfo) ? p.garmentInfo.filter(x => typeof x === 'string' && x.trim()) : []
@@ -1565,7 +1572,8 @@ $('checkout').onclick = async () => {
 };
 
 /* ---- loading: show the saved copy of the products instantly, then refresh quietly in the background ---- */
-const CACHE_KEY = 'hunting-fishing-products-cache-v1';
+const CACHE_KEY = 'hunting-fishing-products-cache-v2';
+try{ localStorage.removeItem('hunting-fishing-products-cache-v1'); }catch(e){}
 function applyFeed(arr){
   arr = arr.filter(p => !/test/i.test(p.title || p.name || ''));
   products = arr.map(normalize).filter(p => p.title);
@@ -1584,7 +1592,7 @@ async function load(){
   try{
     // the request was already started in the page head, so it has been loading while the page drew
     let r = await window.__feed;
-    if(!r) r = await fetch(FUNCTION_URL + '?brand=' + BRAND_KEY);
+    if(!r) r = await fetch(FUNCTION_URL + '?brand=' + BRAND_KEY + '&lite=1');
     const j = await r.json();
     const arr = Array.isArray(j.products) ? j.products : ((j.brands && j.brands[BRAND_KEY]) || (Array.isArray(j) ? j : []));
     const fresh = JSON.stringify(arr);
@@ -1632,7 +1640,7 @@ load();
       var v = (p && p.variants && p.variants.length === 1) ? p.variants[0] : null;
       if(!v) return;
       var raw = JSON.parse(localStorage.getItem(KEY) || '[]');
-      var hit = raw.find(function(x){ return String(x.id) === String(v.id); });
+      var hit = (window.__detail && window.__detail[String(v.id)]) || raw.find(function(x){ return String(x.id) === String(v.id); });
       if(hit && Array.isArray(hit.soldOut)) hit.soldOut.forEach(function(s){ out.add(s); });
     }catch(e){}
   }
@@ -1702,7 +1710,58 @@ load();
   }
 })();
 </script>
+
+<script>
+/* product details load when a product is opened */
+(function(){
+  var orig = window.openProduct;
+  if(typeof orig !== 'function') return;
+  window.__detail = window.__detail || {};
+  var pending = {};
+  function getDetail(id){
+    id = String(id);
+    if(window.__detail[id]) return Promise.resolve(window.__detail[id]);
+    if(pending[id]) return pending[id];
+    pending[id] = fetch(FUNCTION_URL + '?brand=' + BRAND_KEY + '&id=' + encodeURIComponent(id)).then(function(r){
+      if(!r.ok) throw new Error('detail ' + r.status);
+      return r.json();
+    }).then(function(j){
+      if(!j || !j.product) throw new Error('no detail');
+      window.__detail[id] = j.product;
+      delete pending[id];
+      return j.product;
+    }).catch(function(e){ delete pending[id]; throw e; });
+    return pending[id];
+  }
+  function fill(t, d){
+    t.sizes = d.sizes || [];
+    t.colors = d.colors || [];
+    t.gcolors = Array.from(new Set((d.colors || []).map(function(c){ return String(c).trim().toLowerCase(); })));
+    t.colorImages = d.colorImages || {};
+    t.colorValues = d.colorValues || {};
+    t.garmentInfo = d.garmentInfo || [];
+    t.full = true;
+  }
+  window.openProduct = function(p, colors){
+    var self = this, args = arguments;
+    var targets = [p].concat(p && p.variants ? p.variants : []).filter(function(t, i, a){ return t && a.indexOf(t) === i; });
+    var need = targets.filter(function(t){ return t.lite && !t.full; });
+    if(!need.length) return orig.apply(self, args);
+    document.body.style.cursor = 'progress';
+    var ids = Array.from(new Set(need.map(function(t){ return String(t.id); })));
+    return Promise.all(ids.map(getDetail)).then(function(){
+      need.forEach(function(t){ var d = window.__detail[String(t.id)]; if(d) fill(t, d); });
+      document.body.style.cursor = '';
+      orig.apply(self, args);
+    }).catch(function(){
+      document.body.style.cursor = '';
+      if(typeof toast === 'function') toast('Could not load this product. Please try again.');
+    });
+  };
+})();
+</script>
 </body>
 </html>
+
 
 
