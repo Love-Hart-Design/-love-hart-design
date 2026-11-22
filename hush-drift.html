@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet"></noscript>
 <style>
-:root{--page:#fff;--nav:#3a4a5c;--brand:#26323f;--accent:#ffb347;--foot:#20262d;--qv:rgba(38,50,63,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Quicksand','Trebuchet MS',sans-serif}
+:root{--page:#e6f1fa;--nav:#3a4a5c;--brand:#26323f;--accent:#ffb347;--foot:#20262d;--qv:rgba(38,50,63,.92);--bg:#f7f7f7;--line:#dcdcdc;--txt:#333;--body:'Karla','Segoe UI',sans-serif;--cond:'Roboto Condensed','Arial Narrow',sans-serif;--logo:'Quicksand','Trebuchet MS',sans-serif}
 html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box;margin:0}
 img{max-width:100%}
@@ -499,10 +499,11 @@ let APPAREL = []; // filled from Spreadconnect product types when products load
 const CATEGORIES = ['Cabins','Mountains','Forests','Clouds','Stars','Moon','Owls','Deer','Mugs & Blankets','Fireside'];
 let COLORS = []; // filled from Spreadconnect colors when products load
 let COLOR_HEX = {}; // color name -> swatch color, from Spreadconnect
-const COLLECTIONS = ['Rain','Snow','Fireplace','Cozy Cabin'];
+const COLLECTIONS = ['Nature','Fireplace','Rain','Hot Chocolate','Snow'];
 // Social media pages. Put each full web address between the second pair of quotes; blank ones show as "Coming soon".
 const SOCIAL = [['Facebook','https://www.facebook.com/HushDrift/'],['Instagram','https://www.instagram.com/lovehartdesigns1/'],['TikTok','https://www.tiktok.com/@lovehartdesign'],['YouTube','https://www.youtube.com/@HushDriftCo'],['Pinterest','https://www.pinterest.com/LoveHartDesign/'],['Threads','https://www.threads.com/@lovehartdesign1'],['Reddit','https://www.reddit.com/user/LoveHartDesign/']];
 const COLLECTION_MATCH = Object.fromEntries(COLLECTIONS.map(c => [c, new RegExp('^' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')]));
+COLLECTION_MATCH['Nature'] = /^(nature|cozy cabin)$/i; // products already tagged Cozy Cabin now show under Nature
 const AUDIENCES = ['Men','Women','Unisex','Kids','Babies'];
 // Product types that are listed under BOTH Men and Women (instead of Other). To add another: add /words in the product type name/.
 const MEN_AND_WOMEN = [/ultra.?cotton.*adult/i];
@@ -1118,10 +1119,10 @@ function renderList(r){
     cb.onchange = () => go(key, val, cb.checked);
     return el('label', {className:'fr'}, [el('span', {}, [label + ' ', el('b', {textContent:'(' + n + ')'})]), cb]);
   };
-  const section = (title, nodes) => {
+  const section = (title, nodes, key) => {
     if(!nodes.length) return;
-    const d = el('details', {className:'fs', open:openSecs.has(title)}, [el('summary', {textContent:title})]);
-    d.addEventListener('toggle', () => { if(d.open) openSecs.add(title); else openSecs.delete(title); });
+    const d = el('details', {className:'fs', open:openSecs.has(key || title)}, [el('summary', {textContent:title})]);
+    d.addEventListener('toggle', () => { if(d.open) openSecs.add(key || title); else openSecs.delete(key || title); });
     nodes.forEach(x => d.append(x));
     sb.append(d);
   };
@@ -1141,6 +1142,7 @@ function renderList(r){
     kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.auds.includes(a)), 'app', k, r.apps)));
     prodNodes.push(el('div', {className:'sub'}, [gh, body]));
   });
+  section('Themes', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false), 'themes-top');
   section('Products', prodNodes);
   section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
   section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
