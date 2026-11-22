@@ -1142,7 +1142,6 @@ function renderList(r){
     kinds.forEach(k => body.append(row(k, countAll(p => p.apparel === k && p.auds.includes(a)), 'app', k, r.apps)));
     prodNodes.push(el('div', {className:'sub'}, [gh, body]));
   });
-  section('Themes', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false), 'themes-top');
   section('Products', prodNodes);
   section('Categories', opts(AUDIENCES, 'aud', r.auds, (p, v) => p.auds.includes(v), true));
   section('Collection', opts(COLLECTIONS, 'col', r.cols, (p, v) => p.cols.includes(v), false));
@@ -1740,6 +1739,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
