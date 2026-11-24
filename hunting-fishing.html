@@ -1152,6 +1152,7 @@ function renderList(r){
     const cur = {app:r.apps, grp:r.grps, cat:r.cats, color:r.colors, aud:r.auds, col:r.cols};
     if(on && (key === 'grp' || key === 'app')){ cur.grp = []; cur.app = []; } // Products: only one box at a time
     if(on && key === 'app') cur.aud = []; // a product type already belongs to one audience, so drop the audience filter
+    if(on && key === 'cat') cur.col = cur.col.filter(c => c !== 'Hunting' && c !== 'Fishing'); // picking a Fishing or Hunting theme drops the Hunting/Fishing collection filter so it can't hide the theme's products
     cur[key] = on ? cur[key].concat(val) : cur[key].filter(x => x !== val);
     fromSidebar = true; location.hash = href(r.mode, cur);
   };
@@ -1797,7 +1798,4 @@ load();
 </script>
 </body>
 </html>
-
-
-
 
