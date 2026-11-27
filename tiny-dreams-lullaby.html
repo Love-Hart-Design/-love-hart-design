@@ -373,12 +373,13 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-tou
 .sw.txt.out::after{display:none}
 .sw.txt.out{text-decoration:line-through}
 </style>
+<style id="lhd-css">#lhdbar{background:var(--foot,#333);color:#eee;font-family:var(--body,sans-serif);position:relative;z-index:50}#lhdbar .in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 4vw}#lhdbar a,#lhdbar summary{color:#eee;text-decoration:none;font-size:.9rem;font-weight:500}#lhdbar .home{display:flex;align-items:center;gap:8px;font-weight:700}#lhdbar .home svg{width:18px;height:18px;fill:var(--accent,#fff)}#lhdbar a:hover,#lhdbar summary:hover{color:var(--accent,#fff)}#lhdbar details{position:relative}#lhdbar summary{cursor:pointer;list-style:none}#lhdbar summary::-webkit-details-marker{display:none}#lhdbar summary::after{content:" \25BE"}#lhdbar .menu{position:absolute;right:0;top:100%;min-width:260px;max-height:70vh;overflow:auto;background:#fff;border:1px solid #dcdcdc;box-shadow:0 10px 20px rgba(0,0,0,.2);padding:6px 0}#lhdbar .menu a{display:block;padding:9px 18px;color:#333}#lhdbar .menu a:hover{background:#f7f7f7;color:var(--brand,#333)}#lhdbar .menu a[aria-current=page]{font-weight:700;color:var(--brand,#333)}</style>
 </head>
 <body>
 <div id="errbar" hidden></div>
 <script>window.addEventListener('error',function(e){var b=document.getElementById('errbar');if(!b)return;b.hidden=false;b.textContent='Page error: '+e.message+' (line '+e.lineno+')';});</script>
 
-<div class="backbar"><a href="https://lovehartdesign.com/">&larr; Love Hart Design</a></div>
+<!--lhd-bar--><div id="lhdbar"><div class="in"><a class="home" href="https://lovehartdesign.com/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9C.8 8.5 3 5 6.5 5c2 0 3.500 1 5.500 3 2-2 3.500-3 5.500-3 3.500 0 5.700 3.500 4 7-2.500 4.500-9.500 9-9.500 9z"/></svg>Love Hart Design</a><details><summary>Our brands</summary><div class="menu"><a href="angels-store.html">Angels</a><a href="Animals-store.html">Animals</a><a href="christmas-songs-all-year-long.html">Christmas Songs All Year Long</a><a href="Fantasy-store.html">Fantasy</a><a href="https://heirloom-hart.lovable.app/">Heirloom Hart</a><a href="hunting-fishing.html">Hunting &amp; Fishing</a><a href="hush-drift.html">Hush Drift</a><a href="little-princess-lullabies.html">Little Princess Lullabies</a><a href="pure-dream-sounds.html">Pure Dream Sounds</a><a href="skulls-after-dark.html">Skulls After Dark</a><a href="tiny-dreams-lullaby.html" aria-current="page">Tiny Dreams Lullaby</a><a href="https://lovehartdesign.com/">View all brands</a></div></details></div><script>document.addEventListener("click",function(e){var d=document.querySelector("#lhdbar details");if(d&&!d.contains(e.target))d.open=false;});</script></div><!--/lhd-bar-->
 <div class="hd">
   <header class="top">
     <button class="hamb" id="hamb" aria-label="Open menu"><i></i><i></i><i></i></button>
@@ -1774,6 +1775,7 @@ load();
 </script>
 </body>
 </html>
+
 
 
 
